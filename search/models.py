@@ -25,7 +25,7 @@ class SearchImages(models.Model):
     uploaded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     uploaded_timestamp = models.DateTimeField(auto_now=True)
     s3_key = models.CharField(max_length=2048)
-    link_url = models.CharField()
+    link_url = models.CharField(max_length=2048)
     alt_text = models.CharField(max_length=2048)
 
     def __str__(self):
@@ -37,12 +37,14 @@ class SearchEntity(models.Model):
     """An abstract base class for searchable entities."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="creator")
+    created_by = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name=f"%(class)s_created_by",
+    )
     creation_timestamp = models.DateTimeField(auto_now=True)
     approved_by = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name="creator",
+        related_name=f"%(class)s_approved_by",
         null=True,
     )
     approval_timestamp = models.DateTimeField(auto_now=True, null=True)
@@ -70,7 +72,6 @@ class SearchEntity(models.Model):
 
 class Activity(SearchEntity):
     """Something to do, without a specific date or place."""
-
     synonyms = ArrayField(models.CharField(max_length=1024), null=True, blank=True)
 
     def __str__(self):
@@ -88,6 +89,6 @@ class Place(SearchEntity):
 class Event(SearchEntity):
     """A specific instance of an activity that will take place in a given place at a given time."""
 
-    dates = ArrayField(ArrayField(models.DateTimeField, size=2), verbose_name="Event dates")
+    dates = ArrayField(ArrayField(models.DateTimeField(), size=2), verbose_name="Event dates")
     activities = models.ManyToManyField(Activity)
     places = models.ManyToManyField(Place)
