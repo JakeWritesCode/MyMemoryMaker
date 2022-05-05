@@ -43,5 +43,5 @@ jobs:
       - run:
           name: Flake8
           command: |
-            flake8 my_memory_maker users searchs
+            flake8 my_memory_maker users search
       - codecov/upload
