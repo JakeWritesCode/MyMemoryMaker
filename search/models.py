@@ -38,13 +38,15 @@ class SearchEntity(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_by = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, related_name=f"%(class)s_created_by",
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="%(class)s_created_by",
     )
     creation_timestamp = models.DateTimeField(auto_now=True)
     approved_by = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name=f"%(class)s_approved_by",
+        related_name="%(class)s_approved_by",
         null=True,
     )
     approval_timestamp = models.DateTimeField(auto_now=True, null=True)
@@ -72,6 +74,7 @@ class SearchEntity(models.Model):
 
 class Activity(SearchEntity):
     """Something to do, without a specific date or place."""
+
     synonyms = ArrayField(models.CharField(max_length=1024), null=True, blank=True)
 
     def __str__(self):
