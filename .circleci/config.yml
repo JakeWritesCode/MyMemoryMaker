@@ -17,16 +17,16 @@ jobs:
         environment:
           DJANGO_SECRET_KEY: test_django_secret_key
           DEBUG: False
-          POSTGRES_DB_NAME: django_boilerplate
-          POSTGRES_DB_USER: django_boilerplate
-          POSTGRES_DB_PASSWORD: django_boilerplate
+          POSTGRES_DB_NAME: my_memory_maker
+          POSTGRES_DB_USER: my_memory_maker
+          POSTGRES_DB_PASSWORD: my_memory_maker
           POSTGRES_DB_HOST: localhost
           POSTGRES_DB_PORT: 5432
       - image: cimg/postgres:14.0
         environment:
-          POSTGRES_USER: django_boilerplate
-          POSTGRES_PASSWORD: django_boilerplate
-          POSTGRES_DB: django_boilerplate
+          POSTGRES_USER: my_memory_maker
+          POSTGRES_PASSWORD: my_memory_maker
+          POSTGRES_DB: my_memory_maker
     steps:
       - checkout
       - python/install-packages:
@@ -35,13 +35,13 @@ jobs:
       - run:
           name: Run tests
           command: |
-            pytest --cov=. --cov-report=xml --ds=django_boilerplate.settings.test
+            pytest --cov=. --cov-report=xml --ds=my_memory_maker.settings.test
       - run:
           name: Black
           command: |
-            black -l 100 --check django_boilerplate users
+            black -l 100 --check my_memory_maker users
       - run:
           name: Flake8
           command: |
-            flake8 django_boilerplate users
+            flake8 my_memory_maker users
       - codecov/upload

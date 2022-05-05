@@ -8,7 +8,7 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_boilerplate.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "my_memory_maker.settings")
     try:
         # 3rd-party
         from django.core.management import execute_from_command_line

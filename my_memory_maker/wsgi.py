@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-WSGI config for django_boilerplate project.
+WSGI config for my_memory_maker project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -14,6 +14,6 @@ import os
 # 3rd-party
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_boilerplate.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "my_memory_maker.settings")
 
 application = get_wsgi_application()

@@ -38,7 +38,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "django_boilerplate.urls"
+ROOT_URLCONF = "my_memory_maker.urls"
 
 TEMPLATES = [
     {
@@ -56,7 +56,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "django_boilerplate.wsgi.application"
+WSGI_APPLICATION = "my_memory_maker.wsgi.application"
 
 DATABASES = {
     "default": {
