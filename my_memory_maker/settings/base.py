@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Apps
     "users",
+    "search",
     # 3rd party modules
     "crispy_forms",
 ]
