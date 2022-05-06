@@ -35,7 +35,7 @@ jobs:
       - run:
           name: Run tests
           command: |
-            pytest --cov=search users --cov-report=xml --ds=my_memory_maker.settings.test
+            pytest . --cov=search users --cov-report=xml --ds=my_memory_maker.settings.test
       - run:
           name: Black
           command: |
