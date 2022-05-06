@@ -6,6 +6,7 @@ import uuid
 # 3rd-party
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.fields import HStoreField
+from django.core.exceptions import ValidationError
 from django.db import models
 
 # Project
@@ -13,7 +14,7 @@ from search.constants import SEARCH_ENTITY_SOURCES
 from users.models import CustomUser
 
 
-class SearchImages(models.Model):
+class SearchImage(models.Model):
     """
     Images uploaded or linked that are related to search entities.
 
@@ -24,13 +25,21 @@ class SearchImages(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     uploaded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     uploaded_timestamp = models.DateTimeField(auto_now=True)
-    s3_key = models.CharField(max_length=2048)
-    link_url = models.CharField(max_length=2048)
+    s3_key = models.CharField(max_length=2048, null=True)
+    link_url = models.CharField(max_length=2048, null=True)
     alt_text = models.CharField(max_length=2048)
 
     def __str__(self):
         """String representation."""
         return f"Search Uploaded Image {self.id}: {self.alt_text}"
+
+    def clean(self):
+        """Custom model validation."""
+        super(SearchImage, self).clean()
+
+        # Either S3 key or link URL must be filled in.
+        if not self.s3_key and not self.link_url:
+            raise ValidationError("You must either specify an s3 key or link url.")
 
 
 class SearchEntity(models.Model):
@@ -49,7 +58,7 @@ class SearchEntity(models.Model):
         related_name="%(class)s_approved_by",
         null=True,
     )
-    approval_timestamp = models.DateTimeField(auto_now=True, null=True)
+    approval_timestamp = models.DateTimeField(null=True)
     headline = models.CharField(max_length=2048)
     description = models.TextField()
     price_lower = models.FloatField()
@@ -65,7 +74,7 @@ class SearchEntity(models.Model):
         verbose_name="Pseudo-FK to the source data table (if any)",
         null=True,
     )
-    images = models.ManyToManyField(SearchImages)
+    images = models.ManyToManyField(SearchImage)
     attributes = HStoreField()
 
     class Meta:  # noqa: D106
@@ -88,6 +97,10 @@ class Place(SearchEntity):
     google_maps_place_id = models.CharField(max_length=1024, null=True)
     activities = models.ManyToManyField(Activity)
 
+    def __str__(self):
+        """String representation."""
+        return f"Place: {self.headline}"
+
 
 class Event(SearchEntity):
     """A specific instance of an activity that will take place in a given place at a given time."""
@@ -95,3 +108,7 @@ class Event(SearchEntity):
     dates = ArrayField(ArrayField(models.DateTimeField(), size=2), verbose_name="Event dates")
     activities = models.ManyToManyField(Activity)
     places = models.ManyToManyField(Place)
+
+    def __str__(self):
+        """String representation."""
+        return f"Event: {self.headline}"
