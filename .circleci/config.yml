@@ -35,13 +35,13 @@ jobs:
       - run:
           name: Run tests
           command: |
-            pytest --cov=. --cov-report=xml --ds=my_memory_maker.settings.test
+            pytest . --cov=search users --cov-report=xml --ds=my_memory_maker.settings.test
       - run:
           name: Black
           command: |
-            black -l 100 --check my_memory_maker users
+            black -l 100 --check my_memory_maker users search
       - run:
           name: Flake8
           command: |
-            flake8 my_memory_maker users
+            flake8 my_memory_maker users search
       - codecov/upload
