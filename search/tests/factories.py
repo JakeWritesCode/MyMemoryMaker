@@ -9,7 +9,6 @@ from datetime import timedelta
 from django.utils import timezone
 from factory import LazyAttribute
 from factory import LazyFunction
-from factory import SelfAttribute
 from factory import SubFactory
 from factory.django import DjangoModelFactory
 from faker import Faker
@@ -17,7 +16,6 @@ from faker import Faker
 # Project
 from search import models
 from search.constants import SEARCH_ENTITY_SOURCES
-from search.models import Activity
 from users.tests.factories import CustomUserFactory
 
 fake = Faker()
@@ -116,7 +114,7 @@ class EventFactory(DjangoModelFactory):
                 o.date_base + timedelta(hours=24) - timedelta(hours=random.randint(1, 4)),
                 o.date_base + timedelta(hours=24) + timedelta(hours=random.randint(1, 4)),
             ],
-        ]
+        ],
     )
 
     class Meta:  # noqa: D106
