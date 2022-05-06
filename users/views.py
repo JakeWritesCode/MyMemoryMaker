@@ -52,9 +52,10 @@ def log_out(request):
 
 def log_in(request):
     """Log the user in."""
+    redirect_url = request.GET.get("next", reverse("index"))
     if request.user.is_authenticated:
         messages.info(request, "You are already logged in.")
-        return redirect(reverse("index"))
+        return redirect(redirect_url)
 
     form = CustomUserLoginForm()
     if request.method == "POST":
@@ -66,7 +67,7 @@ def log_in(request):
                 request,
                 f"Logged in successfully. Welcome {user.first_name} {user.last_name}",
             )
-            return redirect(reverse("index"))
+            return redirect(redirect_url)
     return render(request, "log_in.html", {"form": form})
 
 

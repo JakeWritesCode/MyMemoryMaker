@@ -6,7 +6,7 @@ from django.contrib import admin
 # Project
 from search import models
 
-admin.site.register(models.SearchImages)
+admin.site.register(models.SearchImage)
 admin.site.register(models.Activity)
 admin.site.register(models.Place)
 admin.site.register(models.Event)

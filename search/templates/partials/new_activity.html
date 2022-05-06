@@ -1,0 +1,169 @@
+{#New activity form partial#}
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block extended_head %}
+    {{ form.media }}
+    <link rel="stylesheet" href="{% static "css/search.css" %}">
+    <script src="{% static "js/search.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="row" style="align-items: center; justify-content: center; height: 80vh">
+        <div class="col-12 col-md-10">
+            <div class="card bg-memorymaker-light">
+                <div class="card-body">
+                    <h1>Create a new activity.</h1>
+                    <p>
+                        Please fill in the required fields below to create a new activity.
+                        You can see what the activity card will look like using the preview area.
+                    </p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <!-- Headline -->
+                        <div class="form-row mb-4">
+                            <div class="form-group col-12">
+                                {{ form.headline|as_crispy_field }}
+                            </div>
+                        </div>
+                        <!-- Description -->
+                        <div class="form-row mb-4">
+                            <div class="form-group col-12">
+                                {{ form.description|as_crispy_field }}
+                            </div>
+                        </div>
+                        <!-- Price and duration sliders -->
+                        <div class="row mb-5">
+                            <div class="form-group col-md-6">
+                                <h3>Typical Prices</h3>
+                                <p>How much does your activity typically cost? Give us a lower and upper cost.</p>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="price_lower" class="form-label">
+                                            Lowest Price
+                                            <br>
+                                            £<span id="price-low-display"></span>
+                                        </label>
+                                        {{ form.price_lower }}
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="price_upper" class="form-label float-right">
+                                            Highest Price
+                                            <br>
+                                            £<span id="price-high-display"></span>
+                                        </label>
+                                        {{ form.price_upper }}
+                                    </div>
+                                </div>
+                                <div class="row px-3">
+                                    <span id="price-selector" class="price-selector mt-1"></span>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <h3>Typical Duration</h3>
+                                <p>How long does your activity usually last?</p>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="price_lower" class="form-label">
+                                            Lowest time
+                                            <br>
+                                            <span id="duration-low-display"></span> minutes
+                                        </label>
+                                        {{ form.duration_lower }}
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="price_upper" class="form-label float-right">
+                                            Highest time
+                                            <br>
+                                            <span id="duration-high-display"></span> minutes
+                                        </label>
+                                        {{ form.duration_upper }}
+                                    </div>
+                                </div>
+                                <div class="row px-3">
+                                    <span id="duration-selector" class="duration-selector mt-1"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Images formset -->
+                        <div class="form-row mb-3">
+                            <h3>Add images</h3>
+                            <p>
+                                Add images for your activity. You need at least one but you may
+                                add as many as you like.
+                            </p>
+                            <div class="form-row">
+                                {{ images_formset.management_form }}
+                                <table class="table table-striped w-100">
+                                    <thead>
+                                    <tr>
+                                        <th style="width: 40%">Image Upload</th>
+                                        <th>Alt Text</th>
+                                        <th style="width: 100px">Delete</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="activity-images-form-container">
+                                    {% for image_form in images_formset %}
+                                        <tr id="image-form-{{ forloop.counter0 }}">
+                                            <td>{{ image_form.uploaded_image }}</td>
+                                            <td>{{ image_form.alt_text }}</td>
+                                            <td>
+                                                <button type="button"
+                                                        class="btn btn-danger"
+                                                        onclick="dynamicFormsetRemoveRow(this, 'form-{{ forloop.counter0 }}-')"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </td>
+                                            <span class="activity-images-end-marker"></span>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                                <button type="button"
+                                        class="btn btn-primary"
+                                        id="activity-images-add"
+                                >Add Another Image
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary" style="">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        generateRangeSelector(
+            "price-selector",
+            "id_price_lower",
+            "id_price_upper",
+            "price-low-display",
+            "price-high-display",
+            0,
+            1000,
+            2,
+            50
+        )
+        generateRangeSelector(
+            "duration-selector",
+            "id_duration_lower",
+            "id_duration_upper",
+            "duration-low-display",
+            "duration-high-display",
+            0,
+            1000,
+            2,
+            50
+        )
+        dynamicFormsetInit(
+            "activity-images-form-container",
+            "activity-images-add",
+            "activity-images-end-marker"
+        )
+    </script>
+{% endblock %}

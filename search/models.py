@@ -25,8 +25,8 @@ class SearchImage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     uploaded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     uploaded_timestamp = models.DateTimeField(auto_now=True)
-    s3_key = models.CharField(max_length=2048, null=True)
-    link_url = models.CharField(max_length=2048, null=True)
+    uploaded_image = models.ImageField(null=True, upload_to="searchimages/")
+    link_url = models.CharField(max_length=2048, null=True, blank=True)
     alt_text = models.CharField(max_length=2048)
 
     def __str__(self):
@@ -38,7 +38,7 @@ class SearchImage(models.Model):
         super(SearchImage, self).clean()
 
         # Either S3 key or link URL must be filled in.
-        if not self.s3_key and not self.link_url:
+        if not self.uploaded_image and not self.link_url:
             raise ValidationError("You must either specify an s3 key or link url.")
 
     def save(self, *args, **kwargs):

@@ -1,0 +1,19 @@
+.float-right {
+    float: right;
+}
+
+.price-duration-inputs {
+    max-width: 100px;
+}
+
+.input-right-align {
+    display: inline-block;
+}
+
+.image-upload-column {
+    max-width: 30px
+}
+
+.bg-memorymaker-light {
+    background: #eaeaea;
+}
