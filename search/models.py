@@ -41,6 +41,11 @@ class SearchImage(models.Model):
         if not self.s3_key and not self.link_url:
             raise ValidationError("You must either specify an s3 key or link url.")
 
+    def save(self, *args, **kwargs):
+        """Call the clean method on save."""
+        self.clean()
+        super(SearchImage, self).save(*args, **kwargs)
+
 
 class SearchEntity(models.Model):
     """An abstract base class for searchable entities."""
