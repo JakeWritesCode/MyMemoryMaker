@@ -35,9 +35,9 @@
                         </div>
                         <!-- Price and duration sliders -->
                         <div class="row mb-5">
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-4">
                                 <h3>Typical Prices</h3>
-                                <p>How much does your activity typically cost? Give us a lower and upper cost.</p>
+                                <p>How much does your activity typically cost?</p>
                                 <div class="row">
                                     <div class="col-6">
                                         <label for="price_lower" class="form-label">
@@ -60,12 +60,12 @@
                                     <span id="price-selector" class="price-selector mt-1"></span>
                                 </div>
                             </div>
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-4">
                                 <h3>Typical Duration</h3>
                                 <p>How long does your activity usually last?</p>
                                 <div class="row">
                                     <div class="col-6">
-                                        <label for="price_lower" class="form-label">
+                                        <label for="duration_lower" class="form-label">
                                             Lowest time
                                             <br>
                                             <span id="duration-low-display"></span> minutes
@@ -73,7 +73,7 @@
                                         {{ form.duration_lower }}
                                     </div>
                                     <div class="col-6">
-                                        <label for="price_upper" class="form-label float-right">
+                                        <label for="duration_upper" class="form-label float-right">
                                             Highest time
                                             <br>
                                             <span id="duration-high-display"></span> minutes
@@ -85,47 +85,53 @@
                                     <span id="duration-selector" class="duration-selector mt-1"></span>
                                 </div>
                             </div>
+                            <div class="form-group col-md-4">
+                                <h3>Number of People</h3>
+                                <p>How many people can take part in your activity?</p>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="people_lower" class="form-label">
+                                            Lowest number of people
+                                            <br>
+                                            <span id="people-low-display"></span> people
+                                        </label>
+                                        {{ form.people_lower }}
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="people_upper" class="form-label float-right">
+                                            Highest number of people
+                                            <br>
+                                            <span id="people-high-display"></span> minutes
+                                        </label>
+                                        {{ form.people_upper }}
+                                    </div>
+                                </div>
+                                <div class="row px-3">
+                                    <span id="people-selector" class="people-selector mt-1"></span>
+                                </div>
+                            </div>
                         </div>
-                        <!-- Images formset -->
-                        <div class="form-row mb-3">
-                            <h3>Add images</h3>
+                        <div class="row mb-2">
+                            <h3>Add an Image</h3>
+                            <p>Please upload an image showing off your activity.</p>
+                            <div class="col-md-6">
+                                {{ image_form.uploaded_image|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ image_form.alt_text|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            {{ image_form.permissions_confirmation|as_crispy_field }}
+                        </div>
+                        <div class="row mb-4">
+                            <h3>Filters</h3>
                             <p>
-                                Add images for your activity. You need at least one but you may
-                                add as many as you like.
+                                Please select which filters do or do not apply to your activity.
+                                This powers our filters on the search page!
                             </p>
-                            <div class="form-row">
-                                {{ images_formset.management_form }}
-                                <table class="table table-striped w-100">
-                                    <thead>
-                                    <tr>
-                                        <th style="width: 40%">Image Upload</th>
-                                        <th>Alt Text</th>
-                                        <th style="width: 100px">Delete</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody id="activity-images-form-container">
-                                    {% for image_form in images_formset %}
-                                        <tr id="image-form-{{ forloop.counter0 }}">
-                                            <td>{{ image_form.uploaded_image }}</td>
-                                            <td>{{ image_form.alt_text }}</td>
-                                            <td>
-                                                <button type="button"
-                                                        class="btn btn-danger"
-                                                        onclick="dynamicFormsetRemoveRow(this, 'form-{{ forloop.counter0 }}-')"
-                                                >
-                                                    Delete
-                                                </button>
-                                            </td>
-                                            <span class="activity-images-end-marker"></span>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                                <button type="button"
-                                        class="btn btn-primary"
-                                        id="activity-images-add"
-                                >Add Another Image
-                                </button>
+                            <div class="col-12">
+                                {% include "partials/filter_setter_form.html" %}
                             </div>
                         </div>
                         <div class="text-center">
@@ -146,8 +152,8 @@
             "price-high-display",
             0,
             1000,
-            2,
-            50
+            0,
+            1000
         )
         generateRangeSelector(
             "duration-selector",
@@ -155,15 +161,21 @@
             "id_duration_upper",
             "duration-low-display",
             "duration-high-display",
-            0,
+            1,
             1000,
-            2,
-            50
+            1,
+            1000
         )
-        dynamicFormsetInit(
-            "activity-images-form-container",
-            "activity-images-add",
-            "activity-images-end-marker"
+        generateRangeSelector(
+            "people-selector",
+            "id_people_lower",
+            "id_people_upper",
+            "people-low-display",
+            "people-high-display",
+            1,
+            20,
+            1,
+            20
         )
     </script>
 {% endblock %}

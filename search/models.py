@@ -70,6 +70,9 @@ class SearchEntity(models.Model):
     price_upper = models.FloatField()
     duration_lower = models.IntegerField()
     duration_upper = models.IntegerField()
+    people_lower = models.IntegerField()
+    people_upper = models.IntegerField()
+    synonyms_keywords = ArrayField(models.CharField(max_length=1024), null=True, blank=True)
     source_type = models.CharField(
         max_length=256,
         choices=[(choice, choice) for choice in SEARCH_ENTITY_SOURCES],
@@ -88,8 +91,6 @@ class SearchEntity(models.Model):
 
 class Activity(SearchEntity):
     """Something to do, without a specific date or place."""
-
-    synonyms = ArrayField(models.CharField(max_length=1024), null=True, blank=True)
 
     def __str__(self):
         """String representation."""

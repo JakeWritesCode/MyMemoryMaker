@@ -4,12 +4,13 @@
 # 3rd-party
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from search.models import SearchImage
 
 # Project
+from search.filters import FilterSettingForm
 from search.forms import ActivitySelectorForm
 from search.forms import NewActivityForm
-from search.forms import SearchImageFormset
+from search.forms import SearchImageForm
+from search.models import SearchImage
 
 
 def multi_activity_selector(request):
@@ -22,8 +23,13 @@ def new_activity(request):
     """Create a new activity."""
 
     form = NewActivityForm(user=request.user)
-    images_formset = SearchImageFormset(queryset=SearchImage.objects.none())
+    image_form = SearchImageForm(user=request.user)
+    filter_setter_form = FilterSettingForm()
 
     return render(
-        request, "partials/new_activity.html", {"form": form, "images_formset": images_formset}
+        request,
+        "partials/new_activity.html",
+        {"form": form,
+         "image_form": image_form,
+         "filter_setter_form": filter_setter_form},
     )

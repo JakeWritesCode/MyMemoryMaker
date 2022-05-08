@@ -1,0 +1,102 @@
+function replaceallDescendantIds(node, fromRegex, toString) {
+    // Replace the ID of all child nodes, using a regex.
+    for (var i = 0; i < node.children.length; i++) {
+        var gchild = node.children[i];
+        console.log(gchild.id)
+        gchild.id = gchild.id.replace(fromRegex, toString)
+        console.log(gchild.id)
+        replaceallDescendantIds(gchild);
+    }
+}
+
+//TODO - Yo, before you went to bed you were trying to get all the child forms
+// to renumber by recursively changing the child IDs using a regexp.
+
+function dynamicFormsetInit(formContainerId, addButtonId, endMarkerId) {
+    // Add a new row to a dynamic formset.
+    const formTable = document.getElementById(formContainerId)
+    const addButton = document.getElementById(addButtonId)
+    const endmarker = document.getElementById(endMarkerId)
+
+    function addForm(e) {
+        e.preventDefault()
+        const newForm = formTable.children[formTable.children.length - 1].cloneNode(true)
+        const addedForm = formTable.insertBefore(newForm, endmarker)
+
+        // Go through and renumber all the forms
+        const formRegex = RegExp(`form-[0-9]-`, 'g')
+        for (let i = 0; i < formTable.children.length; i++) {
+            const child = formTable.children[i]
+            replaceallDescendantIds(child, formRegex, `form-${i}-`)
+        }
+
+        clearChildren(addedForm)
+    }
+
+    addButton.addEventListener("click", addForm)
+}
+
+function dynamicFormsetRemoveRow(element) {
+    // Remove a row from a dynamic formset.
+    if (element.parentElement.parentElement.parentElement.children.length > 1) {
+        element.parentElement.parentElement.remove()
+    }
+}
+
+
+<!-- Images formset -->
+<div class="form-row mb-3">
+    <h3>Add images</h3>
+    <p>
+        Add images for your activity. You need at least one but you may
+        add as many as you like.
+    </p>
+    <div class="form-row">
+        {{images_formset.management_form}}
+        <table class="table table-striped w-100">
+            <thead>
+            <tr>
+                <th style="width: 40%">Image Upload</th>
+                <th>Alt Text</th>
+                <th style="width: 100px">Delete</th>
+            </tr>
+            </thead>
+            <tbody id="activity-images-form-container">
+            {% for image_form in images_formset %}
+            <tr id="image-form-{{ forloop.counter0 }}">
+                <td>{{image_form.uploaded_image}}</td>
+                <td>{{image_form.alt_text}}</td>
+                <td>
+                    <button type="button"
+                            class="btn btn-danger"
+                            onclick="dynamicFormsetRemoveRow(this, 'form-{{ forloop.counter0 }}-')"
+                    >
+                        Delete
+                    </button>
+                </td>
+                <span class="activity-images-end-marker"></span>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <button type="button"
+                class="btn btn-primary"
+                id="activity-images-add"
+        >Add Another Image
+        </button>
+    </div>
+</div>
+
+
+django
+SearchImageFormset = forms.modelformset_factory(
+    SearchImage,
+    fields=["uploaded_image", "alt_text"],
+    extra=1,
+    widgets={
+        "uploaded_image": forms.FileInput(attrs={"class": "form-control"}),
+        "alt_text": forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "Describe your image content."}
+        ),
+    },
+)

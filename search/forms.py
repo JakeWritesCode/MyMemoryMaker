@@ -21,13 +21,22 @@ def get_activity_choices():
     return choices
 
 
-SearchImageFormset = forms.modelformset_factory(
-    SearchImage,
-    fields=["uploaded_image", "alt_text"],
-    extra=1,
-    widgets={"uploaded_image": forms.FileInput(attrs={"class": "form-control"}),
-             "alt_text": forms.TextInput(attrs={"class": "form-control", "placeholder": "Describe your image content."}),}
-)
+class SearchImageForm(forms.ModelForm):
+    """A form for uploading a single search image."""
+
+    permissions_confirmation = forms.BooleanField(
+        required=True, label="Please confirm you have permission to use and share this image."
+    )
+
+    def __init__(self, user, *args, **kwargs):  # noqa: D102
+        self.user = user
+        super(SearchImageForm, self).__init__(*args, **kwargs)
+        self.fields["uploaded_image"].widget.attrs["class"] = "form-control"
+        self.fields["alt_text"].widget.attrs["placeholder"] = "Please describe your image."
+
+    class Meta:  # noqa: D106
+        model = SearchImage
+        fields = ["uploaded_image", "alt_text"]
 
 
 class ActivitySelectorForm(forms.Form):
@@ -44,16 +53,15 @@ class NewActivityForm(forms.ModelForm):
         super(NewActivityForm, self).__init__(*args, **kwargs)
 
         # Mess about with widget attributes
-        self.fields["headline"].widget.attrs["placeholder"] = "Give us a one sentence summary of your activity."
+        self.fields["headline"].widget.attrs[
+            "placeholder"
+        ] = "Give us a one sentence summary of your activity."
         self.fields["price_upper"].widget = forms.HiddenInput()
         self.fields["price_lower"].widget = forms.HiddenInput()
         self.fields["duration_upper"].widget = forms.HiddenInput()
         self.fields["duration_lower"].widget = forms.HiddenInput()
-
-    price_upper = forms.FloatField(label="")
-    price_lower = forms.FloatField(label="")
-    duration_upper = forms.FloatField(label="")
-    duration_lower = forms.FloatField(label="")
+        self.fields["people_lower"].widget = forms.HiddenInput()
+        self.fields["people_upper"].widget = forms.HiddenInput()
 
     class Meta:  # noqa: D106
         model = Activity
@@ -64,6 +72,8 @@ class NewActivityForm(forms.ModelForm):
             "price_lower",
             "duration_upper",
             "duration_lower",
+            "people_lower",
+            "people_upper",
             "images",
         ]
         widgets = {"description": RichTextWidget()}
