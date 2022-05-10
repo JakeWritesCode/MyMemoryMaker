@@ -40,9 +40,6 @@ class FilterSettingForm(forms.Form):
         """
         generated_fields = {}
 
-        # Put in a single hidden field we will fill with the compiled JSON when cleaning
-        generated_fields["compiled_json_data"] = forms.JSONField(widget=forms.HiddenInput())
-
         for field_list in FILTERS.values():
             for field in field_list:
                 generated_fields[field] = forms.BooleanField(
@@ -64,10 +61,30 @@ class FilterSettingForm(forms.Form):
             ]
             category_layout += [
                 Column(
-                    Field(field, wrapper_class="form-check form-switch"), css_class="col-md-4 mb-0",
+                    Field(field, wrapper_class="form-check form-switch"),
+                    css_class="col-md-4 mb-0",
                 )
                 for field in filter_list
             ]
             all_categories.append(Row(*category_layout, css_class="row mb-2"))
 
         return Layout(*all_categories)
+
+    def _parse_to_json(self):
+        """Parse the data."""
+        if not self.is_bound:
+            raise ValueError("You need to bind the form to parse to JSON.")
+        return_dict = {}
+        for category, filter_list in FILTERS.items():
+            category_dict = {}
+            for filter_str in filter_list:
+                if filter_str in self.data.keys():
+                    category_dict[filter_str] = True
+                else:
+                    category_dict[filter_str] = False
+            return_dict[category] = category_dict
+        return return_dict
+
+    def save(self):
+        """Override the save functionality to return the parsed form data as JSON."""
+        return self._parse_to_json()

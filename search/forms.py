@@ -4,7 +4,6 @@
 # 3rd-party
 from django import forms
 from django.contrib.auth.models import AnonymousUser
-from djrichtextfield.models import RichTextWidget
 
 # Project
 from search.models import Activity
@@ -38,6 +37,11 @@ class SearchImageForm(forms.ModelForm):
         model = SearchImage
         fields = ["uploaded_image", "alt_text"]
 
+    def save(self, commit=True):
+        """Add the uploading user id."""
+        self.instance.uploaded_by = self.user
+        return super(SearchImageForm, self).save(commit=commit)
+
 
 class ActivitySelectorForm(forms.Form):
     """Tag like form allows you to select multiple activities or start creating a new one."""
@@ -48,6 +52,7 @@ class NewActivityForm(forms.ModelForm):
 
     def __init__(self, user, *args, **kwargs):  # noqa: D107
         self.user = user
+
         if isinstance(user, AnonymousUser) or not user:
             raise ValueError("User must be logged in and passed to this form.")
         super(NewActivityForm, self).__init__(*args, **kwargs)
@@ -62,6 +67,10 @@ class NewActivityForm(forms.ModelForm):
         self.fields["duration_lower"].widget = forms.HiddenInput()
         self.fields["people_lower"].widget = forms.HiddenInput()
         self.fields["people_upper"].widget = forms.HiddenInput()
+        self.fields["description"].required = False
+        self.fields["synonyms_keywords"].widget.attrs[
+            "placeholder"
+        ] = "Please seperate words or phrases with commas."
 
     class Meta:  # noqa: D106
         model = Activity
@@ -74,6 +83,14 @@ class NewActivityForm(forms.ModelForm):
             "duration_lower",
             "people_lower",
             "people_upper",
-            "images",
+            "synonyms_keywords",
         ]
-        widgets = {"description": RichTextWidget()}
+
+    def save(self, commit=True):
+        """Enrich the instance with attribute data, user data and images."""
+        self.instance.created_by = self.user
+        if not self.image or not self.filters_json:
+            raise ValueError("You need to add the filter data and the image.")
+        self.instance.attributes = self.filters_json
+        super(NewActivityForm, self).save(commit=commit)
+        self.instance.images.add(self.image)

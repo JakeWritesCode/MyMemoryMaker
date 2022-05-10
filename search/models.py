@@ -44,7 +44,7 @@ class SearchImage(models.Model):
     def save(self, *args, **kwargs):
         """Call the clean method on save."""
         self.clean()
-        super(SearchImage, self).save(*args, **kwargs)
+        return super(SearchImage, self).save(*args, **kwargs)
 
 
 class SearchEntity(models.Model):

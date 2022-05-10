@@ -4,9 +4,14 @@
 {% load static %}
 
 {% block extended_head %}
-    {{ form.media }}
-    <link rel="stylesheet" href="{% static "css/search.css" %}">
     <script src="{% static "js/search.js" %}"></script>
+    <script>
+        tinymce.init({
+            selector: '#id_description',
+            menubar: false
+        });
+    </script>
+    <link rel="stylesheet" href="{% static "css/search.css" %}">
 {% endblock %}
 
 {% block content %}
@@ -19,7 +24,7 @@
                         Please fill in the required fields below to create a new activity.
                         You can see what the activity card will look like using the preview area.
                     </p>
-                    <form method="post">
+                    <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         <!-- Headline -->
                         <div class="form-row mb-4">
@@ -101,7 +106,7 @@
                                         <label for="people_upper" class="form-label float-right">
                                             Highest number of people
                                             <br>
-                                            <span id="people-high-display"></span> minutes
+                                            <span id="people-high-display"></span> people
                                         </label>
                                         {{ form.people_upper }}
                                     </div>
@@ -125,6 +130,13 @@
                             {{ image_form.permissions_confirmation|as_crispy_field }}
                         </div>
                         <div class="row mb-4">
+                            <h3>Keywords / Synonyms</h3>
+                            <p>Are there any other words or phrases that could be used to describe your activity?</p>
+                            <div class="col-12">
+                                {{form.synonyms_keywords|as_crispy_field}}
+                            </div>
+                        </div>
+                        <div class="row mb-4">
                             <h3>Filters</h3>
                             <p>
                                 Please select which filters do or do not apply to your activity.
@@ -133,9 +145,9 @@
                             <div class="col-12">
                                 {% include "partials/filter_setter_form.html" %}
                             </div>
-                        </div>
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-primary" style="">Save</button>
+                            <div class="form-row text-center">
+                                <button type="submit" class="btn btn-primary" style="">Save</button>
+                            </div>
                         </div>
                     </form>
                 </div>

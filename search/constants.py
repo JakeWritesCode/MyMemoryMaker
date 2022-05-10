@@ -36,5 +36,6 @@ FILTERS = {
         "couple",
         "alone",
         "family",
+        "colleagues",
     ]
 }
