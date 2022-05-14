@@ -7,9 +7,12 @@ function generateRangeSelector(
     min,
     max,
     startLower,
-    startUpper
+    startUpper,
+    callbackLower,
+    callbackUpper,
 ) {
     // Generate a single range selector slider to feed an upper and lower input element.
+    // Callbacks accept a function with the new value as a single arg.
     const rangeSelector = document.querySelector('#' + targetElementId);
     const inputLower = document.querySelector("#" + targetLowerInputId)
     const inputUpper = document.querySelector("#" + targetUpperInputId)
@@ -44,6 +47,13 @@ function generateRangeSelector(
         displayUpper.innerHTML = upper
         inputLower.value = lower
         inputUpper.value = upper
+
+        if (callbackLower) {
+            callbackLower(lower)
+        }
+        if (callbackUpper) {
+            callbackUpper(upper)
+        }
     });
 }
 
@@ -75,5 +85,38 @@ function clearChildren(element) {
             default:
                 clearChildren(e);
         }
+    }
+}
+
+
+function updatePreviewCard(updateFieldId, value) {
+    // Updates an included preview card with the new information provided.
+    const standardFields = [
+        "search-entity-headline",
+        "search-entity-description",
+        "search-entity-price-lower",
+        "search-entity-price-upper",
+        "search-entity-duration-lower",
+        "search-entity-duration-upper",
+        "search-entity-people-lower",
+        "search-entity-people-upper",
+    ]
+
+    if (standardFields.includes(updateFieldId)) {
+        const target = document.getElementById(updateFieldId)
+        target.innerHTML = value
+    }
+
+    if (updateFieldId === "filters") {
+        // Get all the filter id's
+        const all_filters = document.querySelectorAll('[form-field-type="filter"]')
+        let filtersHTML = ""
+        for (let i = 0; i < all_filters.length; i++) {
+            if (all_filters[i].checked) {
+                const humanReadable = all_filters[i].getAttribute("human-readable")
+                filtersHTML = filtersHTML + `</div><span class=\"badge badge-light mx-1\">${humanReadable}</span>`
+            }
+        }
+        document.getElementById("search-entity-filters").innerHTML = filtersHTML
     }
 }

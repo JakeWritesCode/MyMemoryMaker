@@ -45,7 +45,13 @@ class FilterSettingForm(forms.Form):
                 generated_fields[field] = forms.BooleanField(
                     label=self._format_field_or_category_name(field),
                     widget=forms.CheckboxInput(
-                        attrs={"class": "form-check-input", "role": "switch"},
+                        attrs={
+                            "class": "form-check-input",
+                            "role": "switch",
+                            "form-field-type": "filter",
+                            "onchange": "updatePreviewCard('filters', 'changed')",
+                            "human-readable": self._format_field_or_category_name(field),
+                        },
                     ),
                     required=False,
                 )

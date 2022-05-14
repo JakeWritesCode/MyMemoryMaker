@@ -3,50 +3,67 @@
 
 
         <div class="row">
-            <div class="col-12 col-md-6 col-lg-4">
-                <img class="search-entity-image"
+            <div class="col-12 col-md-6 col-lg-4 d-flex">
+                <img id="search-entity-image" class="search-entity-image"
                      src="https://renegadebrewing.com/wp-content/uploads/2021/03/History-3.jpg" alt="{{ alt_text }}">
             </div>
 
-            <div class="col-12 col-md-6 col-lg-8 mt-3 mt-md-0">
+            <div class="col-12 col-md-6 col-lg-8 mt-3 mt-md-0 d-flex flex-column">
                 <div class="d-flex">
                     <div class="flex-grow-1">
-                        <h2 class="h3" class="search-entity-headline">
+                        <h2 class="h3" id="search-entity-headline">
                             {% if headline %}{{ headline }}{% else %}My New Submission{% endif %}</h2>
-                        <p class="search-entity-description">
+                        <p id="search-entity-description">
                             {% if description %}{{ description }}{% else %}My subscription description{% endif %}</p>
                     </div>
                     <div class="">
                         <span class="material-icons material-icons-outlined search-entity-icon">favorite</span>
                     </div>
                 </div>
-                <div class="d-flex">
-                    {% if filters %}
-                        {% for filter in filters %}
-                            <span class="badge badge-info mx-1">{{ filter }}</span>
-                        {% endfor %}
-                    {% else %}
-                        {% with "each filter appears here" as list %}
-                            {% for filter in list.split %}
+                <div class="row d-flex">
+                    <div class="col-12" id="search-entity-filters">
+                        {% if filters %}
+                            {% for filter in filters %}
                                 <span class="badge badge-light mx-1">{{ filter }}</span>
                             {% endfor %}
-                        {% endwith %}
-                    {% endif %}
+                        {% else %}
+                            {% with "each filter appears here" as list %}
+                                {% for filter in list.split %}
+                                    <span class="badge badge-light mx-1">{{ filter }}</span>
+                                {% endfor %}
+                            {% endwith %}
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="d-flex my-2">
                     <div>
-                        <span class="mr-4">£{{ price_lower }} - £{{ price_upper }}</span>
+                        <div class="mr-4">
+                            £<span id="search-entity-price-lower">{{ price_lower }}</span>
+                            -
+                            £<span id="search-entity-price-upper">{{ price_upper }}</span>
+                        </div>
                     </div>
                     <div>
-                        <span class="mx-4">{{ duration_lower }} - {{ duration_upper }} minutes</span>
+                        <div class="mx-4">
+                            <span id="search-entity-duration-lower">{{ duration_lower }}</span>
+                            -
+                            <span id="search-entity-duration-upper">{{ duration_upper }}</span> hours
+                        </div>
+                    </div>
+                    <div>
+                        <div class="mx-4">
+                            <span id="search-entity-people-lower">{{ people_lower }}</span>
+                            -
+                            <span id="search-entity-people-upper">{{ people_upper }}</span> people
+                        </div>
                     </div>
                 </div>
                 <div class="d-flex">
-                    <a href="#" class="btn btn-primary">See More</a>
+                    <a href="{{ link }}" class="btn btn-primary {% if link == None %}disabled{% endif %}">See More</a>
                 </div>
-                <div class="d-flex mt-3 mb-auto">
-                    <div class="flex-grow-1">
-                        <span class="entity-source-text">
+                <div class="d-flex mt-3 flex-grow-1">
+                    <div class="flex-grow-1 align-text-bottom align-self-end">
+                        <span class="entity-source-text align-text-bottom">
                             {% if source_type %}
                                 {{ source_type }}
                             {% else %}
@@ -54,7 +71,7 @@
                             {% endif %}
                         </span>
                     </div>
-                    <div class="">
+                    <div class="align-self-end">
                         <span class="material-icons material-icons-outlined search-entity-icon">auto_stories</span>
                     </div>
                 </div>

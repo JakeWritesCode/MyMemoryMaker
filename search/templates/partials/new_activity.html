@@ -5,12 +5,6 @@
 
 {% block extended_head %}
     <script src="{% static "js/search.js" %}"></script>
-    <script>
-        tinymce.init({
-            selector: '#id_description',
-            menubar: false
-        });
-    </script>
     <link rel="stylesheet" href="{% static "css/search.css" %}">
 {% endblock %}
 
@@ -21,9 +15,10 @@
                 <div class="card-body">
                     <h1>Create a new activity.</h1>
                     <p>
-                        Please fill in the required fields below to create a new activity.
+                        Please fill in the required fields below to create a new activity.</p>
+                    <p><strong>
                         You can see what the activity card will look like using the preview area.
-                    </p>
+                    </strong></p>
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         <!-- Headline -->
@@ -73,7 +68,7 @@
                                         <label for="duration_lower" class="form-label">
                                             Lowest time
                                             <br>
-                                            <span id="duration-low-display"></span> minutes
+                                            <span id="duration-low-display"></span> hours
                                         </label>
                                         {{ form.duration_lower }}
                                     </div>
@@ -81,7 +76,7 @@
                                         <label for="duration_upper" class="form-label float-right">
                                             Highest time
                                             <br>
-                                            <span id="duration-high-display"></span> minutes
+                                            <span id="duration-high-display"></span> hours
                                         </label>
                                         {{ form.duration_upper }}
                                     </div>
@@ -133,7 +128,7 @@
                             <h3>Keywords / Synonyms</h3>
                             <p>Are there any other words or phrases that could be used to describe your activity?</p>
                             <div class="col-12">
-                                {{form.synonyms_keywords|as_crispy_field}}
+                                {{ form.synonyms_keywords|as_crispy_field }}
                             </div>
                         </div>
                         <div class="row mb-4">
@@ -144,6 +139,11 @@
                             </p>
                             <div class="col-12">
                                 {% include "partials/filter_setter_form.html" %}
+                            </div>
+                            <div class="col-12 px-0 my-4">
+                                <h3>Your Activity Preview</h3>
+                                <p>Here's what your card will look like on our site.</p>
+                                {% include "partials/search_entity_card.html" %}
                             </div>
                             <div class="form-row text-center">
                                 <button type="submit" class="btn btn-primary" style="">Save</button>
@@ -156,6 +156,7 @@
     </div>
 
     <script>
+
         generateRangeSelector(
             "price-selector",
             "id_price_lower",
@@ -165,7 +166,9 @@
             0,
             1000,
             0,
-            1000
+            1000,
+            priceLowerCallback,
+            priceUpperCallback,
         )
         generateRangeSelector(
             "duration-selector",
@@ -174,9 +177,11 @@
             "duration-low-display",
             "duration-high-display",
             1,
-            1000,
+            72,
             1,
-            1000
+            72,
+            durationLowerCallback,
+            durationUpperCallback,
         )
         generateRangeSelector(
             "people-selector",
@@ -185,9 +190,78 @@
             "people-low-display",
             "people-high-display",
             1,
-            20,
+            100,
             1,
-            20
+            100,
+            peopleLowerCallback,
+            peopleUpperCallback,
         )
+
+        const headline = document.getElementById("id_headline")
+        headline.addEventListener("change", function () {
+            updatePreviewCard("search-entity-headline", headline.value)
+        })
+        const priceLower = document.getElementById("id_price_lower")
+        priceLower.addEventListener("change", function () {
+            updatePreviewCard("search-entity-price-lower", priceLower.value)
+        })
+
+
+        function priceLowerCallback(value) {
+            // Callback function for the slider to set the preview card.
+            updatePreviewCard("search-entity-price-lower", value)
+        }
+
+        function priceUpperCallback(value) {
+            // Callback function for the slider to set the preview card.
+            updatePreviewCard("search-entity-price-upper", value)
+        }
+
+        function durationLowerCallback(value) {
+            // Callback function for the slider to set the preview card.
+            updatePreviewCard("search-entity-duration-lower", value)
+        }
+
+        function durationUpperCallback(value) {
+            // Callback function for the slider to set the preview card.
+            updatePreviewCard("search-entity-duration-upper", value)
+        }
+
+        function peopleLowerCallback(value) {
+            // Callback function for the slider to set the preview card.
+            updatePreviewCard("search-entity-people-lower", value)
+        }
+
+        function peopleUpperCallback(value) {
+            // Callback function for the slider to set the preview card.
+            updatePreviewCard("search-entity-people-upper", value)
+        }
+
+        // Dynamically render the image that is loaded into the filefield.
+        document.getElementById('id_uploaded_image').onchange = function (evt) {
+            const tgt = evt.target || window.event.srcElement,
+                files = tgt.files;
+
+            // FileReader support
+            if (FileReader && files && files.length) {
+                var fr = new FileReader();
+                fr.onload = function () {
+                    document.getElementById("search-entity-image").src = fr.result;
+                }
+                fr.readAsDataURL(files[0]);
+            }
+        }
     </script>
+    <script>
+        tinymce.init({
+            selector: '#id_description',
+            menubar: false,
+            setup: function (ed) {
+                ed.on('change', function (e) {
+                    updatePreviewCard("search-entity-description", ed.getContent());
+                });
+            }
+        });
+    </script>
+
 {% endblock %}
