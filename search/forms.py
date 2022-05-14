@@ -24,7 +24,8 @@ class SearchImageForm(forms.ModelForm):
     """A form for uploading a single search image."""
 
     permissions_confirmation = forms.BooleanField(
-        required=True, label="Please confirm you have permission to use and share this image.",
+        required=True,
+        label="Please confirm you have permission to use and share this image.",
     )
 
     def __init__(self, user, *args, **kwargs):  # noqa: D107
