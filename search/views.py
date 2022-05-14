@@ -4,7 +4,9 @@
 # 3rd-party
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
 from django.shortcuts import render
+from django.urls import reverse
 
 # Project
 from search.filters import FilterSettingForm
@@ -46,6 +48,7 @@ def new_activity(request):
                 "queue for moderation. Please check your submissions screen to "
                 "see it's progress.",
             )
+            return redirect(reverse("index"))
 
     return render(
         request,
