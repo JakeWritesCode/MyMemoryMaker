@@ -7,8 +7,6 @@ from unittest.mock import patch
 
 # 3rd-party
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Column
-from crispy_forms.layout import Field
 from django import forms
 from django.test import SimpleTestCase
 
@@ -24,10 +22,9 @@ class TestFilterSettingForm(SimpleTestCase):
         self.form = FilterSettingForm()
 
         self.fake_post_data = {}
-        for category, filter_list in FILTERS.items():
+        for _, filter_list in FILTERS.items():
             for filter_str in filter_list:
                 self.fake_post_data[filter_str] = True
-
 
     def test_form_subclasses_django_form(self):
         """Form should inherit django form functionality."""
@@ -67,7 +64,7 @@ class TestFilterSettingForm(SimpleTestCase):
             for filter_str in category_list:
                 assert isinstance(fields[filter_str], forms.BooleanField)
                 assert fields[filter_str].label == self.form._format_field_or_category_name(
-                    filter_str
+                    filter_str,
                 )
                 assert isinstance(fields[filter_str].widget, forms.CheckboxInput)
                 assert fields[filter_str].widget.attrs["class"] == "form-check-input"
@@ -107,8 +104,7 @@ class TestFilterSettingForm(SimpleTestCase):
 
     def test_parse_to_json_parses_into_correct_format(self):
         """The returned JSON should be in the same format as constants.FILTERS."""
-        expected_dict = {
-        }
+        expected_dict = {}
         for category, filter_list in FILTERS.items():
             filters_post = {x: True for x in filter_list}
             expected_dict[category] = filters_post
@@ -123,7 +119,6 @@ class TestFilterSettingForm(SimpleTestCase):
             random_key = random.choice(list(self.fake_post_data.keys()))
             random_keys.append(random_key)
             self.fake_post_data.pop(random_key)
-
 
         flat_filters = {}
         for filters in FilterSettingForm(self.fake_post_data)._parse_to_json().values():

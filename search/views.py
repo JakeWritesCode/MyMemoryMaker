@@ -2,19 +2,14 @@
 """Views for search."""
 
 # 3rd-party
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
 # Project
 from search.filters import FilterSettingForm
-from search.forms import ActivitySelectorForm
 from search.forms import NewActivityForm
 from search.forms import SearchImageForm
-
-
-def multi_activity_selector(request):
-    """A mini view allowing the user to select one or more activities."""
-    form = ActivitySelectorForm()
 
 
 @login_required
@@ -24,7 +19,6 @@ def new_activity(request):
 
     In this view we render three separate forms to look like a single form.
     """
-
     form = NewActivityForm(user=request.user)
     image_form = SearchImageForm(user=request.user)
     filter_setter_form = FilterSettingForm()
@@ -40,20 +34,21 @@ def new_activity(request):
 
         # Finally, bin the main form and validate.
         form = NewActivityForm(request.user, request.POST)
-        if form.is_valid():
+        if form.is_valid() and image_form_valid:
             # Now the form is valid, pass in the data from the other two forms.
             form.image = image_form.save(commit=True)
             form.filters_json = filter_settings
             # Save the new activity
             form.save(commit=True)
-
-
-
+            messages.info(
+                request,
+                "Your activity has been saved and has been added to the "
+                "queue for moderation. Please check your submissions screen to "
+                "see it's progress.",
+            )
 
     return render(
         request,
         "partials/new_activity.html",
-        {"form": form,
-         "image_form": image_form,
-         "filter_setter_form": filter_setter_form},
+        {"form": form, "image_form": image_form, "filter_setter_form": filter_setter_form},
     )

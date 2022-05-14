@@ -9,6 +9,5 @@ from . import views
 urlpatterns = [
     # Form partials
     path("new-activity", views.new_activity, name="new-activity"),
-
     # Whole pages
 ]
