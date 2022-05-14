@@ -1,0 +1,7 @@
+{% load crispy_forms_tags %}
+<!--
+This partial renders a form for setting filters on a new activity, place or event.
+Relies on a search.filters.FilterSettingForm to be passed as context["filter_setter_form"]
+-->
+
+{% crispy filter_setter_form %}

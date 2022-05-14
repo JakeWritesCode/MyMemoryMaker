@@ -11,6 +11,7 @@ from django.urls import path
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("users/", include("users.urls")),
+    path("search/", include("search.urls")),
     # Basic index view, remove when you want something better.
     path("", lambda request: render(request, "index.html"), name="index"),
 ]

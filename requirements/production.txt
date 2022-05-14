@@ -1,7 +1,10 @@
 # Production requirements
 
 asgiref==3.5.0
+boto3==1.22.9
 Django==4.0.4
 django-crispy-forms==1.14.0
+django-storages==1.12.3
+pillow==9.1.0
 psycopg2-binary==2.9.1
 sqlparse==0.4.2

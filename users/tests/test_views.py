@@ -146,7 +146,7 @@ class TestLogIn(TestCase):
             for error_text in error:
                 assert error_text in str(response.content)
 
-    def test_successful_login_auths_user_and_redirects(self):
+    def test_successful_login_auths_user_and_redirects_to_index_if_no_get_params(self):
         """A successful login should auth the user and redirect."""
         response = self.client.post(
             self.url,
@@ -154,6 +154,16 @@ class TestLogIn(TestCase):
         )
         assert response.wsgi_request.user.is_authenticated
         assert response.url == reverse("index")
+
+    def test_successful_login_auths_user_and_redirects_to_specified_page_if_get_param(self):
+        """If a next GET param is specified, redirect to specified page."""
+        self.url = self.url + f"?next={reverse('reset-password')}"
+        response = self.client.post(
+            self.url,
+            data={"email": self.user.email, "password": self.password},
+        )
+        assert response.wsgi_request.user.is_authenticated
+        assert response.url == reverse("reset-password")
 
 
 class TestChangePassword(TestCase):

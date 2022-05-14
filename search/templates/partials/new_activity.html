@@ -1,0 +1,193 @@
+{#New activity form partial#}
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block extended_head %}
+    <script src="{% static "js/search.js" %}"></script>
+    <script>
+        tinymce.init({
+            selector: '#id_description',
+            menubar: false
+        });
+    </script>
+    <link rel="stylesheet" href="{% static "css/search.css" %}">
+{% endblock %}
+
+{% block content %}
+    <div class="row" style="align-items: center; justify-content: center; height: 80vh">
+        <div class="col-12 col-md-10">
+            <div class="card bg-memorymaker-light">
+                <div class="card-body">
+                    <h1>Create a new activity.</h1>
+                    <p>
+                        Please fill in the required fields below to create a new activity.
+                        You can see what the activity card will look like using the preview area.
+                    </p>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <!-- Headline -->
+                        <div class="form-row mb-4">
+                            <div class="form-group col-12">
+                                {{ form.headline|as_crispy_field }}
+                            </div>
+                        </div>
+                        <!-- Description -->
+                        <div class="form-row mb-4">
+                            <div class="form-group col-12">
+                                {{ form.description|as_crispy_field }}
+                            </div>
+                        </div>
+                        <!-- Price and duration sliders -->
+                        <div class="row mb-5">
+                            <div class="form-group col-md-4">
+                                <h3>Typical Prices</h3>
+                                <p>How much does your activity typically cost?</p>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="price_lower" class="form-label">
+                                            Lowest Price
+                                            <br>
+                                            £<span id="price-low-display"></span>
+                                        </label>
+                                        {{ form.price_lower }}
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="price_upper" class="form-label float-right">
+                                            Highest Price
+                                            <br>
+                                            £<span id="price-high-display"></span>
+                                        </label>
+                                        {{ form.price_upper }}
+                                    </div>
+                                </div>
+                                <div class="row px-3">
+                                    <span id="price-selector" class="price-selector mt-1"></span>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <h3>Typical Duration</h3>
+                                <p>How long does your activity usually last?</p>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="duration_lower" class="form-label">
+                                            Lowest time
+                                            <br>
+                                            <span id="duration-low-display"></span> minutes
+                                        </label>
+                                        {{ form.duration_lower }}
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="duration_upper" class="form-label float-right">
+                                            Highest time
+                                            <br>
+                                            <span id="duration-high-display"></span> minutes
+                                        </label>
+                                        {{ form.duration_upper }}
+                                    </div>
+                                </div>
+                                <div class="row px-3">
+                                    <span id="duration-selector" class="duration-selector mt-1"></span>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <h3>Number of People</h3>
+                                <p>How many people can take part in your activity?</p>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="people_lower" class="form-label">
+                                            Lowest number of people
+                                            <br>
+                                            <span id="people-low-display"></span> people
+                                        </label>
+                                        {{ form.people_lower }}
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="people_upper" class="form-label float-right">
+                                            Highest number of people
+                                            <br>
+                                            <span id="people-high-display"></span> people
+                                        </label>
+                                        {{ form.people_upper }}
+                                    </div>
+                                </div>
+                                <div class="row px-3">
+                                    <span id="people-selector" class="people-selector mt-1"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <h3>Add an Image</h3>
+                            <p>Please upload an image showing off your activity.</p>
+                            <div class="col-md-6">
+                                {{ image_form.uploaded_image|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ image_form.alt_text|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            {{ image_form.permissions_confirmation|as_crispy_field }}
+                        </div>
+                        <div class="row mb-4">
+                            <h3>Keywords / Synonyms</h3>
+                            <p>Are there any other words or phrases that could be used to describe your activity?</p>
+                            <div class="col-12">
+                                {{form.synonyms_keywords|as_crispy_field}}
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            <h3>Filters</h3>
+                            <p>
+                                Please select which filters do or do not apply to your activity.
+                                This powers our filters on the search page!
+                            </p>
+                            <div class="col-12">
+                                {% include "partials/filter_setter_form.html" %}
+                            </div>
+                            <div class="form-row text-center">
+                                <button type="submit" class="btn btn-primary" style="">Save</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        generateRangeSelector(
+            "price-selector",
+            "id_price_lower",
+            "id_price_upper",
+            "price-low-display",
+            "price-high-display",
+            0,
+            1000,
+            0,
+            1000
+        )
+        generateRangeSelector(
+            "duration-selector",
+            "id_duration_lower",
+            "id_duration_upper",
+            "duration-low-display",
+            "duration-high-display",
+            1,
+            1000,
+            1,
+            1000
+        )
+        generateRangeSelector(
+            "people-selector",
+            "id_people_lower",
+            "id_people_upper",
+            "people-low-display",
+            "people-high-display",
+            1,
+            20,
+            1,
+            20
+        )
+    </script>
+{% endblock %}
