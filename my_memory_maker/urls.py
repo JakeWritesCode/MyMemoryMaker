@@ -15,6 +15,4 @@ urlpatterns = [
     # Basic index view, remove when you want something better.
     path("", lambda request: render(request, "index.html"), name="index"),
 
-    # External package URLs
-    path('djrichtextfield/', include('djrichtextfield.urls')),
 ]
