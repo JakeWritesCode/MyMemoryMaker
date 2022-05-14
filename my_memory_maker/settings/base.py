@@ -28,7 +28,6 @@ INSTALLED_APPS = [
     "search",
     # 3rd party modules
     "crispy_forms",
-    "djrichtextfield",
 ]
 
 MIDDLEWARE = [
