@@ -27,7 +27,7 @@ class TestSearchImages(TestCase):
         image.link_url = None
         with self.assertRaises(ValidationError) as e:
             image.save()
-        assert "You must either specify an s3 key or link url." in str(e.exception)
+        assert "You must either add an uploaded image or specify an S3 URL." in str(e.exception)
 
 
 class TestActivity(TestCase):
