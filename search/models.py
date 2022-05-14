@@ -39,7 +39,7 @@ class SearchImage(models.Model):
 
         # Either S3 key or link URL must be filled in.
         if not self.uploaded_image and not self.link_url:
-            raise ValidationError("You must either specify an s3 key or link url.")
+            raise ValidationError("You must either add an uploaded image or specify an S3 URL.")
 
     def save(self, *args, **kwargs):
         """Call the clean method on save."""

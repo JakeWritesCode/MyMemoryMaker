@@ -10,16 +10,6 @@ from search.models import Activity
 from search.models import SearchImage
 
 
-def get_activity_choices():
-    """Get a list of tuples representing all active activities."""
-    choices = [
-        (f"{activity.headline} ({', '.join(activity.synonyms)})", activity.id)
-        for activity in Activity.objects.filter(approval_timestamp__isnull=False)
-    ]
-    choices.append(("Create your own...", "create_your_own"))
-    return choices
-
-
 class SearchImageForm(forms.ModelForm):
     """A form for uploading a single search image."""
 
@@ -42,10 +32,6 @@ class SearchImageForm(forms.ModelForm):
         """Add the uploading user id."""
         self.instance.uploaded_by = self.user
         return super(SearchImageForm, self).save(commit=commit)
-
-
-class ActivitySelectorForm(forms.Form):
-    """Tag like form allows you to select multiple activities or start creating a new one."""
 
 
 class NewActivityForm(forms.ModelForm):
@@ -90,8 +76,12 @@ class NewActivityForm(forms.ModelForm):
     def save(self, commit=True):
         """Enrich the instance with attribute data, user data and images."""
         self.instance.created_by = self.user
-        if not self.image or not self.filters_json:
-            raise ValueError("You need to add the filter data and the image.")
-        self.instance.attributes = self.filters_json
+        try:
+            image = self.image
+            filters_json = self.filters_json
+        except AttributeError:
+            raise AttributeError("You need to add the filter data and the image.")
+        self.instance.attributes = filters_json
         super(NewActivityForm, self).save(commit=commit)
-        self.instance.images.add(self.image)
+        self.instance.images.add(image)
+        return self.instance
