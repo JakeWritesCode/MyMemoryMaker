@@ -55,3 +55,9 @@ def new_activity(request):
         "partials/new_activity.html",
         {"form": form, "image_form": image_form, "filter_setter_form": filter_setter_form},
     )
+
+
+def entity_card_test(request):
+    return render(request, "partials/search_entity_test_page.html", {
+
+    })

@@ -17,3 +17,12 @@
 .bg-memorymaker-light {
     background: #eaeaea;
 }
+
+.search-entity-image {
+    width: 100%;
+    object-fit: contain;
+}
+
+.search-entity-icon {
+    font-size: 2rem;
+}
