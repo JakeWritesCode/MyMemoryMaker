@@ -23,7 +23,7 @@ class TestSearchImages(TestCase):
     def test_cannot_save_an_image_with_no_url_or_s3_key(self):
         """Images need to either have a URL or an S3 key."""
         image = SearchImageFactory()
-        image.s3_key = None
+        image.uploaded_image = None
         image.link_url = None
         with self.assertRaises(ValidationError) as e:
             image.save()

@@ -26,7 +26,7 @@ class SearchImageFactory(DjangoModelFactory):
 
     uploaded_by = SubFactory(CustomUserFactory)
     uploaded_timestamp = timezone.now
-    s3_key = fake.url()
+    uploaded_image = fake.url()
     alt_text = fake.sentence()
 
     class Meta:  # noqa: D106
@@ -48,6 +48,10 @@ class ActivityFactory(DjangoModelFactory):
     duration_base = LazyFunction(lambda: random.randint(30, 500))
     duration_lower = LazyAttribute(lambda o: o.duration_base * random.random())
     duration_upper = LazyAttribute(lambda o: o.duration_base * (1 + random.random()))
+
+    people_base = LazyFunction(lambda: random.randint(1, 20))
+    people_lower = LazyAttribute(lambda o: o.people_base * random.random())
+    people_upper = LazyAttribute(lambda o: o.people_base * (1 + random.random()))
     source_type = SEARCH_ENTITY_SOURCES[0]
 
     # TODO - Build this out...
@@ -55,7 +59,7 @@ class ActivityFactory(DjangoModelFactory):
 
     class Meta:  # noqa: D106
         model = models.Activity
-        exclude = ("price_base", "duration_base")
+        exclude = ("price_base", "duration_base", "people_base")
 
 
 class PlaceFactory(DjangoModelFactory):
@@ -73,6 +77,10 @@ class PlaceFactory(DjangoModelFactory):
     duration_base = LazyFunction(lambda: random.randint(30, 500))
     duration_lower = LazyAttribute(lambda o: o.duration_base * random.random())
     duration_upper = LazyAttribute(lambda o: o.duration_base * (1 + random.random()))
+
+    people_base = LazyFunction(lambda: random.randint(1, 20))
+    people_lower = LazyAttribute(lambda o: o.people_base * random.random())
+    people_upper = LazyAttribute(lambda o: o.people_base * (1 + random.random()))
     source_type = SEARCH_ENTITY_SOURCES[0]
 
     # TODO - Build this out...
@@ -80,7 +88,7 @@ class PlaceFactory(DjangoModelFactory):
 
     class Meta:  # noqa: D106
         model = models.Place
-        exclude = ("price_base", "duration_base")
+        exclude = ("price_base", "duration_base", "people_base")
 
 
 class EventFactory(DjangoModelFactory):
@@ -98,6 +106,10 @@ class EventFactory(DjangoModelFactory):
     duration_base = LazyFunction(lambda: random.randint(30, 500))
     duration_lower = LazyAttribute(lambda o: o.duration_base * random.random())
     duration_upper = LazyAttribute(lambda o: o.duration_base * (1 + random.random()))
+
+    people_base = LazyFunction(lambda: random.randint(1, 20))
+    people_lower = LazyAttribute(lambda o: o.people_base * random.random())
+    people_upper = LazyAttribute(lambda o: o.people_base * (1 + random.random()))
     source_type = SEARCH_ENTITY_SOURCES[0]
 
     # TODO - Build this out...
@@ -119,4 +131,4 @@ class EventFactory(DjangoModelFactory):
 
     class Meta:  # noqa: D106
         model = models.Event
-        exclude = ("price_base", "duration_base", "date_base")
+        exclude = ("price_base", "duration_base", "date_base", "people_base")
