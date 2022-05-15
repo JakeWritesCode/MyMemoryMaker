@@ -17,3 +17,31 @@
 .bg-memorymaker-light {
     background: #eaeaea;
 }
+
+.search-entity-image {
+    width: 100%;
+    object-fit: contain;
+    position: relative;
+    align-self: center;
+}
+
+.search-entity-icon {
+    font-size: 2rem;
+}
+
+.search-entity-bottom-element {
+    position: absolute;
+    bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .search-entity-image {
+        height: 25vh !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .search-entity-image {
+        height: 66vh !important;
+    }
+}

@@ -5,7 +5,6 @@ SEARCH_ENTITY_SOURCES = [
     "manually_added",
 ]
 
-
 """Filters configuration"""
 FILTERS = {
     "categories": [
@@ -30,6 +29,7 @@ FILTERS = {
         "dog_friendly",
         "child_friendly",
         "vegan_friendly",
+        "vegetarian_friendly",
     ],
     "people": [
         "friends",

@@ -2,3 +2,6 @@ venv
 htmlcov
 .coverage
 scrapbook.ipynb
+/searchimages/
+/coverage.xml
+.idea
