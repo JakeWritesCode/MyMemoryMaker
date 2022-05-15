@@ -1,3 +1,9 @@
+
+:root {
+    --mymemorymaker-primary: #11a7b5;
+    --mymemorymaker-text-basic: #4f4f4f;
+}
+
 .float-right {
     float: right;
 }
@@ -44,4 +50,134 @@
     .search-entity-image {
         height: 66vh !important;
     }
+}
+
+
+/*Navbar formatting*/
+.navbar-icon-selected {
+    color: var(--mymemorymaker-primary) !important;
+}
+
+@media (max-width: 767px) {
+    .navbar-nav {
+        flex-direction: row !important;
+        width: 100%;
+    }
+
+    .nav-item {
+        flex: 1;
+    }
+}
+
+
+/*Search Home*/
+body {
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    width: 100%;
+    flex-grow: 1;
+}
+
+@media (min-width: 768px) {
+    .filter-column {
+        width: 400px;
+    }
+
+    .results-column {
+        flex-grow: 1;
+    }
+}
+
+@media (max-width: 767px) {
+    .filter-column.active {
+        width: 100vw;
+        background: rgb(255, 255, 255);
+        background: linear-gradient(0deg, rgba(255, 255, 255, 1) 74%, rgba(124, 207, 214, 1) 82%, rgba(17, 167, 181, 1) 88%, rgba(11, 102, 161, 1) 93%, rgba(5, 27, 139, 1) 100%);
+    }
+
+    .filter-column.inactive {
+        display: none;
+    }
+
+    .results-column.active {
+        flex-grow: 1;
+    }
+
+    .results-column.inactive {
+        display: none;
+    }
+}
+
+.results-column {
+    background: rgb(255, 255, 255);
+    background: linear-gradient(0deg, rgba(255, 255, 255, 1) 74%, rgba(124, 207, 214, 1) 82%, rgba(17, 167, 181, 1) 88%, rgba(11, 102, 161, 1) 93%, rgba(5, 27, 139, 1) 100%);
+}
+
+#second-navbar {
+    position: absolute;
+    z-index: 10;
+    bottom: 59px;
+    width: 100vw;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.nav-button-group .btn {
+    border-radius: 0;
+    color: black;
+}
+
+.text-mymemorymaker-primary {
+    color: var(--mymemorymaker-primary) !important;
+}
+
+.toggle-type-text {
+    font-size: 0.5rem;
+}
+
+.w-30 {
+    width: 31% !important;
+    line-height: 1;
+}
+
+.search-home-banner {
+    max-height: 30vh;
+}
+
+.search-home-banner span {
+    color: var(--mymemorymaker-text-basic);
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.homepage-banner-image {
+    height: 25vh;
+    object-fit: contain;
+    position: relative;
+    align-self: center;
+}
+
+.text-basic {
+    color: #4f4f4f;
+}
+
+.btn-activity-type-toggle {
+    background: white;
+    color: var(--mymemorymaker-text-basic);
+}
+
+input[type="checkbox"]:checked + label.btn-activity-type-toggle {
+    background: rgba(0, 126, 0, 0.56);
+}
+
+.get-started-text {
+    color: rgb(5, 27, 139);
 }

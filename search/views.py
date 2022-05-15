@@ -2,6 +2,7 @@
 """Views for search."""
 
 # 3rd-party
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
@@ -9,6 +10,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 # Project
+from search.filters import FilterSearchForm
 from search.filters import FilterSettingForm
 from search.forms import NewActivityForm
 from search.forms import SearchImageForm
@@ -55,3 +57,20 @@ def new_activity(request):
         "partials/new_activity.html",
         {"form": form, "image_form": image_form, "filter_setter_form": filter_setter_form},
     )
+
+
+def search_view(request):
+    """Main search view page."""
+    filter_search_form = FilterSearchForm()
+
+    return render(request, "search_home.html", {
+        "filter_search_form": filter_search_form,
+        "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY
+    })
+
+
+def filters_form(request):
+    """Generate a filters form block partial."""
+    form = FilterSearchForm()
+
+    return render(request, "partials/filter_search_form.html", {"filter_search_form": form})

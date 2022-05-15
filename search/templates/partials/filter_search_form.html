@@ -1,0 +1,42 @@
+{% load crispy_forms_tags %}
+
+<!--
+This partial renders a form for searching by filters on a new activity, place or event.
+Relies on a search.filters.FilterSearchForm to be passed as context["filter_search_form"]
+-->
+<script async
+    src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&callback=initMap">
+</script>
+
+<form type="get" class="p-2">
+    <!-- Activity, event, place -->
+    <div class="row d-flex flex-row">
+        <div class="col-12 d-flex flex-row">
+            {{ filter_search_form.activity_select }}
+            <label class="btn btn-activity-type-toggle btn-lg mx-1 w-30" for="id_activity_select">
+                Activity
+                <br>
+                <span class="toggle-type-text">Something to do, without a specific place or time.</span>
+            </label>
+            {{ filter_search_form.event_select }}
+            <label class="btn btn-activity-type-toggle mx-1 btn-lg w-30" for="id_event_select">
+                Event
+                <br>
+                <span class="toggle-type-text">
+                    Something going on, at a given place and time.
+                </span>
+            </label>
+            {{ filter_search_form.place_select }}
+            <label class="btn btn-activity-type-toggle btn-lg mx-1 w-30" for="id_place_select">
+                Place
+                <br>
+                <span class="toggle-type-text">
+                    A location where activities and events take place.
+                </span>
+            </label>
+        </div>
+
+    </div>
+    <!-- Location, Google maps API -->
+
+</form>

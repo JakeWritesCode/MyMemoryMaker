@@ -10,4 +10,5 @@ urlpatterns = [
     # Form partials
     path("new-activity", views.new_activity, name="new-activity"),
     # Whole pages
+    path("", views.search_view, name="search-home"),
 ]
