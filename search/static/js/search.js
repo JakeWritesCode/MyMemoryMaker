@@ -173,6 +173,8 @@ function parseSearch() {
         "id_price_upper",
         "id_people_lower",
         "id_people_upper",
+        "id_duration_lower",
+        "id_duration_upper",
         "id_keywords",
         "id_datetime_from",
         "id_datetime_to",
@@ -204,6 +206,7 @@ function runSearch() {
     // If so, just remove everything from the target div.
     if (Object.keys(getParams).length === 0) {
         resultsTarget.innerHTML = ""
+        return
     }
 
     // Generate the get params

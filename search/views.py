@@ -11,7 +11,7 @@ from django.urls import reverse
 
 # Project
 from search.constants import FILTERS
-from search.filters import FilterSearchForm
+from search.filters import FilterSearchForm, FilterQueryProcessor
 from search.filters import FilterSettingForm
 from search.forms import NewActivityForm
 from search.forms import SearchImageForm
@@ -81,6 +81,7 @@ def search_view(request):
 
 def search_results(request):
     """An async view that returns the search results based on GET params."""
+    results = FilterQueryProcessor(request.GET).get_results()
     return render(request, "partials/search_results.html", {})
 
 def filters_form(request):

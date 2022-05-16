@@ -106,6 +106,33 @@ Relies on a search.filters.FilterSearchForm to be passed as context["filter_sear
                 </div>
             </div>
         </div>
+        <!-- Duration, slider -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <label for="id_duration_lower">Duration</label>
+                <div class="row">
+                    <div class="col-6">
+                        <label for="duration_lower" class="form-label">
+                            <span id="duration-low-display"></span> hours
+                        </label>
+                        {{ filter_search_form.duration_lower }}
+                    </div>
+                    <div class="col-6">
+                        <label for="duration_upper" class="form-label float-right">
+                            <span id="duration-high-display"></span> hours
+                        </label>
+                        {{ filter_search_form.duration_upper }}
+                    </div>
+                    <div class="row px-3">
+                        <div class="col-12 pl-2">
+                            <div class="w-100 slider-margin-fix" style="height: 3px">
+                                <span id="duration-selector" class="duration-selector mt-1"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Date from, date to -->
         <div class="row mt-4">
             <div class="col-12">
@@ -247,6 +274,18 @@ Relies on a search.filters.FilterSearchForm to be passed as context["filter_sear
         100,
         1,
         100,
+    )
+
+    generateRangeSelector(
+        "duration-selector",
+        "id_duration_lower",
+        "id_duration_upper",
+        "duration-low-display",
+        "duration-high-display",
+        0,
+        72,
+        0,
+        72,
     )
 
     const dateTimeFrom = document.querySelector('#datetime-from-picker');

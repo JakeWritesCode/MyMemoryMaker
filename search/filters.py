@@ -2,6 +2,7 @@
 """Code relating to dealing with boolean filters stored in the attributes HStoreField."""
 
 # 3rd-party
+from datetime import datetime
 from typing import Union
 
 from crispy_forms.helper import FormHelper
@@ -152,6 +153,8 @@ class FilterSearchForm(forms.Form):
         self.fields["price_upper"].widget = forms.HiddenInput()
         self.fields["people_lower"].widget = forms.HiddenInput()
         self.fields["people_upper"].widget = forms.HiddenInput()
+        self.fields["duration_upper"].widget = forms.HiddenInput()
+        self.fields["duration_lower"].widget = forms.HiddenInput()
 
         for field in self.fields.values():
             try:
@@ -171,6 +174,29 @@ class FilterQueryProcessor:
     def __init__(self, request_get):  # noqa: D102
         self.request_get = request_get
 
+    def _types_required(self):
+        """Which types of search entity are required."""
+        required_objects = []
+        activity_selected = self.request_get.get("activity_select", False)
+        if activity_selected:
+            required_objects.append(Activity)
+        event_selected = self.request_get.get("event_select", False)
+        if activity_selected:
+            required_objects.append(Event)
+        place_selected = self.request_get.get("place_select", False)
+        if activity_selected:
+            required_objects.append(Place)
+
+        # If we're not explitly searching for anything, search for everything.
+        if len(required_objects) == 0:
+            required_objects = [Activity, Event, Place]
+
+        return required_objects
+
+    def parse_datepicker_datetime(self, input: str):
+        """Parse datetime picker return into datetime object."""
+        return datetime.strptime(input, "%d/%m/%Y, %H:%M")
+
     def parse_get_into_query(self, query_obj: Union[Activity, Event, Place]):
         """
         Parse a given GET request into a query for the Django ORM.
@@ -179,6 +205,43 @@ class FilterQueryProcessor:
         """
         orm_query = {}
 
-        gt_filters = ["price_lower", "duration_lower", "people_lower"]
+        # greater than filters
+        gt_filters = ["price_lower", "duration_lower", "people_lower", ""]
         for filter in gt_filters:
-            pass
+            selected_filter = self.request_get.get(filter, None)
+            if selected_filter:
+                orm_query[f"{filter}__gte"] = int(selected_filter)
+
+        # less than filters
+        lt_filters = ["price_upper", "duration_upper", "people_upper"]
+        for filter in lt_filters:
+            selected_filter = self.request_get.get(filter, None)
+            if selected_filter:
+                orm_query[f"{filter}__lte"] = int(selected_filter)
+
+        # Datetime filters
+        before_datetime = self.request_get.get("datetime_to")
+        if before_datetime:
+            after_datetime = self.parse_datepicker_datetime(before_datetime)
+
+        after_datetime = self.request_get.get("datetime_from")
+        if after_datetime:
+            after_datetime = self.parse_datepicker_datetime(after_datetime)
+
+        print(orm_query)
+        return orm_query
+
+    def _get_results_for_object_type(self, query_obj: Union[Activity, Event, Place]):
+        """Run the query and get the results for each type."""
+        query_filters = self.parse_get_into_query(query_obj)
+        hello = 1
+
+    def get_results(self):
+        """Return all results."""
+        all_results = []
+
+        for obj_type in self._types_required():
+            all_results.append(self._get_results_for_object_type(obj_type))
+
+
+

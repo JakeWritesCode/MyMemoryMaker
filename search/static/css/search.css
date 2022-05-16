@@ -99,8 +99,15 @@ body {
 @media (max-width: 767px) {
     .filter-column.active {
         width: 100vw;
-        background: rgb(255, 255, 255);
-        background: linear-gradient(0deg, rgba(255, 255, 255, 1) 74%, rgba(124, 207, 214, 1) 82%, rgba(17, 167, 181, 1) 88%, rgba(11, 102, 161, 1) 93%, rgba(5, 27, 139, 1) 100%);
+    }
+
+    .filter-column.active .bg-gradient-home {
+        height: 75vh;
+        position: fixed;
+        width: 100vw;
+        z-index: -1;
+        background: white;
+        background-image: linear-gradient(0deg, rgba(255, 255, 255, 1) 74%, rgba(124, 207, 214, 1) 82%, rgba(17, 167, 181, 1) 88%, rgba(11, 102, 161, 1) 93%, rgba(5, 27, 139, 1) 100%);
     }
 
     .filter-column.inactive {
@@ -117,8 +124,8 @@ body {
 }
 
 .results-column {
-background: rgb(255, 255, 255);
-        background: linear-gradient(0deg, rgba(255, 255, 255, 1) 74%, rgba(124, 207, 214, 1) 82%, rgba(17, 167, 181, 1) 88%, rgba(11, 102, 161, 1) 93%, rgba(5, 27, 139, 1) 100%);
+    background: rgb(255, 255, 255);
+    background: linear-gradient(0deg, rgba(255, 255, 255, 1) 74%, rgba(124, 207, 214, 1) 82%, rgba(17, 167, 181, 1) 88%, rgba(11, 102, 161, 1) 93%, rgba(5, 27, 139, 1) 100%);
 }
 
 #second-navbar {
