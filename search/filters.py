@@ -2,6 +2,8 @@
 """Code relating to dealing with boolean filters stored in the attributes HStoreField."""
 
 # 3rd-party
+from typing import Union
+
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML
 from crispy_forms.layout import Column
@@ -12,6 +14,7 @@ from django import forms
 
 # Project
 from search.constants import FILTERS
+from search.models import Activity, Event, Place
 
 
 def format_field_or_category_name(input: str):
@@ -99,7 +102,12 @@ class FilterSettingForm(forms.Form):
 
 
 class FilterSearchForm(forms.Form):
-    """Form to allow for searching by filters."""
+    """
+    Form to allow for searching by filters.
+
+    Note that this form isn't really processed, but is used to create a big dict in JS
+    that is then fed as GET params to a search view on the fly.
+    """
 
     activity_select = forms.BooleanField()
     event_select = forms.BooleanField()
@@ -142,3 +150,35 @@ class FilterSearchForm(forms.Form):
         self.fields["distance_upper"].widget = forms.HiddenInput()
         self.fields["price_lower"].widget = forms.HiddenInput()
         self.fields["price_upper"].widget = forms.HiddenInput()
+        self.fields["people_lower"].widget = forms.HiddenInput()
+        self.fields["people_upper"].widget = forms.HiddenInput()
+
+        for field in self.fields.values():
+            try:
+                field.widget.attrs["class"] += " search-on-change"
+            except KeyError:
+                field.widget.attrs["class"] = "search-on-change"
+            field.required = False
+
+
+class FilterQueryProcessor:
+    """
+    Processes an incoming dict created from FilterSearchForm into an ORM query.
+
+    Can run the query, then return a list of Activities, event and places.
+    """
+
+    def __init__(self, request_get):  # noqa: D102
+        self.request_get = request_get
+
+    def parse_get_into_query(self, query_obj: Union[Activity, Event, Place]):
+        """
+        Parse a given GET request into a query for the Django ORM.
+
+        The query differs slightly between activity, event and place.
+        """
+        orm_query = {}
+
+        gt_filters = ["price_lower", "duration_lower", "people_lower"]
+        for filter in gt_filters:
+            pass

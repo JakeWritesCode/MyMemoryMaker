@@ -50,6 +50,7 @@ Relies on a search.filters.FilterSearchForm to be passed as context["filter_sear
                 {{ filter_search_form.location_lat }}
                 {{ filter_search_form.location_long }}
             </div>
+            <div class="invalid-feedback-manual" id="invalid-feedback-location"></div>
         </div>
         <!-- Distance, slider -->
         <div class="row mt-4">
@@ -131,6 +132,35 @@ Relies on a search.filters.FilterSearchForm to be passed as context["filter_sear
             <div class="row mt-4">
                 <div class="col-12">
                     <h3 class="h5">{{ category|filter_name_human_readable }}</h3>
+                    {% if category == "people" %}
+                        <!-- Number of people, slider -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <label for="id_distance_lower">Number of people</label>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="people_lower" class="form-label">
+                                            <span id="people-low-display"></span> people
+                                        </label>
+                                        {{ filter_search_form.people_lower }}
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="people_upper" class="form-label float-right">
+                                            <span id="people-high-display"></span> people
+                                        </label>
+                                        {{ filter_search_form.people_upper }}
+                                    </div>
+                                    <div class="row px-3">
+                                        <div class="col-12 pl-2">
+                                            <div class="w-100 slider-margin-fix" style="height: 3px">
+                                                <span id="people-selector" class="people-selector mt-1"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
                     {% for filter in filter_list %}
                         <select
                                 name="filter_{{ filter }}"
@@ -145,7 +175,7 @@ Relies on a search.filters.FilterSearchForm to be passed as context["filter_sear
                         <button type="button"
                                 class="btn btn-white m-1"
                                 id="search-filter-button-{{ filter }}"
-                                onclick="searchFilterButtonOperate('{{ filter }}')"
+                                onclick="searchFilterButtonOperate('{{ filter }}', runSearch)"
                         >{{ filter|filter_name_human_readable }}
                         </button>
                     {% endfor %}
@@ -170,7 +200,17 @@ Relies on a search.filters.FilterSearchForm to be passed as context["filter_sear
             const place = autocomplete.getPlace();
             document.getElementById("id_location_lat").value = place.geometry.location.lat()
             document.getElementById("id_location_long").value = place.geometry.location.lng()
+            checkValidLocation()
         });
+    }
+
+    function checkValidLocation() {
+        if (document.getElementById("id_location_lat").value === "") {
+            document.getElementById("invalid-feedback-location").innerHTML = "Please select a location to enable distance search."
+        } else {
+            document.getElementById("invalid-feedback-location").innerHTML = ""
+            runSearch()
+        }
     }
 
     generateRangeSelector(
@@ -196,12 +236,48 @@ Relies on a search.filters.FilterSearchForm to be passed as context["filter_sear
         0,
         1000,
     )
+
+    generateRangeSelector(
+        "people-selector",
+        "id_people_lower",
+        "id_people_upper",
+        "people-low-display",
+        "people-high-display",
+        1,
+        100,
+        1,
+        100,
+    )
+
     const dateTimeFrom = document.querySelector('#datetime-from-picker');
     new mdb.Datetimepicker(dateTimeFrom, {
         timepicker: {format24: true},
     });
+    dateTimeFrom.addEventListener('datetimeChange.mdb.datetimepicker', (e) => {
+        runSearch()
+    })
     const dateTimeTo = document.querySelector('#datetime-to-picker');
     new mdb.Datetimepicker(dateTimeTo, {
         timepicker: {format24: true},
     });
+    dateTimeTo.addEventListener('datetimeChange.mdb.datetimepicker', (e) => {
+        runSearch()
+    })
+
+    // Force all applicable fields to re-run the search function on change
+    var searchFields = document.getElementsByClassName("search-on-change");
+    for (let i = 0; i < searchFields.length; i++) {
+        searchFields.item(i).addEventListener("change", runSearch)
+    }
+
+    // Watching for changes to the slider boxes spams the search API for every slide
+    // Limit this by checking for removal of the active class from multi-range-slider-hand
+    // classed objects.
+    var sliderHands = document.getElementsByClassName("multi-range-slider-hand");
+    for (let i = 0; i < sliderHands.length; i++) {
+        new ClassWatcher(sliderHands[i], 'active', function () {
+        }, runSearch)
+    }
+
+    const searchResultsURL = "{{ search_results_url }}"
 </script>

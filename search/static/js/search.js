@@ -88,7 +88,6 @@ function clearChildren(element) {
     }
 }
 
-
 function updatePreviewCard(updateFieldId, value) {
     // Updates an included preview card with the new information provided.
     const standardFields = [
@@ -121,7 +120,7 @@ function updatePreviewCard(updateFieldId, value) {
     }
 }
 
-function searchFilterButtonOperate (filterName) {
+function searchFilterButtonOperate(filterName, callback) {
     // Operates the custom toggle buttons for search filters.
     // Will find the accompanying select field and toggle value
     // Then apply style to visible button.
@@ -146,4 +145,125 @@ function searchFilterButtonOperate (filterName) {
     const visibleButton = document.getElementById("search-filter-button-" + filterName)
     visibleButton.classList.remove("search-filter-button-" + currentValue)
     visibleButton.classList.add("search-filter-button-" + newValue)
+
+    // Run the callback if there is one
+    if (callback) {
+        callback()
+    }
+}
+
+function parseSearch() {
+    // Parses the data from the form into get params for the runSearch function.
+    // Returns a dict of get params as k/v pairs.
+    let getParams = {}
+    const checkboxFields = ["id_event_select", "id_activity_select", "id_place_select"]
+    for (let i = 0; i < checkboxFields.length; i++) {
+        const field = document.getElementById(checkboxFields[i])
+        if (field.checked) {
+            getParams[field.name] = true
+        }
+    }
+
+    const textFields = [
+        "id_location_lat",
+        "id_location_long",
+        "id_distance_lower",
+        "id_distance_upper",
+        "id_price_lower",
+        "id_price_upper",
+        "id_people_lower",
+        "id_people_upper",
+        "id_keywords",
+        "id_datetime_from",
+        "id_datetime_to",
+    ]
+    for (let i = 0; i < textFields.length; i++) {
+        const field = document.getElementById(textFields[i])
+        if (field.value !== "") {
+            getParams[field.name] = field.value
+        }
+    }
+
+    // All the null bool filter buttons with hidden fields attached
+    const nullBoolFilters = document.getElementsByClassName("filter-select")
+    for (let i = 0; i < nullBoolFilters.length; i++) {
+        if (nullBoolFilters[i].value !== "none") {
+            getParams[nullBoolFilters[i].name] = nullBoolFilters[i].value
+        }
+    }
+
+    console.log(getParams)
+    return getParams
+}
+
+function runSearch() {
+    const getParams = parseSearch()
+    const resultsTarget = document.getElementById("search-results-target")
+
+    // It's possible the user could have deactivated all filters after activating some.
+    // If so, just remove everything from the target div.
+    if (Object.keys(getParams).length === 0) {
+        resultsTarget.innerHTML = ""
+    }
+
+    // Generate the get params
+    const searchResultsURLWithGETParams = new URL(searchResultsURL)
+    for (let k in getParams) {
+        searchResultsURLWithGETParams.searchParams.append(k, getParams[k]);
+    }
+
+    // Send a GET request to the search URL and add the returned HTML into the
+    // target div, HTMX style.
+    fetch(searchResultsURLWithGETParams.href, {
+        method: 'GET',
+    })
+        .then(response => response.text())
+        .then(html => {
+                // console.log(html);
+                resultsTarget.innerHTML = html;
+            }
+        )
+}
+
+class ClassWatcher {
+
+    constructor(targetNode, classToWatch, classAddedCallback, classRemovedCallback) {
+        this.targetNode = targetNode
+        this.classToWatch = classToWatch
+        this.classAddedCallback = classAddedCallback
+        this.classRemovedCallback = classRemovedCallback
+        this.observer = null
+        this.lastClassState = targetNode.classList.contains(this.classToWatch)
+
+        this.init()
+    }
+
+    init() {
+        this.observer = new MutationObserver(this.mutationCallback)
+        this.observe()
+    }
+
+    observe() {
+        this.observer.observe(this.targetNode, {attributes: true})
+    }
+
+    disconnect() {
+        this.observer.disconnect()
+    }
+
+    mutationCallback = mutationsList => {
+        for (let mutation of mutationsList) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                let currentClassState = mutation.target.classList.contains(this.classToWatch)
+                if (this.lastClassState !== currentClassState) {
+                    this.lastClassState = currentClassState
+                    if (currentClassState) {
+                        this.classAddedCallback()
+                    } else {
+                        this.classRemovedCallback()
+                    }
+                }
+            }
+        }
+    }
 }

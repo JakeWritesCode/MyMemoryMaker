@@ -197,3 +197,10 @@ input[type="checkbox"]:checked + label.btn-activity-type-toggle {
 .search-filter-button-false {
     background: rgba(189, 0, 0, 0.63) !important;
 }
+
+.invalid-feedback-manual {
+    width: 100%;
+    margin-top: .25rem;
+    font-size: .875em;
+    color: #dc3545;
+}

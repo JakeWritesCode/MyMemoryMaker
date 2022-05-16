@@ -9,6 +9,7 @@ from . import views
 urlpatterns = [
     # Form partials
     path("new-activity", views.new_activity, name="new-activity"),
+    path("search_results", views.search_results, name="search-results"),
     # Whole pages
     path("", views.search_view, name="search-home"),
 ]

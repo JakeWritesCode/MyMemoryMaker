@@ -29,13 +29,16 @@
             <div class="mt-4 d-none d-md-block">
                 {% include "partials/welcome_banner.html" %}
             </div>
+            <div id="search-results-target">
+                <!-- Search results will go here! -->
+                gpooglygfgb
+            </div>
         </div>
     </div>
 
     <script>
         document.getElementById("search-filter-column-select").addEventListener("click", function () {
             // make filter column active on mobile
-            console.log("activating filters")
             const filterColumn = document.getElementById("filter-column")
             filterColumn.classList.remove("inactive")
             filterColumn.classList.add("active")
@@ -47,7 +50,6 @@
         })
         document.getElementById("search-results-column-select").addEventListener("click", function () {
             // make results column active on mobile
-            console.log("activating results")
             const filterColumn = document.getElementById("filter-column")
             filterColumn.classList.remove("active")
             filterColumn.classList.add("inactive")

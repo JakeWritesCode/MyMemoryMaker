@@ -61,7 +61,11 @@ def new_activity(request):
 
 
 def search_view(request):
-    """Main search view page."""
+    """
+    Main search view page. Basically loads the template only.
+
+    Actual results are served by search_results.
+    """
     filter_search_form = FilterSearchForm()
 
     return render(
@@ -70,9 +74,14 @@ def search_view(request):
         {
             "filter_search_form": filter_search_form,
             "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
-            "filters_dict": FILTERS
+            "filters_dict": FILTERS,
+            "search_results_url": request.build_absolute_uri(reverse("search-results")),
         },
     )
+
+def search_results(request):
+    """An async view that returns the search results based on GET params."""
+    return render(request, "partials/search_results.html", {})
 
 def filters_form(request):
     """Generate a filters form block partial."""
