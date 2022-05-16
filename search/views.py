@@ -10,6 +10,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 # Project
+from search.constants import FILTERS
 from search.filters import FilterSearchForm
 from search.filters import FilterSettingForm
 from search.forms import NewActivityForm
@@ -63,14 +64,22 @@ def search_view(request):
     """Main search view page."""
     filter_search_form = FilterSearchForm()
 
-    return render(request, "search_home.html", {
-        "filter_search_form": filter_search_form,
-        "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY
-    })
-
+    return render(
+        request,
+        "search_home.html",
+        {
+            "filter_search_form": filter_search_form,
+            "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+            "filters_dict": FILTERS
+        },
+    )
 
 def filters_form(request):
     """Generate a filters form block partial."""
     form = FilterSearchForm()
 
-    return render(request, "partials/filter_search_form.html", {"filter_search_form": form})
+    return render(
+        request,
+        "partials/filter_search_form.html",
+        {"filter_search_form": form},
+    )

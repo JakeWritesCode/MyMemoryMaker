@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Popperjs -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.2/dist/umd/popper.min.js"
+            crossorigin="anonymous"></script>
+    <!-- Tempus Dominus JavaScript -->
+    <script src="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/js/tempus-dominus.js"
+            crossorigin="anonymous"></script>
+    <!-- Tempus Dominus Styles -->
+    <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css"
+          rel="stylesheet" crossorigin="anonymous">
+</head>
+
+
+<body>
+<div
+        class='input-group'
+        id='datetimepicker1'
+        data-td-target-input='nearest'
+        data-td-target-toggle='nearest'
+>
+    <input
+            id='datetimepicker1Input'
+            type='text'
+            class='form-control'
+            data-td-target='#datetimepicker1'
+    />
+    <span
+            class='input-group-text'
+            data-td-target='#datetimepicker1'
+            data-td-toggle='datetimepicker'
+    >
+     <span class='fa-solid fa-calendar'></span>
+   </span>
+</div>
+
+<script>
+    console.log("Hello")
+    let item = new tempusDominus.TempusDominus(document.getElementById('datetimepicker1'));
+    console.log(item)
+</script>
+
+
+</body>
+
+
+</html>

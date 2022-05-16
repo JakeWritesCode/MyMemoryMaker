@@ -1,42 +1,207 @@
 {% load crispy_forms_tags %}
+{% load static %}
+{% load getattribute %}
+{% load filter_name_human_readable %}
 
 <!--
 This partial renders a form for searching by filters on a new activity, place or event.
 Relies on a search.filters.FilterSearchForm to be passed as context["filter_search_form"]
 -->
 <script async
-    src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&callback=initMap">
+        src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&callback=gmapsInitialize">
 </script>
 
-<form type="get" class="p-2">
-    <!-- Activity, event, place -->
-    <div class="row d-flex flex-row">
-        <div class="col-12 d-flex flex-row">
-            {{ filter_search_form.activity_select }}
-            <label class="btn btn-activity-type-toggle btn-lg mx-1 w-30" for="id_activity_select">
-                Activity
-                <br>
-                <span class="toggle-type-text">Something to do, without a specific place or time.</span>
-            </label>
-            {{ filter_search_form.event_select }}
-            <label class="btn btn-activity-type-toggle mx-1 btn-lg w-30" for="id_event_select">
-                Event
-                <br>
-                <span class="toggle-type-text">
+<script src="{% static "js/search.js" %}"></script>
+
+<div class="container">
+    <form type="get" class="p-2">
+        <!-- Activity, event, place -->
+        <div class="row d-flex flex-row">
+            <div class="col-12 d-flex flex-row">
+                {{ filter_search_form.activity_select }}
+                <label class="btn btn-activity-type-toggle btn-lg mx-1 w-30" for="id_activity_select">
+                    Activity
+                    <br>
+                    <span class="toggle-type-text">Something to do, without a specific place or time.</span>
+                </label>
+                {{ filter_search_form.event_select }}
+                <label class="btn btn-activity-type-toggle mx-1 btn-lg w-30" for="id_event_select">
+                    Event
+                    <br>
+                    <span class="toggle-type-text">
                     Something going on, at a given place and time.
                 </span>
-            </label>
-            {{ filter_search_form.place_select }}
-            <label class="btn btn-activity-type-toggle btn-lg mx-1 w-30" for="id_place_select">
-                Place
-                <br>
-                <span class="toggle-type-text">
+                </label>
+                {{ filter_search_form.place_select }}
+                <label class="btn btn-activity-type-toggle btn-lg mx-1 w-30" for="id_place_select">
+                    Place
+                    <br>
+                    <span class="toggle-type-text">
                     A location where activities and events take place.
                 </span>
-            </label>
+                </label>
+            </div>
+
         </div>
+        <!-- Location, Google maps API -->
+        <div class="row mt-3">
+            <div class="col-12">
+                {{ filter_search_form.location|as_crispy_field }}
+                {{ filter_search_form.location_lat }}
+                {{ filter_search_form.location_long }}
+            </div>
+        </div>
+        <!-- Distance, slider -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <label for="id_distance_lower">Distance</label>
+                <div class="row">
+                    <div class="col-6">
+                        <label for="distance_lower" class="form-label">
+                            <span id="distance-low-display"></span> miles
+                        </label>
+                        {{ form.distance_lower }}
+                    </div>
+                    <div class="col-6">
+                        <label for="distance_upper" class="form-label float-right">
+                            <span id="distance-high-display"></span> miles
+                        </label>
+                        {{ form.distance_upper }}
+                    </div>
+                    <div class="row px-3">
+                        <div class="col-12 pl-2">
+                            <div class="w-100 slider-margin-fix" style="height: 3px">
+                                <span id="distance-selector" class="distance-selector mt-1"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Price, slider -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <label for="id_price_lower">Price</label>
+                <div class="row">
+                    <div class="col-6">
+                        <label for="price_lower" class="form-label">
+                            £<span id="price-low-display"></span>
+                        </label>
+                        {{ form.price_lower }}
+                    </div>
+                    <div class="col-6">
+                        <label for="price_upper" class="form-label float-right">
+                            £<span id="price-high-display"></span>
+                        </label>
+                        {{ form.price_upper }}
+                    </div>
+                    <div class="row px-3">
+                        <div class="col-12 pl-2">
+                            <div class="w-100 slider-margin-fix" style="height: 3px">
+                                <span id="price-selector" class="price-selector mt-1"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Date from, date to -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="form-outline" id="datetime-from-picker">
+                    <label for="id_datetime_from" class="form-label">Date / Time from</label>
+                    {{ filter_search_form.datetime_from }}
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="form-outline" id="datetime-to-picker">
+                    <label for="id_datetime_to" class="form-label">Date / Time to</label>
+                    {{ filter_search_form.datetime_to }}
+                </div>
+            </div>
+        </div>
+        <!-- Keyword search -->
+        <div class="row">
+            <div class="col-12">
+                {{ filter_search_form.keywords|as_crispy_field }}
+            </div>
+        </div>
+        <!--Filters button section-->
+        {% for category, filter_list in filters_dict.items %}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <h3 class="h5">{{ category|filter_name_human_readable }}</h3>
+                    {% for filter in filter_list %}
+                        <select
+                                name="filter_{{ filter }}"
+                                id="filter_{{ filter }}"
+                                class="filter-select"
+                                hidden
+                        >
+                            <option value="none" selected>none</option>
+                            <option value="true">true</option>
+                            <option value="false">false</option>
+                        </select>
+                        <button type="button"
+                                class="btn btn-white m-1"
+                                id="search-filter-button-{{ filter }}"
+                                onclick="searchFilterButtonOperate('{{ filter }}')"
+                        >{{ filter|filter_name_human_readable }}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+        <!-- Sticky bottom second nav fix-->
+        <div class="row d-md-none" style="height: 120px"></div>
+    </form>
+</div>
 
-    </div>
-    <!-- Location, Google maps API -->
+<script>
+    function gmapsInitialize() {
+        var input = document.getElementById('id_location');
+        const options = {
+            componentRestrictions: {country: "uk"},
+            fields: ["geometry"],
+            strictBounds: false,
+        };
+        const autocomplete = new google.maps.places.Autocomplete(input, options);
+        autocomplete.addListener("place_changed", function () {
+            const place = autocomplete.getPlace();
+            document.getElementById("id_location_lat").value = place.geometry.location.lat()
+            document.getElementById("id_location_long").value = place.geometry.location.lng()
+        });
+    }
 
-</form>
+    generateRangeSelector(
+        "distance-selector",
+        "id_distance_lower",
+        "id_distance_upper",
+        "distance-low-display",
+        "distance-high-display",
+        0,
+        100,
+        0,
+        100,
+    )
+
+    generateRangeSelector(
+        "price-selector",
+        "id_price_lower",
+        "id_price_upper",
+        "price-low-display",
+        "price-high-display",
+        0,
+        1000,
+        0,
+        1000,
+    )
+    const dateTimeFrom = document.querySelector('#datetime-from-picker');
+    new mdb.Datetimepicker(dateTimeFrom, {
+        timepicker: {format24: true},
+    });
+    const dateTimeTo = document.querySelector('#datetime-to-picker');
+    new mdb.Datetimepicker(dateTimeTo, {
+        timepicker: {format24: true},
+    });
+</script>

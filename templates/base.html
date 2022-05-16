@@ -26,10 +26,10 @@
           rel="stylesheet">
     <!-- MDB -->
     <link
-            href="{% static "css/mdb.min.css" %}"
+            href="{% static "css/mdb/mdb.min.css" %}"
             rel="stylesheet"
     />
-    <script src="{% static "js/mdb.min.js" %}"></script>
+    <script src="{% static "js/mdb/mdb.min.js" %}"></script>
     <script src="{% static "js/tinymce/js/tinymce/tinymce.min.js" %}"></script>
 
     <link rel="stylesheet" href="{% static "css/search.css" %}">
@@ -40,7 +40,7 @@
 <body>
 
 <!-- Main Navbar -->
-<nav class="navbar navbar-expand-sm bg-light navbar-light d-md-none" id="mobile-lgogo-navbar">
+<nav class="navbar navbar-expand-sm bg-light navbar-light d-md-none sticky-top" id="mobile-lgogo-navbar">
     <div class="container-fluid pr-0">
         <a class="navbar-brand d-md-none" href="{% url "index" %}">
             <img src="{% static "image/logo.png" %}" alt="MyMemoryMaker logo" height="50px">

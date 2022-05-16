@@ -120,3 +120,30 @@ function updatePreviewCard(updateFieldId, value) {
         document.getElementById("search-entity-filters").innerHTML = filtersHTML
     }
 }
+
+function searchFilterButtonOperate (filterName) {
+    // Operates the custom toggle buttons for search filters.
+    // Will find the accompanying select field and toggle value
+    // Then apply style to visible button.
+    const valueToggle = ["none", "true", "false", "none"]
+
+    // First, get the accompanying select and the value
+    const filterToggle = document.getElementById("filter_" + filterName)
+    let currentValue = ""
+    let newValue = ""
+    for (let i = 0; i < valueToggle.length; i++) {
+        if (filterToggle.value === valueToggle[i]) {
+            currentValue = valueToggle[i]
+            newValue = valueToggle[i + 1]
+            break
+        }
+    }
+
+    // Set the new value in the select
+    filterToggle.value = newValue
+
+    // Set the new class in the visible button
+    const visibleButton = document.getElementById("search-filter-button-" + filterName)
+    visibleButton.classList.remove("search-filter-button-" + currentValue)
+    visibleButton.classList.add("search-filter-button-" + newValue)
+}

@@ -104,7 +104,10 @@ class FilterSearchForm(forms.Form):
     activity_select = forms.BooleanField()
     event_select = forms.BooleanField()
     place_select = forms.BooleanField()
+
     location = forms.CharField()
+    location_lat = forms.CharField(widget=forms.HiddenInput())
+    location_long = forms.CharField(widget=forms.HiddenInput())
 
     distance_lower = forms.IntegerField()
     distance_upper = forms.IntegerField()
@@ -128,25 +131,11 @@ class FilterSearchForm(forms.Form):
     def __init__(self):
         """Auto-generate filters on init."""
         super(FilterSearchForm, self).__init__()
-        self.fields = self.fields | self._generate_filters_fields()
 
         # Field formatting
-        self.fields["activity_select"].widget.attrs["class"] = "btn-check"
+        self.fields["activity_select"].widget.attrs["class"] = "d-none"
         self.fields["event_select"].widget.attrs["class"] = "d-none"
         self.fields["place_select"].widget.attrs["class"] = "d-none"
+        self.fields["datetime_from"].widget.attrs["class"] = "form-control"
+        self.fields["datetime_to"].widget.attrs["class"] = "form-control"
 
-
-    def _generate_filters_fields(self):
-        """Auto-generate filters fields based on constants."""
-        generated_fields = {}
-
-        for field_list in FILTERS.values():
-            for field in field_list:
-                generated_fields[field] = forms.NullBooleanField(
-                    label=format_field_or_category_name(field),
-                    widget=forms.NullBooleanSelect(
-                        attrs={},
-                    ),
-                    required=False,
-                )
-        return generated_fields

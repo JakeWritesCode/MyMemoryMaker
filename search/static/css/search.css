@@ -117,12 +117,12 @@ body {
 }
 
 .results-column {
-    background: rgb(255, 255, 255);
-    background: linear-gradient(0deg, rgba(255, 255, 255, 1) 74%, rgba(124, 207, 214, 1) 82%, rgba(17, 167, 181, 1) 88%, rgba(11, 102, 161, 1) 93%, rgba(5, 27, 139, 1) 100%);
+background: rgb(255, 255, 255);
+        background: linear-gradient(0deg, rgba(255, 255, 255, 1) 74%, rgba(124, 207, 214, 1) 82%, rgba(17, 167, 181, 1) 88%, rgba(11, 102, 161, 1) 93%, rgba(5, 27, 139, 1) 100%);
 }
 
 #second-navbar {
-    position: absolute;
+    position: fixed;
     z-index: 10;
     bottom: 59px;
     width: 100vw;
@@ -180,4 +180,20 @@ input[type="checkbox"]:checked + label.btn-activity-type-toggle {
 
 .get-started-text {
     color: rgb(5, 27, 139);
+}
+
+.slider-margin-fix {
+    margin-bottom: 40px;
+}
+
+.datepicker-toggle-icon {
+    font-size: 2rem;
+}
+
+.search-filter-button-true {
+    background: rgba(0, 126, 0, 0.56) !important;
+}
+
+.search-filter-button-false {
+    background: rgba(189, 0, 0, 0.63) !important;
 }
