@@ -60,13 +60,13 @@ Relies on a search.filters.FilterSearchForm to be passed as context["filter_sear
                         <label for="distance_lower" class="form-label">
                             <span id="distance-low-display"></span> miles
                         </label>
-                        {{ form.distance_lower }}
+                        {{ filter_search_form.distance_lower }}
                     </div>
                     <div class="col-6">
                         <label for="distance_upper" class="form-label float-right">
                             <span id="distance-high-display"></span> miles
                         </label>
-                        {{ form.distance_upper }}
+                        {{ filter_search_form.distance_upper }}
                     </div>
                     <div class="row px-3">
                         <div class="col-12 pl-2">
@@ -87,13 +87,13 @@ Relies on a search.filters.FilterSearchForm to be passed as context["filter_sear
                         <label for="price_lower" class="form-label">
                             £<span id="price-low-display"></span>
                         </label>
-                        {{ form.price_lower }}
+                        {{ filter_search_form.price_lower }}
                     </div>
                     <div class="col-6">
                         <label for="price_upper" class="form-label float-right">
                             £<span id="price-high-display"></span>
                         </label>
-                        {{ form.price_upper }}
+                        {{ filter_search_form.price_upper }}
                     </div>
                     <div class="row px-3">
                         <div class="col-12 pl-2">

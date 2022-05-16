@@ -138,4 +138,7 @@ class FilterSearchForm(forms.Form):
         self.fields["place_select"].widget.attrs["class"] = "d-none"
         self.fields["datetime_from"].widget.attrs["class"] = "form-control"
         self.fields["datetime_to"].widget.attrs["class"] = "form-control"
-
+        self.fields["distance_lower"].widget = forms.HiddenInput()
+        self.fields["distance_upper"].widget = forms.HiddenInput()
+        self.fields["price_lower"].widget = forms.HiddenInput()
+        self.fields["price_upper"].widget = forms.HiddenInput()
