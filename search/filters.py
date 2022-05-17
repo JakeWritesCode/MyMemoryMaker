@@ -245,20 +245,16 @@ class FilterQueryProcessor:
             )
 
         # Null boolean filters
-        boolean_filters = []
+        boolean_filters = {}
         for _category, filter_list in FILTERS.items():
             for filter in filter_list:
                 boolean_filter = self.request_get.get(f"filter_{filter}")
                 if boolean_filter is not None:
                     boolean_filter = True if boolean_filter == "true" else False
-                    boolean_filters.append(Q(**{f"attributes__{filter}": str(boolean_filter)}))
+                    boolean_filters[f"attributes__{filter}"]: str(boolean_filter)
 
         if boolean_filters:
-            or_query = boolean_filters.pop()
-            for item in boolean_filters:
-                or_query |= item
-
-            orm_query = orm_query.filter(or_query)
+            orm_query = orm_query.filter(**boolean_filters)
 
         return orm_query.all()
 
