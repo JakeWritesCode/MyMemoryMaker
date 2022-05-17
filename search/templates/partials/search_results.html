@@ -6,7 +6,7 @@ Basically just parses each result into a card.
 {% for result in results %}
     <div class="row px-2 pt-2">
         <div class="col-12">
-            {% include "partials/search_entity_card.html" with headline=result.headline deacription=result.description filters=result.active_filters price_lower=result.price_lower|floatformat price_upper=result.price_upper|floatformat duration_lower=result.duration_lower duration_upper=result.duration_upper people_lower=result.people_lower people_upper=result.people_upper source_type=result.source_type image=result.images.first.uploaded_image.url %}
+            {% include "partials/search_entity_card.html" with headline=result.headline description=result.description|safe filters=result.active_filters price_lower=result.price_lower|floatformat price_upper=result.price_upper|floatformat duration_lower=result.duration_lower duration_upper=result.duration_upper people_lower=result.people_lower people_upper=result.people_upper source_type=result.source_type image=result.images.first.uploaded_image.url %}
         </div>
     </div>
 {% endfor %}
