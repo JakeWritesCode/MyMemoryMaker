@@ -8,10 +8,4 @@ from my_memory_maker.settings.base import *  # noqa: F403
 DEBUG = getenv("DEBUG", False)  # noqa: F405
 ALLOWED_HOSTS = [getenv("DJANGO_ALLOWED_HOSTS")]
 
-# DATABASES = {"default": dj_database_url.parse(getenv("DATABASE_URL"))}
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'mydatabase',
-    }
-}
+DATABASES = {"default": dj_database_url.parse(getenv("DATABASE_URL"))}
