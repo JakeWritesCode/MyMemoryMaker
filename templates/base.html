@@ -37,16 +37,19 @@
     {% block extended_head %}
     {% endblock %}
 </head>
+
+
 <body>
 
 <!-- Mobile logo Navbar -->
-<nav class="navbar navbar-expand-sm bg-light navbar-light d-md-none sticky-top" id="mobile-lgogo-navbar">
+<nav class="navbar navbar-expand-sm bg-light navbar-light d-md-none" id="mobile-lgogo-navbar">
     <div class="container-fluid pr-0">
         <a class="navbar-brand d-md-none" href="{% url "index" %}">
             <img src="{% static "image/logo.png" %}" alt="MyMemoryMaker logo" height="50px">
         </a>
     </div>
 </nav>
+
 <!-- Main Navbar -->
 <nav class="navbar navbar-expand-sm bg-light navbar-light" id="main-navbar">
     <div class="container-fluid pr-0">
