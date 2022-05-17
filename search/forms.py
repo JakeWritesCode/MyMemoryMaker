@@ -6,6 +6,7 @@ from django import forms
 from django.contrib.auth.models import AnonymousUser
 
 # Project
+from search.constants import SEARCH_ENTITY_SOURCES
 from search.models import Activity
 from search.models import SearchImage
 
@@ -82,6 +83,7 @@ class NewActivityForm(forms.ModelForm):
         except AttributeError:
             raise AttributeError("You need to add the filter data and the image.")
         self.instance.attributes = filters_json
+        self.instance.source_type = SEARCH_ENTITY_SOURCES[0]
         super(NewActivityForm, self).save(commit=commit)
         self.instance.images.add(image)
         return self.instance

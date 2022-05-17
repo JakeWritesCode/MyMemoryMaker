@@ -88,6 +88,15 @@ class SearchEntity(models.Model):
     class Meta:  # noqa: D106
         abstract = True
 
+    @property
+    def active_filters(self):
+        """Returns the list of active filters as strings."""
+        return [
+            filter_name
+            for filter_name in self.attributes.keys()
+            if self.attributes[filter_name] == "True"
+        ]
+
 
 class Activity(SearchEntity):
     """Something to do, without a specific date or place."""

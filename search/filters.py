@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 """Code relating to dealing with boolean filters stored in the attributes HStoreField."""
 
-# 3rd-party
+# Standard Library
+import random
 from datetime import datetime
+from typing import Type
 from typing import Union
 
+# 3rd-party
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML
 from crispy_forms.layout import Column
@@ -12,10 +15,13 @@ from crispy_forms.layout import Field
 from crispy_forms.layout import Layout
 from crispy_forms.layout import Row
 from django import forms
+from django.db.models import Q
 
 # Project
 from search.constants import FILTERS
-from search.models import Activity, Event, Place
+from search.models import Activity
+from search.models import Event
+from search.models import Place
 
 
 def format_field_or_category_name(input: str):
@@ -23,6 +29,7 @@ def format_field_or_category_name(input: str):
     output = input.replace("_", " ")
     output = output[0].upper() + output[1:]
     return output
+
 
 class FilterSettingForm(forms.Form):
     """A dynamic form factory for setting filter attributes on a new activity, event or place."""
@@ -34,8 +41,6 @@ class FilterSettingForm(forms.Form):
 
         self.helper = FormHelper()
         self.helper.layout = self._generate_form_layout()
-
-
 
     def _generate_fields(self):
         """
@@ -87,14 +92,12 @@ class FilterSettingForm(forms.Form):
         if not self.is_bound:
             raise ValueError("You need to bind the form to parse to JSON.")
         return_dict = {}
-        for category, filter_list in FILTERS.items():
-            category_dict = {}
+        for _category, filter_list in FILTERS.items():
             for filter_str in filter_list:
                 if filter_str in self.data.keys():
-                    category_dict[filter_str] = True
+                    return_dict[filter_str] = True
                 else:
-                    category_dict[filter_str] = False
-            return_dict[category] = category_dict
+                    return_dict[filter_str] = False
         return return_dict
 
     def save(self):
@@ -171,7 +174,7 @@ class FilterQueryProcessor:
     Can run the query, then return a list of Activities, event and places.
     """
 
-    def __init__(self, request_get):  # noqa: D102
+    def __init__(self, request_get):  # noqa: D107
         self.request_get = request_get
 
     def _types_required(self):
@@ -181,10 +184,10 @@ class FilterQueryProcessor:
         if activity_selected:
             required_objects.append(Activity)
         event_selected = self.request_get.get("event_select", False)
-        if activity_selected:
+        if event_selected:
             required_objects.append(Event)
         place_selected = self.request_get.get("place_select", False)
-        if activity_selected:
+        if place_selected:
             required_objects.append(Place)
 
         # If we're not explitly searching for anything, search for everything.
@@ -197,51 +200,74 @@ class FilterQueryProcessor:
         """Parse datetime picker return into datetime object."""
         return datetime.strptime(input, "%d/%m/%Y, %H:%M")
 
-    def parse_get_into_query(self, query_obj: Union[Activity, Event, Place]):
-        """
-        Parse a given GET request into a query for the Django ORM.
-
-        The query differs slightly between activity, event and place.
-        """
-        orm_query = {}
+    def _get_results_for_object_type(self, query_obj: Type[Union[Activity, Event, Place]]):
+        """Run the query and get the results for each type."""
+        # TODO - For now we're going to do the distance query and times query in
+        # python, it can definitely be done in SQL, fix this for future.
+        orm_query_kwargs = {}
 
         # greater than filters
-        gt_filters = ["price_lower", "duration_lower", "people_lower", ""]
+        gt_filters = ["price_lower", "duration_lower", "people_lower"]
         for filter in gt_filters:
             selected_filter = self.request_get.get(filter, None)
             if selected_filter:
-                orm_query[f"{filter}__gte"] = int(selected_filter)
+                orm_query_kwargs[f"{filter}__gte"] = int(selected_filter)
 
         # less than filters
         lt_filters = ["price_upper", "duration_upper", "people_upper"]
         for filter in lt_filters:
             selected_filter = self.request_get.get(filter, None)
             if selected_filter:
-                orm_query[f"{filter}__lte"] = int(selected_filter)
+                orm_query_kwargs[f"{filter}__lte"] = int(selected_filter)
 
-        # Datetime filters
-        before_datetime = self.request_get.get("datetime_to")
-        if before_datetime:
-            after_datetime = self.parse_datepicker_datetime(before_datetime)
+        datetime_filters = {}
+        if query_obj == Event:
+            # Datetime filters
+            before_datetime = self.request_get.get("datetime_to")
+            if before_datetime:
+                after_datetime = self.parse_datepicker_datetime(before_datetime)
 
-        after_datetime = self.request_get.get("datetime_from")
-        if after_datetime:
-            after_datetime = self.parse_datepicker_datetime(after_datetime)
+            after_datetime = self.request_get.get("datetime_from")
+            if after_datetime:
+                after_datetime = self.parse_datepicker_datetime(after_datetime)
+            datetime_filters = {"after": after_datetime, "before": before_datetime}
 
-        print(orm_query)
-        return orm_query
+        orm_query = query_obj.objects.filter(**orm_query_kwargs)
 
-    def _get_results_for_object_type(self, query_obj: Union[Activity, Event, Place]):
-        """Run the query and get the results for each type."""
-        query_filters = self.parse_get_into_query(query_obj)
-        hello = 1
+        # Contains filters.
+        # TODO - This feels a bit limited, are there any search packages we can use?
+        keywords_filters = self.request_get.get("keywords")
+        if keywords_filters:
+            orm_query = orm_query.filter(
+                Q(synonyms_keywords=keywords_filters.split())
+                | Q(headline__search=keywords_filters)
+                | Q(description__search=keywords_filters),
+            )
+
+        # Null boolean filters
+        boolean_filters = []
+        for _category, filter_list in FILTERS.items():
+            for filter in filter_list:
+                boolean_filter = self.request_get.get(f"filter_{filter}")
+                if boolean_filter is not None:
+                    boolean_filter = True if boolean_filter == "true" else False
+                    boolean_filters.append(Q(**{f"attributes__{filter}": str(boolean_filter)}))
+
+        if boolean_filters:
+            or_query = boolean_filters.pop()
+            for item in boolean_filters:
+                or_query |= item
+
+            orm_query = orm_query.filter(or_query)
+
+        return orm_query.all()
 
     def get_results(self):
         """Return all results."""
         all_results = []
 
         for obj_type in self._types_required():
-            all_results.append(self._get_results_for_object_type(obj_type))
+            all_results += list(self._get_results_for_object_type(obj_type))
+        random.shuffle(all_results)
 
-
-
+        return all_results

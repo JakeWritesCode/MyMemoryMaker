@@ -39,7 +39,7 @@
 </head>
 <body>
 
-<!-- Main Navbar -->
+<!-- Mobile logo Navbar -->
 <nav class="navbar navbar-expand-sm bg-light navbar-light d-md-none sticky-top" id="mobile-lgogo-navbar">
     <div class="container-fluid pr-0">
         <a class="navbar-brand d-md-none" href="{% url "index" %}">
@@ -47,6 +47,7 @@
         </a>
     </div>
 </nav>
+<!-- Main Navbar -->
 <nav class="navbar navbar-expand-sm bg-light navbar-light" id="main-navbar">
     <div class="container-fluid pr-0">
         <a class="navbar-brand d-none d-md-inline" href="{% url "index" %}">
@@ -55,7 +56,7 @@
         <ul class="navbar-nav px-0">
             <li class="nav-item mx-1">
                 <a class="nav-link active {% if "/search" in request.build_absolute_uri %}navbar-icon-selected{% endif %}"
-                   href="3">
+                   href="{% url "search-home" %}">
                     <i class="fa-solid fa-magnifying-glass fa-xl"></i>
                     <span class="d-none d-md-inline"> Search</span>
                 </a>

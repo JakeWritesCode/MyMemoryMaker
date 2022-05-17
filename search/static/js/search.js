@@ -194,7 +194,6 @@ function parseSearch() {
         }
     }
 
-    console.log(getParams)
     return getParams
 }
 
@@ -206,6 +205,8 @@ function runSearch() {
     // If so, just remove everything from the target div.
     if (Object.keys(getParams).length === 0) {
         resultsTarget.innerHTML = ""
+        document.getElementById("welcome-banner").classList.add("active")
+        document.getElementById("search-results-column-select").innerHTML = `Results`
         return
     }
 
@@ -222,10 +223,14 @@ function runSearch() {
     })
         .then(response => response.text())
         .then(html => {
-                // console.log(html);
                 resultsTarget.innerHTML = html;
+                const totalResults = document.getElementById("total-number-of-results").innerHTML
+                document.getElementById("search-results-column-select").innerHTML = `Results (${totalResults})`
             }
         )
+
+    // Populate total results into button for mobile
+    document.getElementById("welcome-banner").classList.remove("active")
 }
 
 class ClassWatcher {
