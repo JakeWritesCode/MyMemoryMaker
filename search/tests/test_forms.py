@@ -4,7 +4,6 @@
 from io import BytesIO
 
 # 3rd-party
-from django import forms
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.test import TestCase
