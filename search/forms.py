@@ -49,12 +49,12 @@ class NewActivityForm(forms.ModelForm):
         self.fields["headline"].widget.attrs[
             "placeholder"
         ] = "Give us a one sentence summary of your activity."
-        self.fields["price_upper"].widget = forms.HiddenInput()
-        self.fields["price_lower"].widget = forms.HiddenInput()
-        self.fields["duration_upper"].widget = forms.HiddenInput()
-        self.fields["duration_lower"].widget = forms.HiddenInput()
-        self.fields["people_lower"].widget = forms.HiddenInput()
-        self.fields["people_upper"].widget = forms.HiddenInput()
+        self.fields["price_upper"].widget.attrs["class"] = "form-control"
+        self.fields["price_lower"].widget.attrs["class"] = "form-control"
+        self.fields["duration_upper"].widget.attrs["class"] = "form-control"
+        self.fields["duration_lower"].widget.attrs["class"] = "form-control"
+        self.fields["people_lower"].widget.attrs["class"] = "form-control"
+        self.fields["people_upper"].widget.attrs["class"] = "form-control"
         self.fields["description"].required = False
         self.fields["synonyms_keywords"].widget.attrs[
             "placeholder"

@@ -33,77 +33,77 @@
                                 {{ form.description|as_crispy_field }}
                             </div>
                         </div>
-                        <!-- Price and duration sliders -->
+                        <!-- Price and duration -->
                         <div class="row mb-5">
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-lg-4">
                                 <h3>Typical Prices</h3>
                                 <p>How much does your activity typically cost?</p>
                                 <div class="row">
                                     <div class="col-6">
                                         <label for="price_lower" class="form-label">
                                             Lowest Price
-                                            <br>
-                                            £<span id="price-low-display"></span>
                                         </label>
-                                        {{ form.price_lower }}
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="_id_price_lower">£</span>
+                                            {{ form.price_lower }}
+                                        </div>
                                     </div>
                                     <div class="col-6">
                                         <label for="price_upper" class="form-label float-right">
                                             Highest Price
-                                            <br>
-                                            £<span id="price-high-display"></span>
                                         </label>
-                                        {{ form.price_upper }}
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="_id_price_upper">£</span>
+                                            {{ form.price_upper }}
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="row px-3">
-                                    <span id="price-selector" class="price-selector mt-1"></span>
-                                </div>
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-lg-4 mt-4 mt-lg-0">
                                 <h3>Typical Duration</h3>
                                 <p>How long does your activity usually last?</p>
                                 <div class="row">
                                     <div class="col-6">
                                         <label for="duration_lower" class="form-label">
                                             Lowest time
-                                            <br>
-                                            <span id="duration-low-display"></span> hours
                                         </label>
-                                        {{ form.duration_lower }}
+                                        <div class="input-group">
+                                            {{ form.duration_lower }}
+                                            <span class="input-group-text" id="_id_duration_lower">hours</span>
+                                        </div>
                                     </div>
                                     <div class="col-6">
                                         <label for="duration_upper" class="form-label float-right">
                                             Highest time
-                                            <br>
-                                            <span id="duration-high-display"></span> hours
                                         </label>
-                                        {{ form.duration_upper }}
+                                        <div class="input-group">
+                                            {{ form.duration_upper }}
+                                            <span class="input-group-text" id="_id_duration_upper">hours</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="row px-3">
-                                    <span id="duration-selector" class="duration-selector mt-1"></span>
-                                </div>
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-lg-4 mt-4 mt-lg-0">
                                 <h3>Number of People</h3>
                                 <p>How many people can take part in your activity?</p>
                                 <div class="row">
                                     <div class="col-6">
                                         <label for="people_lower" class="form-label">
-                                            Lowest number of people
-                                            <br>
-                                            <span id="people-low-display"></span> people
+                                            Fewest people
                                         </label>
-                                        {{ form.people_lower }}
+                                        <div class="input-group">
+                                            {{ form.people_lower }}
+                                            <span class="input-group-text" id="_id_people_lower">people</span>
+                                        </div>
                                     </div>
                                     <div class="col-6">
                                         <label for="people_upper" class="form-label float-right">
-                                            Highest number of people
-                                            <br>
-                                            <span id="people-high-display"></span> people
+                                            Highest people
                                         </label>
-                                        {{ form.people_upper }}
+                                        <div class="input-group">
+                                            {{ form.people_upper }}
+                                            <span class="input-group-text" id="_id_people_upper">people</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="row px-3">
@@ -157,46 +157,6 @@
 
     <script>
 
-        generateRangeSelector(
-            "price-selector",
-            "id_price_lower",
-            "id_price_upper",
-            "price-low-display",
-            "price-high-display",
-            0,
-            1000,
-            0,
-            1000,
-            priceLowerCallback,
-            priceUpperCallback,
-        )
-        generateRangeSelector(
-            "duration-selector",
-            "id_duration_lower",
-            "id_duration_upper",
-            "duration-low-display",
-            "duration-high-display",
-            1,
-            72,
-            1,
-            72,
-            durationLowerCallback,
-            durationUpperCallback,
-        )
-        generateRangeSelector(
-            "people-selector",
-            "id_people_lower",
-            "id_people_upper",
-            "people-low-display",
-            "people-high-display",
-            1,
-            100,
-            1,
-            100,
-            peopleLowerCallback,
-            peopleUpperCallback,
-        )
-
         const headline = document.getElementById("id_headline")
         headline.addEventListener("change", function () {
             updatePreviewCard("search-entity-headline", headline.value)
@@ -205,37 +165,26 @@
         priceLower.addEventListener("change", function () {
             updatePreviewCard("search-entity-price-lower", priceLower.value)
         })
-
-
-        function priceLowerCallback(value) {
-            // Callback function for the slider to set the preview card.
-            updatePreviewCard("search-entity-price-lower", value)
-        }
-
-        function priceUpperCallback(value) {
-            // Callback function for the slider to set the preview card.
-            updatePreviewCard("search-entity-price-upper", value)
-        }
-
-        function durationLowerCallback(value) {
-            // Callback function for the slider to set the preview card.
-            updatePreviewCard("search-entity-duration-lower", value)
-        }
-
-        function durationUpperCallback(value) {
-            // Callback function for the slider to set the preview card.
-            updatePreviewCard("search-entity-duration-upper", value)
-        }
-
-        function peopleLowerCallback(value) {
-            // Callback function for the slider to set the preview card.
-            updatePreviewCard("search-entity-people-lower", value)
-        }
-
-        function peopleUpperCallback(value) {
-            // Callback function for the slider to set the preview card.
-            updatePreviewCard("search-entity-people-upper", value)
-        }
+        const priceUpper = document.getElementById("id_price_upper")
+        priceUpper.addEventListener("change", function () {
+            updatePreviewCard("search-entity-price-upper", priceUpper.value)
+        })
+        const durationLower = document.getElementById("id_duration_lower")
+        durationLower.addEventListener("change", function () {
+            updatePreviewCard("search-entity-duration-lower", durationLower.value)
+        })
+        const durationUpper = document.getElementById("id_duration_upper")
+        durationUpper.addEventListener("change", function () {
+            updatePreviewCard("search-entity-duration-upper", durationUpper.value)
+        })
+        const peopleLower = document.getElementById("id_people_lower")
+        peopleLower.addEventListener("change", function () {
+            updatePreviewCard("search-entity-people-lower", peopleLower.value)
+        })
+        const peopleUpper = document.getElementById("id_people_upper")
+        peopleUpper.addEventListener("change", function () {
+            updatePreviewCard("search-entity-people-upper", peopleUpper.value)
+        })
 
         // Dynamically render the image that is loaded into the filefield.
         document.getElementById('id_uploaded_image').onchange = function (evt) {
