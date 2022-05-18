@@ -340,18 +340,18 @@ class TestFilterQueryProcessor(TestCase):
     def test_get_results_for_object_type_calls_correct_functions_for_activity(self):
         """Function should call all correct functions."""
         processor = self.processor({})
-        self.processor._append_gt_queries = MagicMock(return_value=1)
-        self.processor._append_lt_queries = MagicMock(return_value=2)
-        self.processor._append_search_queries = MagicMock(return_value=3)
-        self.processor._append_null_boolean_filter_queries = MagicMock(
+        processor._append_gt_queries = MagicMock(return_value=1)
+        processor._append_lt_queries = MagicMock(return_value=2)
+        processor._append_search_queries = MagicMock(return_value=3)
+        processor._append_null_boolean_filter_queries = MagicMock(
             return_value=Activity.objects.filter(),
         )
         result = processor._get_results_for_object_type(Activity)
-        self.processor._append_gt_queries.assert_called_once()
-        assert self.processor._append_gt_queries.call_args_list[0][0][0].model == Activity
-        self.processor._append_lt_queries.assert_called_once_with(1)
-        self.processor._append_search_queries.assert_called_once_with(2)
-        self.processor._append_null_boolean_filter_queries.assert_called_once_with(3)
+        processor._append_gt_queries.assert_called_once()
+        assert processor._append_gt_queries.call_args_list[0][0][0].model == Activity
+        processor._append_lt_queries.assert_called_once_with(1)
+        processor._append_search_queries.assert_called_once_with(2)
+        processor._append_null_boolean_filter_queries.assert_called_once_with(3)
         assert result == []
 
     def test_get_results_calls__get_results_for_object_type_for_each_object_in_types_required(self):
@@ -369,8 +369,7 @@ class TestFilterQueryProcessor(TestCase):
         activity = ActivityFactory()
         event = EventFactory()
         place = PlaceFactory()
-        results = self.processor({}).get_results()
+        results = FilterQueryProcessor({}).get_results()
         assert activity in results
         assert event in results
         assert place in results
-        assert results != [activity, event, place]
