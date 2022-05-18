@@ -90,6 +90,16 @@ class SearchEntity(models.Model):
     class Meta:  # noqa: D106
         abstract = True
 
+    def clean_synonyms_keywords(self):
+        """Make all synonyms lower case."""
+        if self.synonyms_keywords:
+            self.synonyms_keywords = [x.lower() for x in self.synonyms_keywords]
+
+    def save(self, **kwargs):
+        """Call clean method on save."""
+        self.clean_synonyms_keywords()
+        super(SearchEntity, self).save(**kwargs)
+
     @property
     def active_filters(self):
         """Returns the list of active filters as strings."""

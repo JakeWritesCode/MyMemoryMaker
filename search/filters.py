@@ -16,6 +16,7 @@ from crispy_forms.layout import Layout
 from crispy_forms.layout import Row
 from django import forms
 from django.db.models import Q
+from django.db.models import QuerySet
 
 # Project
 from search.constants import FILTERS
@@ -166,13 +167,16 @@ class FilterSearchForm(forms.Form):
                 field.widget.attrs["class"] = "search-on-change"
             field.required = False
 
+    def save(self):
+        """Raise an error, because this form isn't meant to be saved."""
+        raise ValueError("This form isn't meant to be saved!")
+
 
 class FilterQueryProcessor:
     """
-    Processes an incoming dict created from FilterSearchForm into an ORM query.
-
-    Can run the query, then return a list of Activities, event and places.
-    """
+    This class is designed to receive a raw series of get parameters and return
+    a list of applicable Activities, Events or Places.
+    """  # noqa: D205 D400
 
     def __init__(self, request_get):  # noqa: D107
         self.request_get = request_get
@@ -200,59 +204,70 @@ class FilterQueryProcessor:
         """Parse datetime picker return into datetime object."""
         return datetime.strptime(input, "%d/%m/%Y, %H:%M")
 
-    def _get_results_for_object_type(self, query_obj: Type[Union[Activity, Event, Place]]):
-        """Run the query and get the results for each type."""
-        # TODO - For now we're going to do the distance query and times query in
-        # python, it can definitely be done in SQL, fix this for future.
-        orm_query_kwargs = {}
-
-        # greater than filters
+    def _append_gt_queries(self, queryset: QuerySet):
+        """Parse and append all __gt based queries in the get params."""
         gt_filters = ["price_lower", "duration_lower", "people_lower"]
-        for filter in gt_filters:
-            selected_filter = self.request_get.get(filter, None)
+        for gt_filter in gt_filters:
+            selected_filter = self.request_get.get(gt_filter, None)
             if selected_filter:
-                orm_query_kwargs[f"{filter}__gte"] = int(selected_filter)
+                queryset = queryset.filter(**{f"{gt_filter}__gte": int(selected_filter)})
+        return queryset
 
-        # less than filters
+    def _append_lt_queries(self, queryset: QuerySet):
+        """Parse and append all __lt based queries in the get params."""
         lt_filters = ["price_upper", "duration_upper", "people_upper"]
-        for filter in lt_filters:
-            selected_filter = self.request_get.get(filter, None)
+        for lt_filter in lt_filters:
+            selected_filter = self.request_get.get(lt_filter, None)
             if selected_filter:
-                orm_query_kwargs[f"{filter}__lte"] = int(selected_filter)
+                queryset = queryset.filter(**{f"{lt_filter}__lte": int(selected_filter)})
+        return queryset
 
-        datetime_filters = {}
-        if query_obj == Event:
-            # Datetime filters
-            before_datetime = self.request_get.get("datetime_to")
-            if before_datetime:
-                after_datetime = self.parse_datepicker_datetime(before_datetime)
-
-            after_datetime = self.request_get.get("datetime_from")
-            if after_datetime:
-                after_datetime = self.parse_datepicker_datetime(after_datetime)
-            datetime_filters = {"after": after_datetime, "before": before_datetime}  # noqa: F841
-
-        orm_query = query_obj.objects.filter(**orm_query_kwargs)
-
-        # Contains filters.
+    def _append_search_queries(self, queryset: QuerySet):
         # TODO - This feels a bit limited, are there any search packages we can use?
         keywords_filters = self.request_get.get("keywords")
         if keywords_filters:
-            orm_query = orm_query.filter(
-                Q(synonyms_keywords=keywords_filters.split())
+            queryset = queryset.filter(
+                Q(synonyms_keywords__overlap=[x.lower() for x in keywords_filters.split()])
                 | Q(headline__search=keywords_filters)
                 | Q(description__search=keywords_filters),
             )
+        return queryset
 
-        # Null boolean filters
+    def _append_null_boolean_filter_queries(self, queryset: QuerySet):
+        """Append a HStoreField query for each of the returned filter status'."""
         for _category, filter_list in FILTERS.items():
-            for filter in filter_list:
-                boolean_filter = self.request_get.get(f"filter_{filter}")
+            for nb_filter in filter_list:
+                boolean_filter = self.request_get.get(f"filter_{nb_filter}")
                 if boolean_filter is not None:
                     boolean_filter = True if boolean_filter == "true" else False
-                    orm_query = orm_query.filter(**{f"attributes__{filter}": str(boolean_filter)})
+                    queryset = queryset.filter(**{f"attributes__{nb_filter}": str(boolean_filter)})
+        return queryset
 
-        return orm_query.all()
+    def _perform_datetime_query(self, list_of_results: list):
+        """Pythonically (for now) filter queryset for event datetimes and place opening times."""
+        return list_of_results
+
+    def _perform_distance_query(self, list_of_results: list):
+        return list_of_results
+
+    def _get_results_for_object_type(self, query_obj: Type[Union[Activity, Event, Place]]):
+        """Run the query and get the results for each type."""
+        queryset = query_obj.objects.filter()
+        queryset = self._append_gt_queries(queryset)
+        queryset = self._append_lt_queries(queryset)
+        queryset = self._append_search_queries(queryset)
+        queryset = self._append_null_boolean_filter_queries(queryset)
+
+        # These bits are done in Python until I can figure out how to use the SQL better
+        # Making them more computationally expensive
+        # Do them last so they have a smaller qs to work with
+        list_of_results = list(queryset.all())
+        if query_obj == Event:
+            list_of_results = self._perform_datetime_query(list_of_results)
+        if query_obj in [Event, Place]:
+            list_of_results = self._perform_distance_query(list_of_results)
+
+        return list_of_results
 
     def get_results(self):
         """Return all results."""
