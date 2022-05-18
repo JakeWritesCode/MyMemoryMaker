@@ -12,7 +12,8 @@ from django.test import SimpleTestCase
 
 # Project
 from search.constants import FILTERS
-from search.filters import FilterSettingForm, format_field_or_category_name
+from search.filters import FilterSettingForm
+from search.filters import format_field_or_category_name
 
 
 class TestFilterSettingForm(SimpleTestCase):

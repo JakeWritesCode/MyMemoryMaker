@@ -230,7 +230,7 @@ class FilterQueryProcessor:
             after_datetime = self.request_get.get("datetime_from")
             if after_datetime:
                 after_datetime = self.parse_datepicker_datetime(after_datetime)
-            datetime_filters = {"after": after_datetime, "before": before_datetime}
+            datetime_filters = {"after": after_datetime, "before": before_datetime}  # noqa: F841
 
         orm_query = query_obj.objects.filter(**orm_query_kwargs)
 
