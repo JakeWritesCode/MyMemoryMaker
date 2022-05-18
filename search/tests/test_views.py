@@ -103,8 +103,9 @@ class TestNewActivity(TestCase):
         for key, expected in self.fake_post_data_main_form.items():
             assert getattr(activities[0], key) == expected
 
-        for key in FILTERS.keys():
-            assert key in activities[0].attributes.keys()
+        for filter_list in FILTERS.values():
+            for filter in filter_list:
+                assert filter in activities[0].attributes.keys()
 
     def test_successful_post_request_renders_message(self):
         """A successful post request should return a message to the user."""
@@ -118,7 +119,7 @@ class TestNewActivity(TestCase):
         assert "Your activity has been saved and has been added" in str(response.content)
 
     def test_successful_post_request_redirects_to_index(self):
-        """A successful post request should redirect to the index page."""
+        """A successful post request should redirect to the search home page."""
         post_data = (
             self.fake_post_data_filters | self.fake_post_data_main_form | self.fake_post_data_image
         )
@@ -126,7 +127,7 @@ class TestNewActivity(TestCase):
         response = self.client.post(self.url, data=post_data, follow=True)
         assert response.status_code == OK
 
-        assert response.wsgi_request.path == reverse("index")
+        assert response.wsgi_request.path == reverse("search-home")
 
     def test_form_does_not_save_if_main_form_is_not_valid(self):
         """If the image form does not validate, nothing should save and errors should be shown."""

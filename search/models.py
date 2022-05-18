@@ -62,8 +62,9 @@ class SearchEntity(models.Model):
         on_delete=models.CASCADE,
         related_name="%(class)s_approved_by",
         null=True,
+        blank=True,
     )
-    approval_timestamp = models.DateTimeField(null=True)
+    approval_timestamp = models.DateTimeField(null=True, blank=True)
     headline = models.CharField(max_length=2048)
     description = models.TextField()
     price_lower = models.FloatField()
@@ -81,6 +82,7 @@ class SearchEntity(models.Model):
     source_id = models.UUIDField(
         verbose_name="Pseudo-FK to the source data table (if any)",
         null=True,
+        blank=True,
     )
     images = models.ManyToManyField(SearchImage)
     attributes = HStoreField()

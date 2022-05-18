@@ -12,7 +12,7 @@ from django.test import SimpleTestCase
 
 # Project
 from search.constants import FILTERS
-from search.filters import FilterSettingForm
+from search.filters import FilterSettingForm, format_field_or_category_name
 
 
 class TestFilterSettingForm(SimpleTestCase):
@@ -47,8 +47,8 @@ class TestFilterSettingForm(SimpleTestCase):
 
     def test_format_field_or_category_name_formats_correctly(self):
         """Function should format the slugified string into human-readable text."""
-        assert self.form._format_field_or_category_name("test_field") == "Test field"
-        assert self.form._format_field_or_category_name("I_am_Groot") == "I am Groot"
+        assert format_field_or_category_name("test_field") == "Test field"
+        assert format_field_or_category_name("I_am_Groot") == "I am Groot"
 
     def test_generate_fields_generates_a_field_for_each_filter_in_constants(self):
         """Function should generate a field for each filter specified in constants.FILTERS."""
@@ -63,7 +63,7 @@ class TestFilterSettingForm(SimpleTestCase):
         for category_list in FILTERS.values():
             for filter_str in category_list:
                 assert isinstance(fields[filter_str], forms.BooleanField)
-                assert fields[filter_str].label == self.form._format_field_or_category_name(
+                assert fields[filter_str].label == format_field_or_category_name(
                     filter_str,
                 )
                 assert isinstance(fields[filter_str].widget, forms.CheckboxInput)
@@ -80,7 +80,7 @@ class TestFilterSettingForm(SimpleTestCase):
         for index, category in enumerate(FILTERS.keys()):
             assert (
                 self.form.helper.layout.fields[index].fields[0].html
-                == f"<h3>{self.form._format_field_or_category_name(category)}</h3>"
+                == f"<h3>{format_field_or_category_name(category)}</h3>"
             )
 
     def test_generate_form_layout_generates_a_switch_field_for_each_expected_filter(self):
@@ -103,11 +103,11 @@ class TestFilterSettingForm(SimpleTestCase):
         assert "You need to bind the form to parse to JSON." in str(e.exception)
 
     def test_parse_to_json_parses_into_correct_format(self):
-        """The returned JSON should be in the same format as constants.FILTERS."""
+        """The returned JSON should just ber a flat list of k/v pairs."""
         expected_dict = {}
-        for category, filter_list in FILTERS.items():
+        for _category, filter_list in FILTERS.items():
             filters_post = {x: True for x in filter_list}
-            expected_dict[category] = filters_post
+            expected_dict |= filters_post
 
         self.form = FilterSettingForm(self.fake_post_data)
         assert self.form._parse_to_json() == expected_dict
@@ -120,9 +120,7 @@ class TestFilterSettingForm(SimpleTestCase):
             random_keys.append(random_key)
             self.fake_post_data.pop(random_key)
 
-        flat_filters = {}
-        for filters in FilterSettingForm(self.fake_post_data)._parse_to_json().values():
-            flat_filters = flat_filters | filters
+        flat_filters = FilterSettingForm(self.fake_post_data)._parse_to_json()
 
         for key in random_keys:
             assert not flat_filters[key]
