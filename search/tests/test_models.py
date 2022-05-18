@@ -6,7 +6,6 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 # Project
-from search.models import SearchEntity
 from search.tests.factories import ActivityFactory
 from search.tests.factories import EventFactory
 from search.tests.factories import PlaceFactory
@@ -31,28 +30,6 @@ class TestSearchImages(TestCase):
         assert "You must either add an uploaded image or specify an S3 URL." in str(e.exception)
 
 
-class TestSearchEntity(TestCase):
-    """Tests for the abstract base class."""
-
-    class ConcreteClass(SearchEntity):
-        """Concrete base class to test with."""
-
-        pass
-
-    def test_clean_synonyms_keywords_lowers_case(self):
-        """Clean function should lower case."""
-        entity = self.ConcreteClass(synonyms_keywords=["Whats", "Up", "Doc"])
-        entity.clean_synonyms_keywords()
-        assert entity.synonyms_keywords == ["whats", "up", "doc"]
-
-    def test_active_filters_returns_active_filters(self):
-        """Property should return a flat list of all active filters."""
-        entity = self.ConcreteClass(
-            attributes={"filter": "True", "not": "False", "selected": "True"},
-        )
-        assert entity.active_filters == ["filter", "selected"]
-
-
 class TestActivity(TestCase):
     """Tests for Activity."""
 
@@ -66,6 +43,19 @@ class TestActivity(TestCase):
         entity = ActivityFactory(synonyms_keywords=["Whats", "Up", "Doc"])
         entity.save()
         assert entity.synonyms_keywords == ["whats", "up", "doc"]
+
+    def test_clean_synonyms_keywords_lowers_case(self):
+        """Clean function should lower case."""
+        entity = ActivityFactory(synonyms_keywords=["Whats", "Up", "Doc"])
+        entity.clean_synonyms_keywords()
+        assert entity.synonyms_keywords == ["whats", "up", "doc"]
+
+    def test_active_filters_returns_active_filters(self):
+        """Property should return a flat list of all active filters."""
+        entity = ActivityFactory(
+            attributes={"filter": "True", "not": "False", "selected": "True"},
+        )
+        assert entity.active_filters == ["filter", "selected"]
 
 
 class TestPlace(TestCase):

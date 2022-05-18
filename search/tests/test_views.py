@@ -141,3 +141,7 @@ class TestNewActivity(TestCase):
         assert response.context["form"].errors == {"headline": ["This field is required."]}
         assert Activity.objects.count() == 0
         assert SearchImage.objects.count() == 0
+
+
+class TestSearchView(TestCase):
+    """Tests for search_view."""
