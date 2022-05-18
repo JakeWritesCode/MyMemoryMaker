@@ -96,12 +96,12 @@ class TestNewActivityForm(TestCase):
             self.form.fields["headline"].widget.attrs["placeholder"]
             == "Give us a one sentence summary of your activity."
         )
-        assert isinstance(self.form.fields["price_upper"].widget, forms.HiddenInput)
-        assert isinstance(self.form.fields["price_lower"].widget, forms.HiddenInput)
-        assert isinstance(self.form.fields["duration_upper"].widget, forms.HiddenInput)
-        assert isinstance(self.form.fields["duration_lower"].widget, forms.HiddenInput)
-        assert isinstance(self.form.fields["people_lower"].widget, forms.HiddenInput)
-        assert isinstance(self.form.fields["people_upper"].widget, forms.HiddenInput)
+        assert "form-control" in self.form.fields["price_upper"].widget.attrs["class"]
+        assert "form-control" in self.form.fields["price_lower"].widget.attrs["class"]
+        assert "form-control" in self.form.fields["duration_upper"].widget.attrs["class"]
+        assert "form-control" in self.form.fields["duration_lower"].widget.attrs["class"]
+        assert "form-control" in self.form.fields["people_lower"].widget.attrs["class"]
+        assert "form-control" in self.form.fields["people_upper"].widget.attrs["class"]
         assert not self.form.fields["description"].required
         assert (
             self.form.fields["synonyms_keywords"].widget.attrs["placeholder"]
