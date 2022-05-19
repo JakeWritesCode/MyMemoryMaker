@@ -192,6 +192,11 @@ class TestFilterSelectForm(SimpleTestCase):
             assert "search-on-change" in field.widget.attrs["class"]
             assert field.required is False
 
+    def test_saving_form_raises_validationerror(self):
+        """Form should not be saved."""
+        with self.assertRaises(ValueError):
+            self.form.save()
+
 
 class TestFilterQueryProcessor(TestCase):
     """
