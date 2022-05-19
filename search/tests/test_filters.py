@@ -253,11 +253,11 @@ class TestFilterQueryProcessor(TestCase):
 
         get_params = {"price_lower": 5, "price_upper": 15}
         results = list(self.processor(get_params)._append_slider_queries(qs).all())
-        assert results == [activity]
+        assert results == []
 
         get_params = {"price_lower": 150, "price_upper": 170}
         results = list(self.processor(get_params)._append_slider_queries(qs).all())
-        assert results == [activity]
+        assert results == []
 
     def test_append_slider_queries_uses_defaults_if_upper_or_lower_not_provided(self):
         """If either slider is not provided, use the default upper or lower bounds."""

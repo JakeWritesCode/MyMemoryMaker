@@ -253,12 +253,10 @@ class FilterQueryProcessor:
                 if not upper_selected:
                     upper_selected = filter_set[3]
                 # User selected low needs to be less than entity high
-                # OR
+                # AND
                 # User selected high needs to be more than entity low
-                extra_query = Q(**{f"{filter_set[1]}__gte": lower_selected}) | Q(
-                    **{f"{filter_set[0]}__lte": upper_selected},
-                )
-                queryset = queryset.filter(extra_query)
+                queryset = queryset.filter(**{f"{filter_set[1]}__gte": lower_selected})
+                queryset = queryset.filter(**{f"{filter_set[0]}__lte": upper_selected})
 
         return queryset
 
