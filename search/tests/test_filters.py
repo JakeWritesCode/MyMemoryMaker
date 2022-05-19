@@ -233,65 +233,39 @@ class TestFilterQueryProcessor(TestCase):
             == datetime.datetime(1994, 5, 12, 4, 30)
         )
 
-    def test_append_gt_queries_appends_sent_queries_price_lower(self):
-        """Function should modify queryset based on GET params and return modified queryset."""
-        activity = ActivityFactory(price_lower=12)
+    def test_append_slider_queries_gets_the_intersection_right(self):
+        """The function should return entities that have an intersection with user upper / lower."""
+        activity = ActivityFactory(price_lower=20, price_upper=100)
         qs = Activity.objects.filter()
-        get_param = {"price_lower": "10"}
-        assert list(self.processor(get_param)._append_gt_queries(qs).all()) == [activity]
-        activity.price_lower = 8
-        activity.save()
-        assert list(self.processor(get_param)._append_gt_queries(qs).all()) == []
 
-    def test_append_gt_queries_appends_sent_queries_duration_lower(self):
-        """Function should modify queryset based on GET params and return modified queryset."""
-        activity = ActivityFactory(duration_lower=12)
-        qs = Activity.objects.filter()
-        get_param = {"duration_lower": "10"}
-        assert list(self.processor(get_param)._append_gt_queries(qs).all()) == [activity]
-        activity.duration_lower = 8
-        activity.save()
-        assert list(self.processor(get_param)._append_gt_queries(qs).all()) == []
+        get_params = {"price_lower": 10, "price_upper": 50}
+        results = list(self.processor(get_params)._append_slider_queries(qs).all())
+        assert results == [activity]
 
-    def test_append_gt_queries_appends_sent_queries_people_lower(self):
-        """Function should modify queryset based on GET params and return modified queryset."""
-        activity = ActivityFactory(people_lower=12)
-        qs = Activity.objects.filter()
-        get_param = {"people_lower": "10"}
-        assert list(self.processor(get_param)._append_gt_queries(qs).all()) == [activity]
-        activity.people_lower = 8
-        activity.save()
-        assert list(self.processor(get_param)._append_gt_queries(qs).all()) == []
+        get_params = {"price_lower": 50, "price_upper": 150}
+        results = list(self.processor(get_params)._append_slider_queries(qs).all())
+        assert results == [activity]
 
-    def test_append_lt_queries_appends_sent_queries_price_upper(self):
-        """Function should modify queryset based on GET params and return modified queryset."""
-        activity = ActivityFactory(price_upper=15)
-        qs = Activity.objects.filter()
-        get_param = {"price_upper": "20"}
-        assert list(self.processor(get_param)._append_lt_queries(qs).all()) == [activity]
-        activity.price_upper = 25
-        activity.save()
-        assert list(self.processor(get_param)._append_lt_queries(qs).all()) == []
+        get_params = {"price_lower": 5, "price_upper": 15}
+        results = list(self.processor(get_params)._append_slider_queries(qs).all())
+        assert results == [activity]
 
-    def test_append_lt_queries_appends_sent_queries_duration_upper(self):
-        """Function should modify queryset based on GET params and return modified queryset."""
-        activity = ActivityFactory(duration_upper=15)
-        qs = Activity.objects.filter()
-        get_param = {"duration_upper": "20"}
-        assert list(self.processor(get_param)._append_lt_queries(qs).all()) == [activity]
-        activity.duration_upper = 25
-        activity.save()
-        assert list(self.processor(get_param)._append_lt_queries(qs).all()) == []
+        get_params = {"price_lower": 150, "price_upper": 170}
+        results = list(self.processor(get_params)._append_slider_queries(qs).all())
+        assert results == [activity]
 
-    def test_append_lt_queries_appends_sent_queries_people_upper(self):
-        """Function should modify queryset based on GET params and return modified queryset."""
-        activity = ActivityFactory(people_upper=15)
+    def test_append_slider_queries_uses_defaults_if_upper_or_lower_not_provided(self):
+        """If either slider is not provided, use the default upper or lower bounds."""
+        activity = ActivityFactory(price_lower=20, price_upper=100)
         qs = Activity.objects.filter()
-        get_param = {"people_upper": "20"}
-        assert list(self.processor(get_param)._append_lt_queries(qs).all()) == [activity]
-        activity.people_upper = 25
-        activity.save()
-        assert list(self.processor(get_param)._append_lt_queries(qs).all()) == []
+
+        get_params = {"price_lower": 50}
+        results = list(self.processor(get_params)._append_slider_queries(qs).all())
+        assert results == [activity]
+
+        get_params = {"price_upper": 50}
+        results = list(self.processor(get_params)._append_slider_queries(qs).all())
+        assert results == [activity]
 
     def test_append_search_queries_returns_headline_match(self):
         """Search queries should return a direct word match in headline."""
@@ -340,18 +314,16 @@ class TestFilterQueryProcessor(TestCase):
     def test_get_results_for_object_type_calls_correct_functions_for_activity(self):
         """Function should call all correct functions."""
         processor = self.processor({})
-        processor._append_gt_queries = MagicMock(return_value=1)
-        processor._append_lt_queries = MagicMock(return_value=2)
-        processor._append_search_queries = MagicMock(return_value=3)
+        processor._append_slider_queries = MagicMock(return_value=1)
+        processor._append_search_queries = MagicMock(return_value=2)
         processor._append_null_boolean_filter_queries = MagicMock(
             return_value=Activity.objects.filter(),
         )
         result = processor._get_results_for_object_type(Activity)
-        processor._append_gt_queries.assert_called_once()
-        assert processor._append_gt_queries.call_args_list[0][0][0].model == Activity
-        processor._append_lt_queries.assert_called_once_with(1)
-        processor._append_search_queries.assert_called_once_with(2)
-        processor._append_null_boolean_filter_queries.assert_called_once_with(3)
+        processor._append_slider_queries.assert_called_once()
+        assert processor._append_slider_queries.call_args_list[0][0][0].model == Activity
+        processor._append_search_queries.assert_called_once_with(1)
+        processor._append_null_boolean_filter_queries.assert_called_once_with(2)
         assert result == []
 
     def test_get_results_calls__get_results_for_object_type_for_each_object_in_types_required(self):

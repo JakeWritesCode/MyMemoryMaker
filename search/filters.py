@@ -262,24 +262,6 @@ class FilterQueryProcessor:
 
         return queryset
 
-    def _append_gt_queries(self, queryset: QuerySet):
-        """Parse and append all __gt based queries in the get params."""
-        gt_filters = ["price_lower", "duration_lower", "people_lower"]
-        for gt_filter in gt_filters:
-            selected_filter = self.request_get.get(gt_filter, None)
-            if selected_filter:
-                queryset = queryset.filter(**{f"{gt_filter}__gte": int(selected_filter)})
-        return queryset
-
-    def _append_lt_queries(self, queryset: QuerySet):
-        """Parse and append all __lt based queries in the get params."""
-        lt_filters = ["price_upper", "duration_upper", "people_upper"]
-        for lt_filter in lt_filters:
-            selected_filter = self.request_get.get(lt_filter, None)
-            if selected_filter:
-                queryset = queryset.filter(**{f"{lt_filter}__lte": int(selected_filter)})
-        return queryset
-
     def _append_search_queries(self, queryset: QuerySet):
         # TODO - This feels a bit limited, are there any search packages we can use?
         keywords_filters = self.request_get.get("keywords")
@@ -311,8 +293,7 @@ class FilterQueryProcessor:
     def _get_results_for_object_type(self, query_obj: Type[Union[Activity, Event, Place]]):
         """Run the query and get the results for each type."""
         queryset = query_obj.objects.filter()
-        queryset = self._append_gt_queries(queryset)
-        queryset = self._append_lt_queries(queryset)
+        queryset = self._append_slider_queries(queryset)
         queryset = self._append_search_queries(queryset)
         queryset = self._append_null_boolean_filter_queries(queryset)
 
