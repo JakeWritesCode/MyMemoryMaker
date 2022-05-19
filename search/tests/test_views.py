@@ -7,6 +7,7 @@ from http.client import OK
 from io import BytesIO
 
 # 3rd-party
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
@@ -15,11 +16,15 @@ from PIL import Image
 # Project
 from search import views
 from search.constants import FILTERS
+from search.filters import FilterSearchForm
 from search.filters import FilterSettingForm
 from search.forms import NewActivityForm
 from search.forms import SearchImageForm
 from search.models import Activity
 from search.models import SearchImage
+from search.tests.factories import ActivityFactory
+from search.tests.factories import EventFactory
+from search.tests.factories import PlaceFactory
 from users.tests.factories import CustomUserFactory
 from users.views import log_in
 
@@ -145,3 +150,43 @@ class TestNewActivity(TestCase):
 
 class TestSearchView(TestCase):
     """Tests for search_view."""
+
+    def setUp(self) -> None:  # noqa: D102
+        self.view = views.search_view
+        self.url = reverse(self.view)
+
+    def test_template(self):
+        """Test that the view renders the correct template."""
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "search_home.html")
+
+    def test_context(self):
+        """Test that the view renders the correct context."""
+        response = self.client.get(self.url)
+        assert isinstance(response.context["filter_search_form"], FilterSearchForm)
+        assert response.context["GOOGLE_MAPS_API_KEY"] == settings.GOOGLE_MAPS_API_KEY
+        assert response.context["filters_dict"] == FILTERS
+        assert reverse("search-results") in response.context["search_results_url"]
+
+
+class TestSearchResults(TestCase):
+    """Test search results view."""
+
+    def setUp(self) -> None:  # noqa: D102
+        self.view = views.search_results
+        self.url = reverse(self.view)
+
+    def test_template(self):
+        """Test that the view returns the correct template."""
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "partials/search_results.html")
+
+    def test_results(self):
+        """Functional test to make sure that all results are returned."""
+        activity = ActivityFactory()
+        event = EventFactory()
+        place = PlaceFactory()
+        response = self.client.get(self.url)
+        assert activity.headline in str(response.content)
+        assert event.headline in str(response.content)
+        assert place.headline in str(response.content)

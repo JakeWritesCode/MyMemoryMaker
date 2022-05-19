@@ -85,14 +85,3 @@ def search_results(request):
     """An async view that returns the search results based on GET params."""
     results = FilterQueryProcessor(request.GET).get_results()
     return render(request, "partials/search_results.html", {"results": results})
-
-
-def filters_form(request):
-    """Generate a filters form block partial."""
-    form = FilterSearchForm()
-
-    return render(
-        request,
-        "partials/filter_search_form.html",
-        {"filter_search_form": form},
-    )
