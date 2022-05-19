@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+    <!-- secondary navbar -->
+    <nav class="navbar navbar-expand-sm bg-light navbar-light d-md-none" id="second-navbar">
+        <div class="container-fluid p-0">
+            <div class="btn-group w-100 nav-button-group" role="group" aria-label="Basic example">
+                <button type="button" class="btn btn-link btn-lg text-mymemorymaker-primary"
+                        id="search-filter-column-select">Filters
+                </button>
+                <button type="button" class="btn btn-link btn-lg" id="search-results-column-select">Results</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-wrapper">
+        <div class="filter-column active" id="filter-column">
+            <div class="bg-gradient-home"></div>
+            <!-- Home image message shows up here if on mobile -->
+            <div class="container mt-3 d-md-none">
+                {% include "partials/welcome_banner.html" %}
+            </div>
+            <div class="container mt-3 d-none d-md-block text-center get-started-text">
+                <h2>Filters</h2>
+            </div>
+            {% include "partials/filter_search_form.html" %}
+        </div>
+        <div class="results-column inactive" id="results-column">
+            <div class="mt-4 d-none d-md-block welcome-banner active" id="welcome-banner">
+                {% include "partials/welcome_banner.html" %}
+            </div>
+            <div id="search-results-target">
+                <!-- Search results will go here! -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("search-filter-column-select").addEventListener("click", function () {
+            // make filter column active on mobile
+            const filterColumn = document.getElementById("filter-column")
+            filterColumn.classList.remove("inactive")
+            filterColumn.classList.add("active")
+            const resultsColumn = document.getElementById("results-column")
+            resultsColumn.classList.remove("active")
+            resultsColumn.classList.add("inactive")
+            document.getElementById("search-filter-column-select").classList.add("text-mymemorymaker-primary")
+            document.getElementById("search-results-column-select").classList.remove("text-mymemorymaker-primary")
+        })
+        document.getElementById("search-results-column-select").addEventListener("click", function () {
+            // make results column active on mobile
+            const filterColumn = document.getElementById("filter-column")
+            filterColumn.classList.remove("active")
+            filterColumn.classList.add("inactive")
+            const resultsColumn = document.getElementById("results-column")
+            resultsColumn.classList.remove("inactive")
+            resultsColumn.classList.add("active")
+            document.getElementById("search-filter-column-select").classList.remove("text-mymemorymaker-primary")
+            document.getElementById("search-results-column-select").classList.add("text-mymemorymaker-primary")
+        })
+    </script>
+{% endblock %}

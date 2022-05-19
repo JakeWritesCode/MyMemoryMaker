@@ -6,6 +6,7 @@ from django import forms
 from django.contrib.auth.models import AnonymousUser
 
 # Project
+from search.constants import SEARCH_ENTITY_SOURCES
 from search.models import Activity
 from search.models import SearchImage
 
@@ -48,12 +49,12 @@ class NewActivityForm(forms.ModelForm):
         self.fields["headline"].widget.attrs[
             "placeholder"
         ] = "Give us a one sentence summary of your activity."
-        self.fields["price_upper"].widget = forms.HiddenInput()
-        self.fields["price_lower"].widget = forms.HiddenInput()
-        self.fields["duration_upper"].widget = forms.HiddenInput()
-        self.fields["duration_lower"].widget = forms.HiddenInput()
-        self.fields["people_lower"].widget = forms.HiddenInput()
-        self.fields["people_upper"].widget = forms.HiddenInput()
+        self.fields["price_upper"].widget.attrs["class"] = "form-control"
+        self.fields["price_lower"].widget.attrs["class"] = "form-control"
+        self.fields["duration_upper"].widget.attrs["class"] = "form-control"
+        self.fields["duration_lower"].widget.attrs["class"] = "form-control"
+        self.fields["people_lower"].widget.attrs["class"] = "form-control"
+        self.fields["people_upper"].widget.attrs["class"] = "form-control"
         self.fields["description"].required = False
         self.fields["synonyms_keywords"].widget.attrs[
             "placeholder"
@@ -82,6 +83,7 @@ class NewActivityForm(forms.ModelForm):
         except AttributeError:
             raise AttributeError("You need to add the filter data and the image.")
         self.instance.attributes = filters_json
+        self.instance.source_type = SEARCH_ENTITY_SOURCES[0]
         super(NewActivityForm, self).save(commit=commit)
         self.instance.images.add(image)
         return self.instance

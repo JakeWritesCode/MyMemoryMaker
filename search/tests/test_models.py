@@ -38,6 +38,25 @@ class TestActivity(TestCase):
         activity = ActivityFactory()
         assert str(activity) == f"Activity: {activity.headline}"
 
+    def test_save_calls_clean_synonyms_keywords(self):
+        """Save should call clean method."""
+        entity = ActivityFactory(synonyms_keywords=["Whats", "Up", "Doc"])
+        entity.save()
+        assert entity.synonyms_keywords == ["whats", "up", "doc"]
+
+    def test_clean_synonyms_keywords_lowers_case(self):
+        """Clean function should lower case."""
+        entity = ActivityFactory(synonyms_keywords=["Whats", "Up", "Doc"])
+        entity.clean_synonyms_keywords()
+        assert entity.synonyms_keywords == ["whats", "up", "doc"]
+
+    def test_active_filters_returns_active_filters(self):
+        """Property should return a flat list of all active filters."""
+        entity = ActivityFactory(
+            attributes={"filter": "True", "not": "False", "selected": "True"},
+        )
+        assert entity.active_filters == ["filter", "selected"]
+
 
 class TestPlace(TestCase):
     """Tests for Place."""

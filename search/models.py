@@ -62,8 +62,9 @@ class SearchEntity(models.Model):
         on_delete=models.CASCADE,
         related_name="%(class)s_approved_by",
         null=True,
+        blank=True,
     )
-    approval_timestamp = models.DateTimeField(null=True)
+    approval_timestamp = models.DateTimeField(null=True, blank=True)
     headline = models.CharField(max_length=2048)
     description = models.TextField()
     price_lower = models.FloatField()
@@ -81,12 +82,32 @@ class SearchEntity(models.Model):
     source_id = models.UUIDField(
         verbose_name="Pseudo-FK to the source data table (if any)",
         null=True,
+        blank=True,
     )
     images = models.ManyToManyField(SearchImage)
     attributes = HStoreField()
 
     class Meta:  # noqa: D106
         abstract = True
+
+    def clean_synonyms_keywords(self):
+        """Make all synonyms lower case."""
+        if self.synonyms_keywords:
+            self.synonyms_keywords = [x.lower() for x in self.synonyms_keywords]
+
+    def save(self, **kwargs):
+        """Call clean method on save."""
+        self.clean_synonyms_keywords()
+        super(SearchEntity, self).save(**kwargs)
+
+    @property
+    def active_filters(self):
+        """Returns the list of active filters as strings."""
+        return [
+            filter_name
+            for filter_name in self.attributes.keys()
+            if self.attributes[filter_name] == "True"
+        ]
 
 
 class Activity(SearchEntity):

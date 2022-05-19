@@ -2,6 +2,7 @@
 """Views for search."""
 
 # 3rd-party
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
@@ -9,6 +10,9 @@ from django.shortcuts import render
 from django.urls import reverse
 
 # Project
+from search.constants import FILTERS
+from search.filters import FilterQueryProcessor
+from search.filters import FilterSearchForm
 from search.filters import FilterSettingForm
 from search.forms import NewActivityForm
 from search.forms import SearchImageForm
@@ -55,3 +59,29 @@ def new_activity(request):
         "partials/new_activity.html",
         {"form": form, "image_form": image_form, "filter_setter_form": filter_setter_form},
     )
+
+
+def search_view(request):
+    """
+    Main search view page. Basically loads the template only.
+
+    Actual results are served by search_results.
+    """
+    filter_search_form = FilterSearchForm()
+
+    return render(
+        request,
+        "search_home.html",
+        {
+            "filter_search_form": filter_search_form,
+            "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+            "filters_dict": FILTERS,
+            "search_results_url": request.build_absolute_uri(reverse("search-results")),
+        },
+    )
+
+
+def search_results(request):
+    """An async view that returns the search results based on GET params."""
+    results = FilterQueryProcessor(request.GET).get_results()
+    return render(request, "partials/search_results.html", {"results": results})

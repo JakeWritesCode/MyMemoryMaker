@@ -1,11 +1,21 @@
-<div class="card">
+{% load static %}
+{% load filter_name_human_readable %}
+
+<div class="card card-shadow search-entity-card">
     <div class="card-body">
 
 
         <div class="row">
             <div class="col-12 col-md-6 col-lg-4 d-flex">
-                <img id="search-entity-image" class="search-entity-image"
-                     src="https://renegadebrewing.com/wp-content/uploads/2021/03/History-3.jpg" alt="{{ alt_text }}">
+                {% if image %}
+                    <img id="search-entity-image" class="search-entity-image"
+                         src="{{ image }}"
+                         alt="{{ alt_text }}">
+                {% else %}
+                    <img id="search-entity-image" class="search-entity-image"
+                         src="https://renegadebrewing.com/wp-content/uploads/2021/03/History-3.jpg"
+                         alt="{{ alt_text }}">
+                {% endif %}
             </div>
 
             <div class="col-12 col-md-6 col-lg-8 mt-3 mt-md-0 d-flex flex-column">
@@ -14,7 +24,7 @@
                         <h2 class="h3" id="search-entity-headline">
                             {% if headline %}{{ headline }}{% else %}My New Submission{% endif %}</h2>
                         <p id="search-entity-description">
-                            {% if description %}{{ description }}{% else %}My subscription description{% endif %}</p>
+                            {% if description %}{{ description }}{% else %}My description{% endif %}</p>
                     </div>
                     <div class="">
                         <span class="material-icons material-icons-outlined search-entity-icon">favorite</span>
@@ -24,7 +34,7 @@
                     <div class="col-12" id="search-entity-filters">
                         {% if filters %}
                             {% for filter in filters %}
-                                <span class="badge badge-light mx-1">{{ filter }}</span>
+                                <span class="badge badge-light mx-1">{{ filter|filter_name_human_readable }}</span>
                             {% endfor %}
                         {% else %}
                             {% with "each filter appears here" as list %}
@@ -65,7 +75,7 @@
                     <div class="flex-grow-1 align-text-bottom align-self-end">
                         <span class="entity-source-text align-text-bottom">
                             {% if source_type %}
-                                {{ source_type }}
+                                {{ source_type|filter_name_human_readable }}
                             {% else %}
                                 Manual Entry
                             {% endif %}

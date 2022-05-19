@@ -3,6 +3,7 @@
 
 # 3rd-party
 from django.contrib.auth.hashers import make_password
+from factory import LazyFunction
 from factory.django import DjangoModelFactory
 from faker import Faker
 
@@ -15,9 +16,9 @@ fake = Faker()
 class CustomUserFactory(DjangoModelFactory):
     """CustomUser factory."""
 
-    email = fake.email()
-    first_name = fake.first_name()
-    last_name = fake.last_name()
+    email = LazyFunction(fake.email)
+    first_name = LazyFunction(fake.first_name)
+    last_name = LazyFunction(fake.last_name)
     password = make_password(fake.password())
 
     class Meta:  # noqa: D106
