@@ -39,3 +39,13 @@ FILTERS = {
         "colleagues",
     ],
 }
+
+"""
+These are the upper and lower bounds we'll allow the user to enter when 
+creating a new search entity.
+"""
+GT_LT_FILTERS_UPPER_LOWER_BOUNDS = {
+    "duration": [0, 48],  # Hours
+    "price": [0, 250],  # Pounds
+    "people": [1, 50]
+}

@@ -20,6 +20,7 @@ from django.db.models import QuerySet
 
 # Project
 from search.constants import FILTERS
+from search.constants import GT_LT_FILTERS_UPPER_LOWER_BOUNDS
 from search.models import Activity
 from search.models import Event
 from search.models import Place
@@ -203,6 +204,63 @@ class FilterQueryProcessor:
     def parse_datepicker_datetime(self, input: str):
         """Parse datetime picker return into datetime object."""
         return datetime.strptime(input, "%d/%m/%Y, %H:%M")
+
+    def _append_slider_queries(self, queryset: QuerySet):
+        """
+        Append any slider queries to the qs.
+
+        For slider queries, we want to provide any intersection between the upper and lower bounds
+        if the search entity and the user selection.
+        So...
+                |---User Selection ---|
+        |---Search entity 1 --|
+                                |---Search entity 2---|
+                                       |---Search entity 3---|
+        We want to provide search entities 1 and 2 and allow the user to make a decision as to the
+        suitability on their own.
+
+        Filters should always come in pairs but if they don't, add the upper and lower bounds
+        from constants.
+        """
+        filter_sets = [
+            # [lower_name, upper_name, lower default, upper default]
+            [
+                "price_lower",
+                "price_upper",
+                GT_LT_FILTERS_UPPER_LOWER_BOUNDS["price"][0],
+                GT_LT_FILTERS_UPPER_LOWER_BOUNDS["price"][1],
+            ],
+            [
+                "duration_lower",
+                "duration_upper",
+                GT_LT_FILTERS_UPPER_LOWER_BOUNDS["duration"][0],
+                GT_LT_FILTERS_UPPER_LOWER_BOUNDS["duration"][1],
+            ],
+            [
+                "people_lower",
+                "people_upper",
+                GT_LT_FILTERS_UPPER_LOWER_BOUNDS["people"][0],
+                GT_LT_FILTERS_UPPER_LOWER_BOUNDS["people"][1],
+            ],
+        ]
+
+        for filter_set in filter_sets:
+            lower_selected = self.request_get.get(filter_set[0], None)
+            upper_selected = self.request_get.get(filter_set[1], None)
+            if lower_selected or upper_selected:
+                if not lower_selected:
+                    lower_selected = filter_set[2]
+                if not upper_selected:
+                    upper_selected = filter_set[3]
+                # User selected low needs to be less than entity high
+                # OR
+                # User selected high needs to be more than entity low
+                extra_query = Q(**{f"{filter_set[1]}__gte": lower_selected}) | Q(
+                    **{f"{filter_set[0]}__lte": upper_selected},
+                )
+                queryset = queryset.filter(extra_query)
+
+        return queryset
 
     def _append_gt_queries(self, queryset: QuerySet):
         """Parse and append all __gt based queries in the get params."""
