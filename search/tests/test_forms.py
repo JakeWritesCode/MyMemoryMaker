@@ -38,17 +38,28 @@ class TestSearchImageForm(TestCase):
             None,
         )
 
-    def test_layout(self):
-        """Test the visual layout properties defined in the form."""
+    def test_layout_image_required(self):
+        """Test the visual layout properties defined in the form if image_required."""
         assert self.form.fields["uploaded_image"].widget.attrs["class"] == "form-control"
         assert (
             self.form.fields["alt_text"].widget.attrs["placeholder"]
             == "Please describe your image."
         )
-        assert self.form.fields["uploaded_image"].required is False
-        assert self.form.fields["alt_text"].required is False
         assert isinstance(self.form.fields["link_url"].widget, forms.HiddenInput)
         assert self.form.fields["link_url"].required is False
+
+    def test_layout_image_not_required(self):
+        """Test the visual layout properties defined in the form if image_required."""
+        self.form = SearchImageForm(self.user, image_required=False)
+        assert self.form.fields["uploaded_image"].widget.attrs["class"] == "form-control"
+        assert (
+            self.form.fields["alt_text"].widget.attrs["placeholder"]
+            == "Please describe your image."
+        )
+        assert isinstance(self.form.fields["link_url"].widget, forms.HiddenInput)
+        assert self.form.fields["link_url"].required is False
+        assert self.form.fields["uploaded_image"].required is False
+        assert self.form.fields["alt_text"].required is False
         assert self.form.fields["permissions_confirmation"].required is False
 
     def test_form_fields(self):

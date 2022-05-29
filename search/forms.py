@@ -22,16 +22,18 @@ class SearchImageForm(forms.ModelForm):
         label="Please confirm you have permission to use and share this image.",
     )
 
-    def __init__(self, user, *args, **kwargs):  # noqa: D107
+    def __init__(self, user, *args, image_required=True, **kwargs):  # noqa: D107
         self.user = user
         super(SearchImageForm, self).__init__(*args, **kwargs)
         self.fields["uploaded_image"].widget.attrs["class"] = "form-control"
-        self.fields["uploaded_image"].required = False
         self.fields["alt_text"].widget.attrs["placeholder"] = "Please describe your image."
-        self.fields["alt_text"].required = False
         self.fields["link_url"].widget = forms.HiddenInput()
         self.fields["link_url"].required = False
-        self.fields["permissions_confirmation"].required = False
+
+        if not image_required:
+            self.fields["uploaded_image"].required = False
+            self.fields["alt_text"].required = False
+            self.fields["permissions_confirmation"].required = False
 
     class Meta:  # noqa: D106
         model = SearchImage
@@ -41,20 +43,6 @@ class SearchImageForm(forms.ModelForm):
         """Add the uploading user id."""
         self.instance.uploaded_by = self.user
         return super(SearchImageForm, self).save(commit=commit)
-
-    def clean_uploaded_image(self):
-        if "uploaded_image" not in self.data.keys():
-            if not "link_url" not in self.data.keys():
-                raise ValidationError("This field is required.")
-            if self.cleaned_data["link_url"] == "":
-                raise ValidationError("This field is required.")
-
-        return self.cleaned_data["uploaded_image"]
-
-    def clean_alt_text(self):
-        if "uploaded_image" in self.data.keys():
-            raise ValidationError("This field is required.")
-        return self.cleaned_data["alt_text"]
 
 
 class NewSearchEntityForm(forms.ModelForm):
@@ -145,6 +133,7 @@ class NewPlaceForm(NewSearchEntityForm):
         self.fields["location_lat"].widget = forms.HiddenInput()
         self.fields["location_long"].widget = forms.HiddenInput()
         self.fields["google_maps_rating"].widget = forms.HiddenInput()
+        self.fields["google_maps_rating"].required = False
         self.fields["address"].widget = forms.HiddenInput()
         self.fields["activities"].required = False
 

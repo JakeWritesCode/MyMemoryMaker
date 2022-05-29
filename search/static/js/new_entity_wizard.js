@@ -93,6 +93,7 @@ function initNewEntityForm() {
 
 function initNewActivityForm() {
     initNewEntityForm()
+    document.getElementById("")
 }
 
 function initNewPlaceForm() {
@@ -117,5 +118,11 @@ function initNewPlaceForm() {
         document.getElementById("id_link_url").value = photo
         document.getElementById("search-entity-image").setAttribute("src", photo)
 
+        // Make the image fields not required if we have one from google MAPS
+        if (photo) {
+            document.getElementById("id_uploaded_image").required = false;
+            document.getElementById("id_alt_text").required = false;
+            document.getElementById("id_permissions_confirmation").required = false;
+        }
     });
 }

@@ -63,15 +63,13 @@ def new_place(request):
     """
     form = NewPlaceForm(user=request.user)
     image_form = SearchImageForm(user=request.user)
-    # Override image required, because we'll get one from google maps
-    image_form.fields['uploaded_image'].required = False
-    image_form.fields['alt_text'].required = False
-    image_form.fields['permissions_confirmation'].required = False
     filter_setter_form = FilterSettingForm()
 
     if request.method == "POST":
         # Validate the image form first.
-        image_form = SearchImageForm(request.user, request.POST, request.FILES)
+        if request.POST.get("link_url"):
+            image_required = False
+        image_form = SearchImageForm(request.user, request.POST, request.FILES, image_required=image_required)
         image_form_valid = image_form.is_valid()
 
         # Then bind the filters form, and parse the results to JSON.
