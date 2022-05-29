@@ -293,7 +293,8 @@ class FilterQueryProcessor:
         distance_upper = self.request_get.get("distance_upper", None)
 
         if not lat_selected or not long_selected or not distance_lower or not distance_upper:
-            return list_of_results
+            if distance_lower != 0:
+                return list_of_results
 
         try:
             lat_selected = float(lat_selected)

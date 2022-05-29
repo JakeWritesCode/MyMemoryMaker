@@ -4,6 +4,7 @@
 from io import BytesIO
 
 # 3rd-party
+from django import forms
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.test import TestCase
@@ -44,6 +45,11 @@ class TestSearchImageForm(TestCase):
             self.form.fields["alt_text"].widget.attrs["placeholder"]
             == "Please describe your image."
         )
+        assert self.form.fields["uploaded_image"].required is False
+        assert self.form.fields["alt_text"].required is False
+        assert isinstance(self.form.fields["link_url"].widget, forms.HiddenInput)
+        assert self.form.fields["link_url"].required is False
+        assert self.form.fields["permissions_confirmation"].required is False
 
     def test_form_fields(self):
         """Form should show the correct fields."""
@@ -64,6 +70,12 @@ class TestSearchImageForm(TestCase):
         self.form.is_valid()
         instance = self.form.save(commit=True)
         assert instance.uploaded_by == self.user
+
+    def test_form_does_not_validate_if_there_is_no_image_or_url(self):
+        """There needs to be either a url or an uploaded image."""
+        form = SearchImageForm(self.user, data={"permissions_confirmation": True, "alt_text": "Barry"})
+        form.is_valid()
+        assert len(form.fields["uploaded_image"].error_messages)
 
 
 class TestNewActivityForm(TestCase):

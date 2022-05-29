@@ -83,6 +83,9 @@ class PlaceFactory(DjangoModelFactory):
     people_upper = LazyAttribute(lambda o: o.people_base * (1 + random.random()))
     source_type = SEARCH_ENTITY_SOURCES[0]
 
+    location_lat = LazyFunction(lambda: float(fake.latitude()))
+    location_long = LazyFunction(lambda: float(fake.longitude()))
+
     # TODO - Build this out...
     attributes = {}
 
