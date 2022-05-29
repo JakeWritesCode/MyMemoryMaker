@@ -316,6 +316,43 @@ class TestFilterQueryProcessor(TestCase):
                     activity,
                 ]
 
+    def test__perform_distance_query_returns_all_results_if_all_params_unfilled(self):
+        """If the 4 search params are not received, return all objects."""
+        places = [PlaceFactory(), PlaceFactory()]
+
+        get_param = {"location_lat": "1234"}
+        assert self.processor(get_param)._perform_distance_query(places) is places
+
+    def test__perform_distance_query_filters_objects_by_distance(self):
+        """If the 4 search params are not received, return all objects."""
+        places = [PlaceFactory()]
+
+        lat, long = places[0].location_lat, places[0].location_long
+        lat += 0.5
+        actual_distance = places[0].distance_from(lat, long)
+
+        get_param = {
+            "location_lat": lat,
+            "location_long": long,
+            "distance_lower": 0,
+            "distance_upper": actual_distance + 5,
+        }
+        assert self.processor(get_param)._perform_distance_query(places) == places
+        get_param["distance_upper"] = actual_distance - 5
+        assert self.processor(get_param)._perform_distance_query(places) == []
+
+    def test__perform_distance_query_returns_all_results_if_bad_request(self):
+        """If the function can't convert the types, just return everything."""
+        places = [PlaceFactory()]
+
+        get_param = {
+            "location_lat": "tomatos",
+            "location_long": -1,
+            "distance_lower": 0,
+            "distance_upper": 5,
+        }
+        assert self.processor(get_param)._perform_distance_query(places) is places
+
     def test_get_results_for_object_type_calls_correct_functions_for_activity(self):
         """Function should call all correct functions."""
         processor = self.processor({})
