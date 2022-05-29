@@ -4,10 +4,9 @@
 # 3rd-party
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-
-# Project
 from geopy.distance import distance
 
+# Project
 from search.tests.factories import ActivityFactory
 from search.tests.factories import EventFactory
 from search.tests.factories import PlaceFactory
@@ -92,10 +91,11 @@ class TestPlace(TestCase):
         assert "We don't know where this place is!" in str(e.exception)
 
     def test_distance_from_returns_correct_distance(self):
+        """Function should return the correct distance."""
         new_lat, new_long = 1, 2
         expected_distance = distance(
             (self.instance.location_lat, self.instance.location_long),
-            (new_lat, new_long)
+            (new_lat, new_long),
         ).miles
         assert self.instance.distance_from(new_lat, new_long) == expected_distance
 
