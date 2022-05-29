@@ -4,7 +4,6 @@
 # 3rd-party
 from django import forms
 from django.contrib.auth.models import AnonymousUser
-from django.core.exceptions import ValidationError
 
 # Project
 from search.constants import SEARCH_ENTITY_SOURCES
