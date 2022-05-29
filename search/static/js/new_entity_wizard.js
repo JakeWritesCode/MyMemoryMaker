@@ -99,11 +99,14 @@ function initNewActivityForm() {
 function initNewPlaceForm() {
     initNewEntityForm()
     const input = document.getElementById('id_place_search');
+    new mdb.Select(document.getElementById('id_activities'), {"filter": true})
+
     const options = {
         componentRestrictions: {country: "uk"},
         fields: ["geometry", "name", "url", "photos", "place_id", "price_level", "rating", "formatted_address"],
         strictBounds: false,
     };
+
     const autocomplete = new google.maps.places.Autocomplete(input, options);
     autocomplete.addListener("place_changed", function () {
         const place = autocomplete.getPlace();
@@ -112,7 +115,9 @@ function initNewPlaceForm() {
         document.getElementById("id_headline").value = place.name
         updatePreviewCard("search-entity-headline", place.name)
         document.getElementById("id_google_maps_place_id").value = place.place_id
-        document.getElementById("id_google_maps_rating").value = place.rating
+        if (place.rating) {
+            document.getElementById("id_google_maps_rating").value = place.rating
+        }
         document.getElementById("id_address").value = place.formatted_address
         const photo = place.photos[0].getUrl()
         document.getElementById("id_link_url").value = photo
