@@ -5,18 +5,30 @@
     <div class="col-12">
         <form method="post"
               enctype="multipart/form-data"
-              hx-post="{% url "new-activity" %}"
+              hx-post="{% url "new-place" %}"
               hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
               hx-encoding="multipart/form-data"
               hx-target=""
               id="new-entity-form"
         >
             <p>
-                Please fill in the required fields below to create a new activity.</p>
+                Please fill in the required fields below to create a new place.</p>
             <p><strong>
-                You can see what the activity card will look like using the preview area.
+                You can see what the place card will look like using the preview area.
             </strong></p>
             {% csrf_token %}
+            <!-- Location, Google maps API -->
+            <div class="form-row mb-4">
+                <div class="col-12">
+                    {{ form.place_search|as_crispy_field }}
+                    {{ form.google_maps_place_id }}
+                    {{ form.location_lat }}
+                    {{ form.location_long }}
+                    {{ form.google_maps_rating }}
+                    {{ form.address }}
+                </div>
+                <div class="invalid-feedback-manual" id="invalid-feedback-location"></div>
+            </div>
             <!-- Headline -->
             <div class="form-row mb-4">
                 <div class="form-group col-12">
@@ -33,7 +45,7 @@
             <div class="row mb-5">
                 <div class="form-group col-lg-4">
                     <h3>Typical Prices</h3>
-                    <p>How much does your activity typically cost?</p>
+                    <p>How much does your place typically cost?</p>
                     <div class="row">
                         <div class="col-6">
                             <label for="price_lower" class="form-label">
@@ -57,7 +69,7 @@
                 </div>
                 <div class="form-group col-lg-4 mt-4 mt-lg-0">
                     <h3>Typical Duration</h3>
-                    <p>How long does your activity usually last?</p>
+                    <p>How long does your place usually last?</p>
                     <div class="row">
                         <div class="col-6">
                             <label for="duration_lower" class="form-label">
@@ -81,7 +93,7 @@
                 </div>
                 <div class="form-group col-lg-4 mt-4 mt-lg-0">
                     <h3>Number of People</h3>
-                    <p>How many people can take part in your activity?</p>
+                    <p>How many people can take part in your place?</p>
                     <div class="row">
                         <div class="col-6">
                             <label for="people_lower" class="form-label">
@@ -109,9 +121,10 @@
             </div>
             <div class="row mb-2">
                 <h3>Add an Image</h3>
-                <p>Please upload an image showing off your activity.</p>
+                <p>Please upload an image showing off your place.</p>
                 <div class="col-md-6">
                     {{ image_form.uploaded_image|as_crispy_field }}
+                    {{ image_form.link_url }}
                 </div>
                 <div class="col-md-6">
                     {{ image_form.alt_text|as_crispy_field }}
@@ -122,7 +135,7 @@
             </div>
             <div class="row mb-4">
                 <h3>Keywords / Synonyms</h3>
-                <p>Are there any other words or phrases that could be used to describe your activity?</p>
+                <p>Are there any other words or phrases that could be used to describe your place?</p>
                 <div class="col-12">
                     {{ form.synonyms_keywords|as_crispy_field }}
                 </div>
@@ -130,17 +143,17 @@
             <div class="row mb-4">
                 <h3>Filters</h3>
                 <p>
-                    Please select which filters do or do not apply to your activity.
+                    Please select which filters do or do not apply to your place.
                     This powers our filters on the search page!
                 </p>
                 <div class="col-12">
                     {% include "partials/filter_setter_form.html" %}
                 </div>
                 <div class="row mb-4 mt-4">
-                    <div class="form-row text-center">
+                    <div class="col-12 text-center">
                         <button type="submit"
                                 class="btn btn-primary"
-                                id="new-activity-submit">
+                                id="new-place-submit">
                             Save
                         </button>
                     </div>

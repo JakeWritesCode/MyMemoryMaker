@@ -286,7 +286,28 @@ class FilterQueryProcessor:
         return list_of_results
 
     def _perform_distance_query(self, list_of_results: list):
-        return list_of_results
+        """Do this in Python for now. It's expensive though."""
+        lat_selected = self.request_get.get("location_lat", None)
+        long_selected = self.request_get.get("location_long", None)
+        distance_lower = self.request_get.get("distance_lower", None)
+        distance_upper = self.request_get.get("distance_upper", None)
+
+        if not lat_selected or not long_selected or not distance_lower or not distance_upper:
+            return list_of_results
+
+        try:
+            lat_selected = float(lat_selected)
+            long_selected = float(long_selected)
+            distance_lower = int(distance_lower)
+            distance_upper = int(distance_upper)
+        except ValueError:
+            return list_of_results
+
+        return [
+            x
+            for x in list_of_results
+            if distance_lower <= x.distance_from(lat_selected, long_selected) <= distance_upper
+        ]
 
     def _get_results_for_object_type(self, query_obj: Type[Union[Activity, Event, Place]]):
         """Run the query and get the results for each type."""

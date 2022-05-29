@@ -3,6 +3,7 @@
 # Standard Library
 
 # Standard Library
+from http.client import CREATED
 from http.client import OK
 from io import BytesIO
 
@@ -97,7 +98,7 @@ class TestNewActivity(TestCase):
         )
         self.client.force_login(self.user)
         response = self.client.post(self.url, data=post_data, follow=True)
-        assert response.status_code == OK
+        assert response.status_code == CREATED
 
         images = SearchImage.objects.all()
         assert len(images) == 1
@@ -112,27 +113,16 @@ class TestNewActivity(TestCase):
             for filter in filter_list:
                 assert filter in activities[0].attributes.keys()
 
-    def test_successful_post_request_renders_message(self):
-        """A successful post request should return a message to the user."""
+    def test_successful_post_request_renders_complete_message(self):
+        """A successful post request should render the complete message."""
         post_data = (
             self.fake_post_data_filters | self.fake_post_data_main_form | self.fake_post_data_image
         )
         self.client.force_login(self.user)
         response = self.client.post(self.url, data=post_data, follow=True)
-        assert response.status_code == OK
+        assert response.status_code == CREATED
 
-        assert "Your activity has been saved and has been added" in str(response.content)
-
-    def test_successful_post_request_redirects_to_index(self):
-        """A successful post request should redirect to the search home page."""
-        post_data = (
-            self.fake_post_data_filters | self.fake_post_data_main_form | self.fake_post_data_image
-        )
-        self.client.force_login(self.user)
-        response = self.client.post(self.url, data=post_data, follow=True)
-        assert response.status_code == OK
-
-        assert response.wsgi_request.path == reverse("search-home")
+        self.assertTemplateUsed(response, "partials/new-activity-complete.html")
 
     def test_form_does_not_save_if_main_form_is_not_valid(self):
         """If the image form does not validate, nothing should save and errors should be shown."""

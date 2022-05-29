@@ -48,6 +48,7 @@ class TestSearchImageForm(TestCase):
     def test_form_fields(self):
         """Form should show the correct fields."""
         assert list(self.form.fields.keys()) == [
+            "link_url",
             "uploaded_image",
             "alt_text",
             "permissions_confirmation",

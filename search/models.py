@@ -10,6 +10,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 # Project
+from geopy.distance import distance
+
 from search.constants import SEARCH_ENTITY_SOURCES
 from users.models import CustomUser
 
@@ -32,6 +34,11 @@ class SearchImage(models.Model):
     def __str__(self):
         """String representation."""
         return f"Search Uploaded Image {self.id}: {self.alt_text}"
+
+    @property
+    def display_url(self):
+        """Either the uploaded url or the link url, depending on which is filled in."""
+        return self.uploaded_image.url if self.uploaded_image else self.link_url
 
     def clean(self):
         """Custom model validation."""
@@ -122,11 +129,22 @@ class Place(SearchEntity):
     """Place - A place where users can either do an activity or attend an event."""
 
     google_maps_place_id = models.CharField(max_length=1024, null=True)
+    location_lat = models.FloatField(null=True, max_length=40)
+    location_long = models.FloatField(null=True, max_length=40)
     activities = models.ManyToManyField(Activity)
 
     def __str__(self):
         """String representation."""
         return f"Place: {self.headline}"
+
+    def distance_from(self, from_lat, from_long):
+        """Calculate the distance between this place and some other long / lat point."""
+        if not self.location_lat or not self.location_long:
+            raise ValueError("We don't know where this place is!")
+        return distance(
+            (self.location_lat, self.location_long),
+            (from_lat, from_long)
+        ).miles
 
 
 class Event(SearchEntity):

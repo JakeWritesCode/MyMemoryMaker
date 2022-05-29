@@ -4,10 +4,13 @@
 # 3rd-party
 from django import forms
 from django.contrib.auth.models import AnonymousUser
+from django.core.exceptions import ValidationError
 
 # Project
 from search.constants import SEARCH_ENTITY_SOURCES
 from search.models import Activity
+from search.models import Place
+from search.models import SearchEntity
 from search.models import SearchImage
 
 
@@ -23,27 +26,46 @@ class SearchImageForm(forms.ModelForm):
         self.user = user
         super(SearchImageForm, self).__init__(*args, **kwargs)
         self.fields["uploaded_image"].widget.attrs["class"] = "form-control"
+        self.fields["uploaded_image"].required = False
         self.fields["alt_text"].widget.attrs["placeholder"] = "Please describe your image."
+        self.fields["alt_text"].required = False
+        self.fields["link_url"].widget = forms.HiddenInput()
+        self.fields["link_url"].required = False
+        self.fields["permissions_confirmation"].required = False
 
     class Meta:  # noqa: D106
         model = SearchImage
-        fields = ["uploaded_image", "alt_text"]
+        fields = ["link_url", "uploaded_image", "alt_text"]
 
     def save(self, commit=True):
         """Add the uploading user id."""
         self.instance.uploaded_by = self.user
         return super(SearchImageForm, self).save(commit=commit)
 
+    def clean_uploaded_image(self):
+        if "uploaded_image" not in self.data.keys():
+            if not "link_url" not in self.data.keys():
+                raise ValidationError("This field is required.")
+            if self.cleaned_data["link_url"] == "":
+                raise ValidationError("This field is required.")
 
-class NewActivityForm(forms.ModelForm):
-    """Form for a new activity."""
+        return self.cleaned_data["uploaded_image"]
+
+    def clean_alt_text(self):
+        if "uploaded_image" in self.data.keys():
+            raise ValidationError("This field is required.")
+        return self.cleaned_data["alt_text"]
+
+
+class NewSearchEntityForm(forms.ModelForm):
+    """Form for a new search entity."""
 
     def __init__(self, user, *args, **kwargs):  # noqa: D107
         self.user = user
 
         if isinstance(user, AnonymousUser) or not user:
             raise ValueError("User must be logged in and passed to this form.")
-        super(NewActivityForm, self).__init__(*args, **kwargs)
+        super(NewSearchEntityForm, self).__init__(*args, **kwargs)
 
         # Mess about with widget attributes
         self.fields["headline"].widget.attrs[
@@ -61,7 +83,7 @@ class NewActivityForm(forms.ModelForm):
         ] = "Please seperate words or phrases with commas."
 
     class Meta:  # noqa: D106
-        model = Activity
+        model = SearchEntity
         fields = [
             "headline",
             "description",
@@ -84,6 +106,62 @@ class NewActivityForm(forms.ModelForm):
             raise AttributeError("You need to add the filter data and the image.")
         self.instance.attributes = filters_json
         self.instance.source_type = SEARCH_ENTITY_SOURCES[0]
-        super(NewActivityForm, self).save(commit=commit)
+        super(NewSearchEntityForm, self).save(commit=commit)
         self.instance.images.add(image)
         return self.instance
+
+
+class NewActivityForm(NewSearchEntityForm):
+    """New activity form (same as a search entity form)."""
+
+    class Meta:  # noqa: D106
+        model = Activity
+        fields = [
+            "headline",
+            "description",
+            "price_upper",
+            "price_lower",
+            "duration_upper",
+            "duration_lower",
+            "people_lower",
+            "people_upper",
+            "synonyms_keywords",
+        ]
+
+
+class NewPlaceForm(NewSearchEntityForm):
+    """New place form."""
+
+    place_search = forms.CharField(
+        required=True,
+        label="Find your place on Google Maps, and we'll use it to get some inital information.",
+    )
+    google_maps_rating = forms.FloatField(required=False)
+    address = forms.CharField(widget=forms.TextInput)
+
+    def __init__(self, *args, **kwargs):  # noqa: D107
+        super(NewPlaceForm, self).__init__(*args, **kwargs)
+        self.fields["google_maps_place_id"].widget = forms.HiddenInput()
+        self.fields["location_lat"].widget = forms.HiddenInput()
+        self.fields["location_long"].widget = forms.HiddenInput()
+        self.fields["google_maps_rating"].widget = forms.HiddenInput()
+        self.fields["address"].widget = forms.HiddenInput()
+        self.fields["activities"].required = False
+
+    class Meta:  # noqa: D106
+        model = Place
+        fields = [
+            "headline",
+            "description",
+            "price_upper",
+            "price_lower",
+            "duration_upper",
+            "duration_lower",
+            "people_lower",
+            "people_upper",
+            "synonyms_keywords",
+            "google_maps_place_id",
+            "activities",
+            "location_lat",
+            "location_long",
+        ]

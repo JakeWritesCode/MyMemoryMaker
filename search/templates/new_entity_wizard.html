@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extended_head %}
+    <link rel="stylesheet" href="{% static "css/search.css" %}">
+    <script>
+        const newActivityURL = '{% url "new-activity" %}'
+        const newPlaceURL = '{% url "new-place" %}'
+    </script>
+    <script src="{% static "js/new_entity_wizard.js" %}"></script>
+    <script src="{% static "js/search.js" %}"></script>
+    <script src="{% static "js/htmx.min.js" %}"></script>
+    <script async
+            src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places">
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="page-wrapper results-column">
+        <div class="container h-100 flex-column d-flex">
+            <div class="row mt-4 w-100">
+                <div class="col-12 text-center text-white">
+                    <h1>New Submission</h1>
+                    <p>
+                        Thank you for taking the time to create a new submission.
+                        Please follow the steps below, and we'll get your idea on to the site as soon as we can.
+                    </p>
+                    <p>
+                        Please note, all submissions must go through our moderation process before they can be seen on
+                        site.
+                    </p>
+                </div>
+            </div>
+            <!-- Wizard Area -->
+            <div class="row flex-grow-1 my-3">
+                <div class="col-12">
+                    <div class="card flex-grow-1">
+                        <!-- Card header - steps -->
+                        <div class="text-center mt-4 mb-4" id="wizard-progress">
+                            <h2 class="h3" id="new-entity-header">What are you uploading?</h2>
+                        </div>
+                        <!-- Card body Initial type selection -->
+                        <div class="card-body overflow-scroll">
+                            <div class="row" id="form-step-target">
+                                <!-- Card 1 - Entity type selection -->
+                                <div class="row w-100" id="new-entity-type-selection">
+                                    <div class="col-md-4">
+                                        <button type="button" onclick="selectEntityType('activity')" class="card h-100">
+                                            <div class="card-body text-center">
+                                                <h3 class="h4">An Activity</h3>
+                                                <p>
+                                                    An idea or concept for something to do that could be done at a
+                                                    number of places at any time.
+                                                    or place.
+                                                    <br><br>
+                                                    For example: Bake a cake!
+                                                </p>
+                                            </div>
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="button" onclick="selectEntityType('place')" class="card h-100">
+                                            <div class="card-body text-center">
+                                                <h3 class="h4">A Place</h3>
+                                                <p>
+                                                    A specific place where you could do one or more activities. This
+                                                    may be a venue, landmark or other specific point.
+                                                    <br><br>
+                                                    For example: Leicester Square, Barry's Bar, Hyde Park.
+                                                </p>
+                                            </div>
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="button" onclick="selectEntityType('event')" class="card h-100">
+                                            <div class="card-body text-center">
+                                                <h3 class="h4">An Event</h3>
+                                                <p>
+                                                    One or more activities that are happening in a specific place at a
+                                                    specific time you think people might want to come along to.
+                                                    <br><br>
+                                                    For example: Group cycle in the Peak District,
+                                                    Table top games at the board game club.
+                                                </p>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="preview-container" class="d-none">
+                                <div class="col-12 px-0 my-4">
+                                    <h3>Your Place Preview</h3>
+                                    <p>Here's what your card will look like on our site.</p>
+                                    {% include "partials/search_entity_card.html" %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
