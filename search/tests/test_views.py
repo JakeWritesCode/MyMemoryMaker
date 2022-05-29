@@ -329,3 +329,23 @@ class TestSearchResults(TestCase):
         assert activity.headline in str(response.content)
         assert event.headline in str(response.content)
         assert place.headline in str(response.content)
+
+
+class TestNewEntityWizard(TestCase):
+    """Test new entity wizard."""
+
+    def setUp(self) -> None:  # noqa: D102
+        self.user = CustomUserFactory()
+        self.client.force_login(self.user)
+        self.view = views.new_entity_wizard
+        self.url = reverse(self.view)
+
+    def test_template(self):
+        """Test that the view returns the correct template."""
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "new_entity_wizard.html")
+
+    def test_context(self):
+        """Test that the view renders the correct context."""
+        response = self.client.get(self.url)
+        assert response.context["GOOGLE_MAPS_API_KEY"] == settings.GOOGLE_MAPS_API_KEY
