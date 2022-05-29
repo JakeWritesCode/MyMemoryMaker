@@ -69,7 +69,14 @@ def new_place(request):
         # Validate the image form first.
         if request.POST.get("link_url"):
             image_required = False
-        image_form = SearchImageForm(request.user, request.POST, request.FILES, image_required=image_required)
+        else:
+            image_required = True
+        image_form = SearchImageForm(
+            request.user,
+            request.POST,
+            request.FILES,
+            image_required=image_required,
+        )
         image_form_valid = image_form.is_valid()
 
         # Then bind the filters form, and parse the results to JSON.
@@ -84,7 +91,7 @@ def new_place(request):
             # We've got some supplementary google maps data we want to add to attributes here
             gmaps_data = {
                 "rating": form.cleaned_data["google_maps_rating"],
-                "address": form.cleaned_data["address"]
+                "address": form.cleaned_data["address"],
             }
             filter_settings["google_maps_data"] = gmaps_data
             form.filters_json = filter_settings

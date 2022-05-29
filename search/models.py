@@ -8,10 +8,9 @@ from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.fields import HStoreField
 from django.core.exceptions import ValidationError
 from django.db import models
-
-# Project
 from geopy.distance import distance
 
+# Project
 from search.constants import SEARCH_ENTITY_SOURCES
 from users.models import CustomUser
 
@@ -141,10 +140,7 @@ class Place(SearchEntity):
         """Calculate the distance between this place and some other long / lat point."""
         if not self.location_lat or not self.location_long:
             raise ValueError("We don't know where this place is!")
-        return distance(
-            (self.location_lat, self.location_long),
-            (from_lat, from_long)
-        ).miles
+        return distance((self.location_lat, self.location_long), (from_lat, from_long)).miles
 
 
 class Event(SearchEntity):

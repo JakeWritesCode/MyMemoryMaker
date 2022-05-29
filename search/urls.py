@@ -13,5 +13,5 @@ urlpatterns = [
     path("search-results", views.search_results, name="search-results"),
     # Whole pages
     path("", views.search_view, name="search-home"),
-    path("new-submission", views.new_entity_wizard, name="new-submission")
+    path("new-submission", views.new_entity_wizard, name="new-submission"),
 ]
