@@ -1,0 +1,46 @@
+<!--
+This is a formset for entering dates and times for events.
+Form should be passed in as event_dates_formset.
+-->
+
+<div class="form-row mb-3">
+    <h3>Add images</h3>
+    <p>
+        Add dates for your event. You need at least one but you may
+        add as many as you like.
+    </p>
+    <div class="form-row">
+        {{event_dates_formset.management_form}}
+        <table class="table table-striped w-100">
+            <thead>
+            <tr>
+                <th style="width: 40%">Date / Time From</th>
+                <th>Date / Time To</th>
+                <th style="width: 100px">Delete</th>
+            </tr>
+            </thead>
+            <tbody id="activity-images-form-container">
+            {% for date_form in event_dates_formset %}
+            <tr id="image-form-{{ forloop.counter0 }}">
+                <td>{{image_form.uploaded_image}}</td>
+                <td>{{image_form.alt_text}}</td>
+                <td>
+                    <button type="button"
+                            class="btn btn-danger"
+                            onclick="dynamicFormsetRemoveRow(this, 'form-{{ forloop.counter0 }}-')"
+                    >
+                        Delete
+                    </button>
+                </td>
+                <span class="activity-images-end-marker"></span>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <button type="button"
+                class="btn btn-primary"
+                id="activity-images-add"
+        >Add Another Image
+        </button>
+    </div>
+</div>
