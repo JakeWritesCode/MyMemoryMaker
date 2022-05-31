@@ -75,7 +75,9 @@ def edit_activity(request, activity_id: str):
     """
     activity = get_object_or_404(Activity, id=activity_id)
     image = activity.images.first()
-    filters = activity.attributes
+    filters = {}
+    for key, val in activity.attributes.items():
+        filters[key] = True if val == "True" else False
 
     form = NewActivityForm(user=request.user, instance=activity)
     image_form = SearchImageForm(user=request.user, instance=image, image_required=False)
@@ -96,8 +98,8 @@ def edit_activity(request, activity_id: str):
         filter_setter_form = FilterSettingForm(request.POST)
         filter_settings = filter_setter_form.save()
 
-        # Finally, bin the main form and validate.
-        form = NewActivityForm(request.user, request.POST)
+        # Finally, bind the main form and validate.
+        form = NewActivityForm(request.user, request.POST, instance=activity)
         if form.is_valid():
             image.save()
             form.image = image
