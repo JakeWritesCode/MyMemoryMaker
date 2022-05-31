@@ -45,51 +45,11 @@ function dynamicFormsetRemoveRow(element) {
 
 
 <!-- Images formset -->
-<div class="form-row mb-3">
-    <h3>Add images</h3>
-    <p>
-        Add images for your activity. You need at least one but you may
-        add as many as you like.
-    </p>
-    <div class="form-row">
-        {{images_formset.management_form}}
-        <table class="table table-striped w-100">
-            <thead>
-            <tr>
-                <th style="width: 40%">Image Upload</th>
-                <th>Alt Text</th>
-                <th style="width: 100px">Delete</th>
-            </tr>
-            </thead>
-            <tbody id="activity-images-form-container">
-            {% for image_form in images_formset %}
-            <tr id="image-form-{{ forloop.counter0 }}">
-                <td>{{image_form.uploaded_image}}</td>
-                <td>{{image_form.alt_text}}</td>
-                <td>
-                    <button type="button"
-                            class="btn btn-danger"
-                            onclick="dynamicFormsetRemoveRow(this, 'form-{{ forloop.counter0 }}-')"
-                    >
-                        Delete
-                    </button>
-                </td>
-                <span class="activity-images-end-marker"></span>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        <button type="button"
-                class="btn btn-primary"
-                id="activity-images-add"
-        >Add Another Image
-        </button>
-    </div>
-</div>
+
 
 
 django
-SearchImageFormset = forms.modelformset_factory(
+EventDatesFormset = forms.formset_factory(
     SearchImage,
     fields=["uploaded_image", "alt_text"],
     extra=1,

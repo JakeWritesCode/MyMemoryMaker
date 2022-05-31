@@ -17,6 +17,11 @@ function selectEntityType(typeSelected) {
         partialToRender = newPlaceURL
         callback = initNewPlaceForm
     }
+    if (typeSelected === "event") {
+        headingText = "Describe your event."
+        partialToRender = newEventURL
+        callback = initNewEventForm
+    }
 
     document.getElementById("new-entity-header").innerHTML = headingText
     fetch(partialToRender, {
@@ -77,7 +82,10 @@ function initNewEntityForm() {
             fr.readAsDataURL(files[0]);
         }
     }
-
+    try{
+        tinymce.get("id_description").remove()
+    }
+    catch (err) {}
     tinymce.init({
         selector: '#id_description',
         menubar: false,
@@ -93,7 +101,9 @@ function initNewEntityForm() {
 
 function initNewActivityForm() {
     initNewEntityForm()
-    document.getElementById("")
+        htmx.on("htmx:load", function (evt) {
+        initNewActivityForm()
+    });
 }
 
 function initNewPlaceForm() {
@@ -129,5 +139,29 @@ function initNewPlaceForm() {
             document.getElementById("id_alt_text").required = false;
             document.getElementById("id_permissions_confirmation").required = false;
         }
+    });
+
+    htmx.on("htmx:load", function (evt) {
+        initNewPlaceForm()
+    });
+}
+
+function initNewEventForm() {
+    initNewEntityForm()
+    new mdb.Select(document.getElementById('id_activities'), {"filter": true})
+    new mdb.Select(document.getElementById('id_places'), {"filter": true})
+
+    const eventDateTimeFrom = document.querySelector('#datetime-start-picker');
+    new mdb.Datetimepicker(eventDateTimeFrom, {
+        timepicker: {format24: true},
+    });
+
+    const eventDateTimeTo = document.querySelector('#datetime-finish-picker');
+    new mdb.Datetimepicker(eventDateTimeTo, {
+        timepicker: {format24: true},
+    });
+
+    htmx.on("htmx:load", function (evt) {
+        initNewEventForm()
     });
 }

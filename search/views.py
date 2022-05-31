@@ -12,7 +12,9 @@ from search.constants import FILTERS
 from search.filters import FilterQueryProcessor
 from search.filters import FilterSearchForm
 from search.filters import FilterSettingForm
+from search.forms import EventDatesForm
 from search.forms import NewActivityForm
+from search.forms import NewEventForm
 from search.forms import NewPlaceForm
 from search.forms import SearchImageForm
 
@@ -103,6 +105,59 @@ def new_place(request):
         request,
         "partials/new_place.html",
         {"form": form, "image_form": image_form, "filter_setter_form": filter_setter_form},
+    )
+
+
+@login_required
+def new_event(request):
+    """
+    Create a new event.
+
+    In this view we render three separate forms to look like a single form.
+    """
+    form = NewEventForm(user=request.user)
+    image_form = SearchImageForm(user=request.user)
+    event_dates_form = EventDatesForm()
+    filter_setter_form = FilterSettingForm()
+
+    if request.method == "POST":
+        # Validate the image form first.
+        image_form = SearchImageForm(request.user, request.POST, request.FILES)
+        image_form_valid = image_form.is_valid()
+
+        # Then bind the filters form, and parse the results to JSON.
+        filter_setter_form = FilterSettingForm(request.POST)
+        filter_settings = filter_setter_form.save()
+
+        # Next, check the event dates
+        event_dates_form = EventDatesForm(request.POST)
+        dates_form_valid = event_dates_form.is_valid()
+
+        # Finally, bin the main form and validate.
+        form = NewEventForm(request.user, request.POST)
+        if form.is_valid() and image_form_valid and dates_form_valid:
+            # Now the form is valid, pass in the data from the other two forms.
+            form.image = image_form.save(commit=True)
+            form.filters_json = filter_settings
+            form.event_dates = [
+                (
+                    event_dates_form.cleaned_data["from_date"],
+                    event_dates_form.cleaned_data["to_date"],
+                ),
+            ]
+            # Save the new activity
+            form.save(commit=True)
+            return render(request, "partials/new-event-complete.html", status=201)
+
+    return render(
+        request,
+        "partials/new_event.html",
+        {
+            "form": form,
+            "image_form": image_form,
+            "filter_setter_form": filter_setter_form,
+            "event_dates_form": event_dates_form,
+        },
     )
 
 

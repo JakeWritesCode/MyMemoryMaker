@@ -1,0 +1,184 @@
+{% load crispy_forms_tags %}
+{% load static %}
+
+<div class="row" style="align-items: center; justify-content: center">
+    <div class="col-12">
+        <form method="post"
+              enctype="multipart/form-data"
+              hx-post="{% url "new-event" %}"
+              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+              hx-encoding="multipart/form-data"
+              hx-target=""
+              id="new-entity-form"
+        >
+            <p>
+                Please fill in the required fields below to create a new event.</p>
+            <p><strong>
+                You can see what the event card will look like using the preview area.
+            </strong></p>
+            {% csrf_token %}
+            <!-- Headline -->
+            <div class="form-row mb-4">
+                <div class="form-group col-12">
+                    {{ form.headline|as_crispy_field }}
+                </div>
+            </div>
+            <!-- Description -->
+            <div class="form-row mb-4">
+                <div class="form-group col-12">
+                    {{ form.description|as_crispy_field }}
+                </div>
+            </div>
+            <!-- Event dates -->
+            <div class="form-row mb-4">
+                <div class="form-group col-12">
+                    <h3>Event dates</h3>
+                    <p>When is your event on?</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-outline" id="datetime-start-picker">
+                                {{ event_dates_form.from_date|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-outline" id="datetime-finish-picker">
+                                {{ event_dates_form.to_date|as_crispy_field }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Price and duration -->
+            <div class="row mb-5">
+                <div class="form-group col-lg-4">
+                    <h3>Typical Prices</h3>
+                    <p>How much do people normally spend at your event? How much is a ticket?</p>
+                    <div class="row">
+                        <div class="col-6">
+                            <label for="price_lower" class="form-label">
+                                Lowest Price
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text" id="_id_price_lower">£</span>
+                                {{ form.price_lower }}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label for="price_upper" class="form-label float-right">
+                                Highest Price
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text" id="_id_price_upper">£</span>
+                                {{ form.price_upper }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-lg-4 mt-4 mt-lg-0">
+                    <h3>Typical Duration</h3>
+                    <p>How long do people normally spend at your event?</p>
+                    <div class="row">
+                        <div class="col-6">
+                            <label for="duration_lower" class="form-label">
+                                Lowest time
+                            </label>
+                            <div class="input-group">
+                                {{ form.duration_lower }}
+                                <span class="input-group-text" id="_id_duration_lower">hours</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label for="duration_upper" class="form-label float-right">
+                                Highest time
+                            </label>
+                            <div class="input-group">
+                                {{ form.duration_upper }}
+                                <span class="input-group-text" id="_id_duration_upper">hours</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-lg-4 mt-4 mt-lg-0">
+                    <h3>Number of People</h3>
+                    <p>Can people come to your event alone? Is it suitable for large groups?</p>
+                    <div class="row">
+                        <div class="col-6">
+                            <label for="people_lower" class="form-label">
+                                Fewest people
+                            </label>
+                            <div class="input-group">
+                                {{ form.people_lower }}
+                                <span class="input-group-text" id="_id_people_lower">people</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label for="people_upper" class="form-label float-right">
+                                Highest people
+                            </label>
+                            <div class="input-group">
+                                {{ form.people_upper }}
+                                <span class="input-group-text" id="_id_people_upper">people</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row px-3">
+                        <span id="people-selector" class="people-selector mt-1"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <h3>Add an Image</h3>
+                <p>Please upload an image showing off your event.</p>
+                <div class="col-md-6">
+                    {{ image_form.uploaded_image|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ image_form.alt_text|as_crispy_field }}
+                </div>
+            </div>
+            <div class="row mb-4">
+                {{ image_form.permissions_confirmation|as_crispy_field }}
+            </div>
+            <div class="row mb-4">
+                <h3>Keywords / Synonyms</h3>
+                <p>Are there any other words or phrases that could be used to describe your event?</p>
+                <div class="col-12">
+                    {{ form.synonyms_keywords|as_crispy_field }}
+                </div>
+            </div>
+            <div class="row mb-4">
+                <h3>Activities</h3>
+                <p>What activities (if any) will people be able to do at your event?</p>
+                <div class="col-12">
+                    {{ form.activities|as_crispy_field }}
+                </div>
+            </div>
+            <div class="row mb-4">
+                <h3>Places</h3>
+                <p>Where will your event take place?</p>
+                <div class="col-12">
+                    {{ form.places|as_crispy_field }}
+                </div>
+            </div>
+            <div class="row mb-4">
+                <h3>Filters</h3>
+                <p>
+                    Please select which filters do or do not apply to your event.
+                    This powers our filters on the search page!
+                </p>
+                <div class="col-12">
+                    {% include "partials/filter_setter_form.html" %}
+                </div>
+                <div class="row mb-4 mt-4">
+                    <div class="form-row text-center">
+                        <button type="submit"
+                                class="btn btn-primary"
+                                id="new-event-submit">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

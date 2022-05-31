@@ -4,10 +4,12 @@
 # 3rd-party
 from django import forms
 from django.contrib.auth.models import AnonymousUser
+from django.core.exceptions import ValidationError
 
 # Project
 from search.constants import SEARCH_ENTITY_SOURCES
 from search.models import Activity
+from search.models import Event
 from search.models import Place
 from search.models import SearchEntity
 from search.models import SearchImage
@@ -55,9 +57,6 @@ class NewSearchEntityForm(forms.ModelForm):
         super(NewSearchEntityForm, self).__init__(*args, **kwargs)
 
         # Mess about with widget attributes
-        self.fields["headline"].widget.attrs[
-            "placeholder"
-        ] = "Give us a one sentence summary of your activity."
         self.fields["price_upper"].widget.attrs["class"] = "form-control"
         self.fields["price_lower"].widget.attrs["class"] = "form-control"
         self.fields["duration_upper"].widget.attrs["class"] = "form-control"
@@ -101,6 +100,12 @@ class NewSearchEntityForm(forms.ModelForm):
 class NewActivityForm(NewSearchEntityForm):
     """New activity form (same as a search entity form)."""
 
+    def __init__(self, *args, **kwargs):  # noqa: D107
+        super(NewActivityForm, self).__init__(*args, **kwargs)
+        self.fields["headline"].widget.attrs[
+            "placeholder"
+        ] = "Give us a one sentence summary of your activity."
+
     class Meta:  # noqa: D106
         model = Activity
         fields = [
@@ -135,6 +140,9 @@ class NewPlaceForm(NewSearchEntityForm):
         self.fields["google_maps_rating"].required = False
         self.fields["address"].widget = forms.HiddenInput()
         self.fields["activities"].required = False
+        self.fields["headline"].widget.attrs[
+            "placeholder"
+        ] = "Give us a one sentence summary of your place."
 
     class Meta:  # noqa: D106
         model = Place
@@ -153,3 +161,66 @@ class NewPlaceForm(NewSearchEntityForm):
             "location_lat",
             "location_long",
         ]
+
+
+class NewEventForm(NewSearchEntityForm):
+    """New event form."""
+
+    def __init__(self, *args, **kwargs):  # noqa: D107
+        super(NewEventForm, self).__init__(*args, **kwargs)
+        self.fields["headline"].widget.attrs[
+            "placeholder"
+        ] = "Give us a one sentence summary of your event."
+
+    class Meta:  # noqa: D106
+        model = Event
+        fields = [
+            "headline",
+            "description",
+            "price_upper",
+            "price_lower",
+            "duration_upper",
+            "duration_lower",
+            "people_lower",
+            "people_upper",
+            "synonyms_keywords",
+            "activities",
+            "places",
+        ]
+
+    def save(self, commit=True):
+        """Enrich the instance with attribute data, user data, images and dates."""
+        self.instance.created_by = self.user
+        try:
+            image = self.image
+            filters_json = self.filters_json
+            dates = self.event_dates
+        except AttributeError:
+            raise AttributeError("You need to add the filter data and the image.")
+        self.instance.attributes = filters_json
+        self.instance.source_type = SEARCH_ENTITY_SOURCES[0]
+        self.instance.dates = dates
+        super(NewSearchEntityForm, self).save(commit=commit)
+        self.instance.images.add(image)
+        return self.instance
+
+
+class EventDatesForm(forms.Form):
+    """Single form for event dates."""
+
+    def __init__(self, *args, **kwargs):  # noqa: D107
+        super(EventDatesForm, self).__init__(*args, **kwargs)
+        self.fields["from_date"].widget.attrs["class"] = "form-control"
+        self.fields["to_date"].widget.attrs["class"] = "form-control"
+
+    from_date = forms.DateTimeField(
+        label="Event Start Date / Time",
+        input_formats=["%d/%m/%Y, %H:%M"],
+    )
+    to_date = forms.DateTimeField(label="Event End Date / Time", input_formats=["%d/%m/%Y, %H:%M"])
+
+    def clean_to_date(self):
+        """Check that the end date is after the start date."""
+        if self.cleaned_data["from_date"] > self.cleaned_data["to_date"]:
+            raise ValidationError("The end date cannot be before the start date.")
+        return self.cleaned_data["to_date"]
