@@ -36,6 +36,9 @@ class SearchImageForm(forms.ModelForm):
             self.fields["alt_text"].required = False
             self.fields["permissions_confirmation"].required = False
 
+        if self.instance:
+            self.fields["permissions_confirmation"].required = False
+
     class Meta:  # noqa: D106
         model = SearchImage
         fields = ["link_url", "uploaded_image", "alt_text"]
@@ -44,6 +47,7 @@ class SearchImageForm(forms.ModelForm):
         """Add the uploading user id."""
         self.instance.uploaded_by = self.user
         return super(SearchImageForm, self).save(commit=commit)
+
 
 
 class NewSearchEntityForm(forms.ModelForm):

@@ -5,7 +5,7 @@
     <div class="col-12">
         <form method="post"
               enctype="multipart/form-data"
-              hx-post="{% url "new-activity" %}"
+              hx-post="{{ partial_target }}"
               hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
               hx-encoding="multipart/form-data"
               hx-target=""

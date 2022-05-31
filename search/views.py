@@ -3,7 +3,10 @@
 
 # 3rd-party
 from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import user_passes_test
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
 
@@ -17,6 +20,7 @@ from search.forms import NewActivityForm
 from search.forms import NewEventForm
 from search.forms import NewPlaceForm
 from search.forms import SearchImageForm
+from search.models import Activity
 
 
 @login_required
@@ -52,7 +56,67 @@ def new_activity(request):
     return render(
         request,
         "partials/new_activity.html",
-        {"form": form, "image_form": image_form, "filter_setter_form": filter_setter_form},
+        {
+            "form": form,
+            "image_form": image_form,
+            "filter_setter_form": filter_setter_form,
+            "partial_target": reverse(new_activity),
+        },
+    )
+
+
+@login_required
+@staff_member_required
+def edit_activity(request, activity_id: str):
+    """
+    Edit an existing activity.
+
+    In this view we render three separate forms to look like a single form.
+    """
+    activity = get_object_or_404(Activity, id=activity_id)
+    image = activity.images.first()
+    filters = activity.attributes
+
+    form = NewActivityForm(user=request.user, instance=activity)
+    image_form = SearchImageForm(user=request.user, instance=image, image_required=False)
+    filter_setter_form = FilterSettingForm(initial=filters)
+
+    if request.method == "POST":
+        # Validate the image form first.
+        image_form = SearchImageForm(
+            request.user, request.POST, request.FILES, image_required=False
+        )
+        image_form_valid = image_form.is_valid()
+        # Manually update each image attribute individually.
+        for attr in ["link_url", "uploaded_image", "alt_text"]:
+            if image_form.cleaned_data[attr]:
+                setattr(image, attr, image_form.cleaned_data[attr])
+
+        # Then bind the filters form, and parse the results to JSON.
+        filter_setter_form = FilterSettingForm(request.POST)
+        filter_settings = filter_setter_form.save()
+
+        # Finally, bin the main form and validate.
+        form = NewActivityForm(request.user, request.POST)
+        if form.is_valid():
+            image.save()
+            form.image = image
+            form.filters_json = filter_settings
+            # Save the new activity
+            form.save(commit=True)
+            return render(request, "partials/new-activity-complete.html", status=201)
+
+    return render(
+        request,
+        "edit_search_entity.html",
+        {
+            "form": form,
+            "image_form": image_form,
+            "filter_setter_form": filter_setter_form,
+            "entity_type": "Activity",
+            "partial_to_render": "partials/search_entity_card.html",
+            "partial_target": reverse(edit_activity, args=[activity.id]),
+        },
     )
 
 
