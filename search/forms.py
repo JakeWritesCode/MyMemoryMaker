@@ -223,3 +223,4 @@ class EventDatesForm(forms.Form):
         """Check that the end date is after the start date."""
         if self.cleaned_data["from_date"] > self.cleaned_data["to_date"]:
             raise ValidationError("The end date cannot be before the start date.")
+        return self.cleaned_data["to_date"]
