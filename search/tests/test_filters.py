@@ -323,6 +323,56 @@ class TestFilterQueryProcessor(TestCase):
         get_param = {"location_lat": "1234"}
         assert self.processor(get_param)._perform_distance_query(places) is places
 
+    def test__perform_datetime_query_filters_objects_by_datetimes(self):
+        """If the datetimes cannot be parsed or do not exist, return all results."""
+        events = [EventFactory()]
+
+        date_from = events[0].dates[0][0]
+        date_to = events[0].dates[0][1]
+
+        get_param = {
+            "datetime_from": datetime.datetime.strftime(date_from, "%d/%m/%Y, %H:%M"),
+            "datetime_to": datetime.datetime.strftime(date_to, "%d/%m/%Y, %H:%M"),
+        }
+        assert self.processor(get_param)._perform_datetime_query(events) == events
+
+        date_from += datetime.timedelta(minutes=5)
+        date_to += datetime.timedelta(minutes=5)
+        get_param = {
+            "datetime_from": datetime.datetime.strftime(date_from, "%d/%m/%Y, %H:%M"),
+            "datetime_to": datetime.datetime.strftime(date_to, "%d/%m/%Y, %H:%M"),
+        }
+        assert self.processor(get_param)._perform_datetime_query(events) == events
+
+        date_from -= datetime.timedelta(minutes=10)
+        date_to -= datetime.timedelta(minutes=10)
+        get_param = {
+            "datetime_from": datetime.datetime.strftime(date_from, "%d/%m/%Y, %H:%M"),
+            "datetime_to": datetime.datetime.strftime(date_to, "%d/%m/%Y, %H:%M"),
+        }
+        assert self.processor(get_param)._perform_datetime_query(events) == events
+
+        # Totally after
+        date_from = events[0].dates[0][1] + datetime.timedelta(hours=36)
+        get_param = {
+            "datetime_from": datetime.datetime.strftime(date_from, "%d/%m/%Y, %H:%M"),
+        }
+        assert self.processor(get_param)._perform_datetime_query(events) == []
+
+        # Totally before
+        date_to = events[0].dates[0][0] - datetime.timedelta(hours=36)
+        get_param = {
+            "datetime_to": datetime.datetime.strftime(date_to, "%d/%m/%Y, %H:%M"),
+        }
+        assert self.processor(get_param)._perform_datetime_query(events) == []
+
+    def test__perform_datetime_query_returns_all_results_if_bad_request(self):
+        """If the function can't convert the types, just return everything."""
+        places = [PlaceFactory()]
+
+        get_param = {}
+        assert self.processor(get_param)._perform_datetime_query(places) is places
+
     def test__perform_distance_query_filters_objects_by_distance(self):
         """If the 4 search params are not received, return all objects."""
         places = [PlaceFactory()]

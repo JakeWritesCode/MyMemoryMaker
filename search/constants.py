@@ -59,6 +59,7 @@ FILTERS = {
         "business",
         "charity_and_causes",
         "wedding",
+        "festival",
     ],
     "venue": [
         "home",
