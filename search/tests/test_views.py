@@ -415,33 +415,6 @@ class TestNewEvent(TestCase):
         assert Event.objects.count() == 0
         assert SearchImage.objects.count() == 0
 
-    def test_view_saves_data_if_no_uploaded_image_but_link_url(self):
-        """If there's a link_url in the POST request, the form should save."""
-        self.fake_post_data_image = {"link_url": "Alink"}
-        post_data = (
-            self.fake_post_data_filters | self.fake_post_data_main_form | self.fake_post_data_image
-        )
-        self.client.force_login(self.user)
-        response = self.client.post(self.url, data=post_data, follow=True)
-        assert response.status_code == CREATED
-        assert Event.objects.count() == 1
-        assert Event.objects.first().images.first().display_url == "Alink"
-
-    def test_view_saves_google_maps_data_to_attributes(self):
-        """View should add google maps data to the object attributes."""
-        self.fake_post_data_image = {"link_url": "Alink"}
-        post_data = (
-            self.fake_post_data_filters | self.fake_post_data_main_form | self.fake_post_data_image
-        )
-        self.client.force_login(self.user)
-        response = self.client.post(self.url, data=post_data, follow=True)
-        assert response.status_code == CREATED
-
-        place = Place.objects.first()
-        assert place.attributes["google_maps_data"] == str(
-            {"rating": 1.23, "address": "an address"},
-        )
-
 
 class TestSearchView(TestCase):
     """Tests for search_view."""
