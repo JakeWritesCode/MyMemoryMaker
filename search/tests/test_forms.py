@@ -12,6 +12,7 @@ from django.test import TestCase
 from PIL import Image
 
 # Project
+from search.forms import EventDatesForm
 from search.forms import NewActivityForm
 from search.forms import NewEventForm
 from search.forms import NewPlaceForm
@@ -430,3 +431,46 @@ class TestNewEventForm(TestCase):
         self.form.filters_json = {"Hey": "There"}
         instance = self.form.save()
         assert instance.dates == self.dates
+
+
+class TestEventDatesForm(TestCase):
+    """Tests for the event dates form."""
+
+    def setUp(self) -> None:  # noqa: D102
+        self.form = EventDatesForm()
+
+    def test_layout(self):
+        """Test layout."""
+        assert self.form.fields["from_date"].widget.attrs["class"] == "form-control"
+        assert self.form.fields["to_date"].widget.attrs["class"] == "form-control"
+
+    def test_form_accepts_datetimepicker_format(self):
+        """Both fields should accept the dtpicker format."""
+        data = {"from_date": "01/01/2022, 01:00", "to_date": "01/01/2023, 01:00"}
+        self.form = EventDatesForm(data=data)
+        assert self.form.is_valid()
+        assert self.form.cleaned_data["from_date"] == datetime.datetime(
+            2022,
+            1,
+            1,
+            1,
+            0,
+            0,
+            tzinfo=datetime.timezone.utc,
+        )
+        assert self.form.cleaned_data["to_date"] == datetime.datetime(
+            2023,
+            1,
+            1,
+            1,
+            0,
+            0,
+            tzinfo=datetime.timezone.utc,
+        )
+
+    def test_end_date_cannot_be_before_start_date(self):
+        """The end date should not be before the start date."""
+        data = {"from_date": "01/01/2023, 01:00", "to_date": "01/01/2022, 01:00"}
+        self.form = EventDatesForm(data=data)
+        assert not self.form.is_valid()
+        assert self.form.errors["to_date"] == ["The end date cannot be before the start date."]
