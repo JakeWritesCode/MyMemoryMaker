@@ -92,6 +92,7 @@ class NewSearchEntityForm(forms.ModelForm):
         try:
             image = self.image
             filters_json = self.filters_json
+
         except AttributeError:
             raise AttributeError("You need to add the filter data and the image.")
         self.instance.attributes = filters_json
