@@ -14,6 +14,8 @@ FILTERS = {
         "ball_games",
         "cycling",
         "motorsport",
+        "water_sports",
+        "winter_sports",
         "other_sports",
     ],
     "arts": ["theatre", "comedy", "cinema_and_film", "concerts", "museums", "other_arts"],
