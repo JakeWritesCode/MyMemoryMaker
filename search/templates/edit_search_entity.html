@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extended_head %}
+    <link rel="stylesheet" href="{% static "css/search.css" %}">
+    <script src="{% static "js/new_entity_wizard.js" %}"></script>
+    <script src="{% static "js/search.js" %}"></script>
+    <script src="{% static "js/htmx.min.js" %}"></script>
+    <script async
+            src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places">
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="page-wrapper results-column">
+        <div class="container h-100 flex-column d-flex">
+            <div class="row mt-4 w-100">
+                <div class="col-12 text-center text-white">
+                    <h1>Edit Submission</h1>
+                </div>
+            </div>
+            <!-- Wizard Area -->
+            <div class="row flex-grow-1 my-3">
+                <div class="col-12">
+                    <div class="card flex-grow-1">
+                        <!-- Card header - steps -->
+                        <div class="text-center mt-4 mb-4" id="wizard-progress">
+                            <h2 class="h3" id="new-entity-header">Edit an existing {{ entity_type }}</h2>
+                        </div>
+                        <!-- Card body Initial type selection -->
+                        <div class="card-body overflow-scroll">
+                            <div class="row" id="form-step-target">
+                                {% include "partials/new_activity.html" %}
+                            </div>
+                            <div id="preview-container" class="d-none">
+                                <div class="col-12 px-0 my-4">
+                                    <h3>Your Place Preview</h3>
+                                    <p>Here's what your card will look like on our site.</p>
+                                    {% include partial_to_render %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const eType = "{{ entity_type }}"
+        if (eType === "Activity") {
+            initNewActivityForm()
+        }
+        if (eType === "Place") {
+            initNewPlaceForm()
+        }
+        if (eType === "Event") {
+            initNewEventForm()
+        }
+    </script>
+
+{% endblock %}
