@@ -366,6 +366,12 @@ class TestFilterQueryProcessor(TestCase):
         }
         assert self.processor(get_param)._perform_datetime_query(events) == []
 
+        date_to = events[0].dates[0][0] - datetime.timedelta(hours=36)
+        get_param = {
+            "datetime_to": datetime.datetime.strftime(date_to, "%d/%m/%Y, %H:%M"),
+        }
+        assert self.processor(get_param)._perform_datetime_query(events) == []
+
     def test__perform_datetime_query_returns_all_results_if_bad_request(self):
         """If the function can't convert the types, just return everything."""
         places = [PlaceFactory()]
