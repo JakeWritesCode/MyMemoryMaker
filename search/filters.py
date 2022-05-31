@@ -8,6 +8,7 @@ from typing import Type
 from typing import Union
 
 # 3rd-party
+import pytz
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML
 from crispy_forms.layout import Column
@@ -17,6 +18,7 @@ from crispy_forms.layout import Row
 from django import forms
 from django.db.models import Q
 from django.db.models import QuerySet
+from django.utils import timezone
 
 # Project
 from search.constants import FILTERS
@@ -283,7 +285,45 @@ class FilterQueryProcessor:
 
     def _perform_datetime_query(self, list_of_results: list):
         """Pythonically (for now) filter queryset for event datetimes and place opening times."""
-        return list_of_results
+        datetime_from = self.request_get.get("datetime_from", None)
+        datetime_to = self.request_get.get("datetime_to", None)
+
+        try:
+            datetime_from = datetime.strptime(datetime_from, "%d/%m/%Y, %H:%M")
+            datetime_from = timezone.make_aware(
+                datetime_from,
+                timezone=pytz.timezone("Europe/London"),
+            )
+        except (ValueError, TypeError):
+            datetime_from = None
+
+        try:
+            datetime_to = datetime.strptime(datetime_to, "%d/%m/%Y, %H:%M")
+            datetime_to = timezone.make_aware(datetime_to, timezone=pytz.timezone("Europe/London"))
+        except (ValueError, TypeError):
+            datetime_to = None
+
+        if not datetime_from and not datetime_to:
+            return list_of_results
+
+        date_match = []
+        for event in list_of_results:
+            added = False
+            for date_set in event.dates:
+                if added:
+                    continue
+                if datetime_from:
+                    if datetime_from < date_set[1]:
+                        date_match.append(event)
+                        added = True
+                        continue
+                if datetime_to:
+                    if datetime_to > date_set[0]:
+                        date_match.append(event)
+                        added = True
+                        continue
+
+        return date_match
 
     def _perform_distance_query(self, list_of_results: list):
         """Do this in Python for now. It's expensive though."""
