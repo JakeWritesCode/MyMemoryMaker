@@ -148,6 +148,9 @@ class NewPlaceForm(NewSearchEntityForm):
             "placeholder"
         ] = "Give us a one sentence summary of your place."
 
+        if self.instance:
+            self.fields["place_search"].required = False
+
     class Meta:  # noqa: D106
         model = Place
         fields = [

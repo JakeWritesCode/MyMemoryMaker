@@ -6,7 +6,7 @@
     <script src="{% static "js/new_entity_wizard.js" %}"></script>
     <script src="{% static "js/search.js" %}"></script>
     <script src="{% static "js/htmx.min.js" %}"></script>
-    <script async
+    <script
             src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places">
     </script>
 {% endblock %}
@@ -30,13 +30,22 @@
                         <!-- Card body Initial type selection -->
                         <div class="card-body overflow-scroll">
                             <div class="row" id="form-step-target">
-                                {% include "partials/new_activity.html" %}
+                                {% if entity_type == "Activity" %}
+                                    {% include "partials/new_activity.html" %}
+                                {% endif %}
+                                {% if entity_type == "Place" %}
+                                    {% include "partials/new_place.html" %}
+                                {% endif %}
+                                {% if entity_type == "Event" %}
+                                    {% include "partials/new_event.html" %}
+                                {% endif %}
+
                             </div>
                             <div id="preview-container" class="d-none">
                                 <div class="col-12 px-0 my-4">
                                     <h3>Your Place Preview</h3>
                                     <p>Here's what your card will look like on our site.</p>
-                                    {% include partial_to_render %}
+                                    {% include "partials/search_entity_card.html" %}
                                 </div>
                             </div>
                         </div>
