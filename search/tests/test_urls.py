@@ -17,6 +17,10 @@ class TestURLs(SimpleTestCase):
         """Test url."""
         assert reverse(views.new_activity) == "/search/new-activity"
 
+    def test_edit_activity_url(self):
+        """Test url."""
+        assert reverse(views.edit_activity) == "/search/edit-activity"
+
     def test_new_place_url(self):
         """Test url."""
         assert reverse(views.new_place) == "/search/new-place"
