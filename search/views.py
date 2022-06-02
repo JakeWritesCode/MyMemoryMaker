@@ -88,7 +88,7 @@ def edit_activity(request, activity_id: str):
         image_form = SearchImageForm(
             request.user, request.POST, request.FILES, image_required=False
         )
-        image_form_valid = image_form.is_valid()
+        image_form.is_valid()
         # Manually update each image attribute individually.
         for attr in ["link_url", "uploaded_image", "alt_text"]:
             if image_form.cleaned_data[attr]:
