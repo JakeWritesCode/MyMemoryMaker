@@ -19,7 +19,7 @@ class TestURLs(SimpleTestCase):
 
     def test_edit_activity_url(self):
         """Test url."""
-        assert reverse(views.edit_activity) == "/search/edit-activity"
+        assert reverse(views.edit_activity, args=["a123"]) == "/search/edit-activity/a123"
 
     def test_new_place_url(self):
         """Test url."""

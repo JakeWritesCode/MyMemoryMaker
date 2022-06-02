@@ -219,7 +219,7 @@ class TestEditActivity(TestCase):
         )
         self.client.force_login(self.user)
         response = self.client.post(self.url, data=post_data, follow=True)
-        assert response.status_code == CREATED
+        assert response.status_code == OK
 
         images = SearchImage.objects.all()
         assert len(images) == 1
