@@ -5,7 +5,6 @@
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
@@ -86,7 +85,10 @@ def edit_activity(request, activity_id: str):
     if request.method == "POST":
         # Validate the image form first.
         image_form = SearchImageForm(
-            request.user, request.POST, request.FILES, image_required=False
+            request.user,
+            request.POST,
+            request.FILES,
+            image_required=False,
         )
         image_form.is_valid()
         # Manually update each image attribute individually.
@@ -106,7 +108,7 @@ def edit_activity(request, activity_id: str):
             form.filters_json = filter_settings
             # Save the new activity
             form.save(commit=True)
-            return render(request, "partials/new-activity-complete.html", status=201)
+            return render(request, "partials/new-activity-complete.html", status=200)
 
     return render(
         request,

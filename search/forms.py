@@ -49,7 +49,6 @@ class SearchImageForm(forms.ModelForm):
         return super(SearchImageForm, self).save(commit=commit)
 
 
-
 class NewSearchEntityForm(forms.ModelForm):
     """Form for a new search entity."""
 

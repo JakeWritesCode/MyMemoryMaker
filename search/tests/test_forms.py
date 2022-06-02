@@ -68,6 +68,12 @@ class TestSearchImageForm(TestCase):
         assert self.form.fields["alt_text"].required is False
         assert self.form.fields["permissions_confirmation"].required is False
 
+    def test_layout_with_instance(self):
+        """Test layout if there's an instance."""
+        image = SearchImageFactory()
+        self.form = SearchImageForm(user=self.user, instance=image)
+        assert self.form.fields["permissions_confirmation"].required is False
+
     def test_form_fields(self):
         """Form should show the correct fields."""
         assert list(self.form.fields.keys()) == [
