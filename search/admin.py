@@ -11,6 +11,7 @@ from search import models
 
 class SearchEntityAdmin(admin.ModelAdmin):
     """Launch and editor window for that entity type."""
+
     reverse_func = None
     list_display = ["headline", "source_type", "created_by", "approved_by", "edit_in_wizard"]
 
@@ -22,14 +23,19 @@ class SearchEntityAdmin(admin.ModelAdmin):
 
 class ActivityAdmin(SearchEntityAdmin):
     """Activity admin."""
+
     reverse_func = "edit-activity"
+
 
 class PlaceAdmin(SearchEntityAdmin):
     """Place admin."""
+
     reverse_func = "edit-place"
+
 
 class EventAdmin(SearchEntityAdmin):
     """Event admin."""
+
     reverse_func = "edit-event"
 
 

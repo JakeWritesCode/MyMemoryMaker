@@ -85,7 +85,10 @@ def edit_activity(request, activity_id: str):
     if request.method == "POST":
         # Validate the image form first.
         image_form = SearchImageForm(
-            request.user, request.POST, request.FILES, image_required=False,
+            request.user,
+            request.POST,
+            request.FILES,
+            image_required=False,
         )
         image_form.is_valid()
         # Manually update each image attribute individually.
