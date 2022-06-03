@@ -218,12 +218,16 @@ def edit_place(request, place_id: str):
         filter_settings = filter_setter_form.save()
         # Manually update each image attribute individually.
         for attr in ["link_url", "uploaded_image", "alt_text"]:
-            if image_form.cleaned_data[attr]:
-                setattr(image, attr, image_form.cleaned_data[attr])
+            try:
+                if image_form.cleaned_data[attr]:
+                    setattr(image, attr, image_form.cleaned_data[attr])
+            except KeyError:
+                continue
 
         # Finally, bin the main form and validate.
         form = NewPlaceForm(request.user, request.POST, instance=place)
         if form.is_valid():
+            image.save()
             # Now the form is valid, pass in the data from the other two forms.
             # We've got some supplementary google maps data we want to add to attributes here
             gmaps_data = {

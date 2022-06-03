@@ -86,8 +86,7 @@ class PlaceFactory(DjangoModelFactory):
     location_lat = LazyFunction(lambda: float(fake.latitude()))
     location_long = LazyFunction(lambda: float(fake.longitude()))
 
-    # TODO - Build this out...
-    attributes = {}
+    attributes = {"google_maps_data": {"address": "Test address", "rating": 4.1}}
 
     class Meta:  # noqa: D106
         model = models.Place
