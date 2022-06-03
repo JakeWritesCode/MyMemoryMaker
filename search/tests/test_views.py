@@ -1029,9 +1029,10 @@ class TestSearchResults(TestCase):
 
     def test_results(self):
         """Functional test to make sure that all results are returned."""
-        activity = ActivityFactory()
-        event = EventFactory()
-        place = PlaceFactory()
+        user = CustomUserFactory()
+        activity = ActivityFactory(approved_by=user, approval_timestamp=timezone.now())
+        event = EventFactory(approved_by=user, approval_timestamp=timezone.now())
+        place = PlaceFactory(approved_by=user, approval_timestamp=timezone.now())
         response = self.client.get(self.url)
         assert activity.headline in str(response.content)
         assert event.headline in str(response.content)
