@@ -899,7 +899,7 @@ class TestEditEvent(TestCase):
 
     def test_image_form_saves_each_attribute_separately(self):
         """The image form should save each changed attr separately."""
-        self.fake_post_data_image = {"alt_text": "Wazzap!", "uploaded_image": ""}
+        self.fake_post_data_image = {"alt_text": "Wazzap!"}
         post_data = (
             self.fake_post_data_filters
             | self.fake_post_data_main_form
