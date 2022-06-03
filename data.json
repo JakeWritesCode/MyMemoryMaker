@@ -1,0 +1,150 @@
+{
+  "id": "92050063217",
+  "end": {
+    "utc": "2022-06-12T05:00:00Z",
+    "local": "2022-06-12T06:00:00",
+    "timezone": "Europe/London"
+  },
+  "url": "https://www.eventbrite.co.uk/e/rusu-summer-ball-2022-tickets-92050063217",
+  "logo": {
+    "id": "288423859",
+    "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F288423859%2F323983990069%2F1%2Foriginal.20220520-130035?h=200&w=450&auto=format%2Ccompress&q=75&sharp=10&rect=0%2C0%2C2160%2C1080&s=babd750850b67d06c736d31fb13f2faf",
+    "original": {
+      "url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F288423859%2F323983990069%2F1%2Foriginal.20220520-130035?auto=format%2Ccompress&q=75&sharp=10&s=feb08bd7a75000b1081d14690fca591e",
+      "width": 2160,
+      "height": 1080
+    },
+    "crop_mask": {
+      "width": 2160,
+      "height": 1080,
+      "top_left": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    "edge_color": null,
+    "aspect_ratio": "2",
+    "edge_color_set": true
+  },
+  "name": {
+    "html": "RUSU Summer Ball 2022",
+    "text": "RUSU Summer Ball 2022"
+  },
+  "start": {
+    "utc": "2022-06-11T19:00:00Z",
+    "local": "2022-06-11T20:00:00",
+    "timezone": "Europe/London"
+  },
+  "venue": {
+    "id": "46849565",
+    "name": "Reading University Students' Union",
+    "address": {
+      "city": "Reading",
+      "region": "Berkshire",
+      "country": "GB",
+      "latitude": "51.440426",
+      "address_1": "Reading University Students' Union",
+      "address_2": "Whiteknights Campus",
+      "longitude": "-0.9427994999999783",
+      "postal_code": "RG6 6AZ",
+      "localized_area_display": "Reading",
+      "localized_address_display": "Reading University Students' Union Whiteknights Campus, Reading, RG6 6AZ",
+      "localized_multi_line_address_display": [
+        "Reading University Students' Union",
+        "Whiteknights Campus",
+        "Reading",
+        "RG6 6AZ"
+      ]
+    },
+    "capacity": null,
+    "latitude": "51.440426",
+    "longitude": "-0.9427994999999783",
+    "resource_uri": "https://www.eventbriteapi.com/v3/venues/46849565/",
+    "age_restriction": null
+  },
+  "format": {
+    "id": "5",
+    "name": "Festival or Fair",
+    "short_name": "Festival",
+    "resource_uri": "https://www.eventbriteapi.com/v3/formats/5/",
+    "name_localized": "Festival or Fair",
+    "short_name_localized": "Festival"
+  },
+  "listed": true,
+  "locale": "en_GB",
+  "source": "coyote",
+  "status": "live",
+  "changed": "2022-06-03T08:32:43Z",
+  "created": "2020-01-29T16:33:12Z",
+  "is_free": false,
+  "logo_id": "288423859",
+  "summary": "The biggest annual student event at the University of Reading.",
+  "version": null,
+  "capacity": null,
+  "category": {
+    "id": "103",
+    "name": "Music",
+    "short_name": "Music",
+    "resource_uri": "https://www.eventbriteapi.com/v3/categories/103/",
+    "name_localized": "Music",
+    "short_name_localized": "Music"
+  },
+  "currency": "GBP",
+  "venue_id": "46849565",
+  "format_id": "5",
+  "is_locked": false,
+  "is_series": false,
+  "published": "2022-03-11T09:00:35Z",
+  "shareable": true,
+  "vanity_url": "https://rususb2022.eventbrite.co.uk",
+  "category_id": "103",
+  "description": {
+    "html": "The biggest annual student event at the University of Reading.",
+    "text": "The biggest annual student event at the University of Reading."
+  },
+  "subcategory": null,
+  "online_event": false,
+  "organizer_id": "26126686497",
+  "resource_uri": "https://www.eventbriteapi.com/v3/events/92050063217/",
+  "hide_end_date": false,
+  "tx_time_limit": 480,
+  "inventory_type": "limited",
+  "subcategory_id": null,
+  "hide_start_date": false,
+  "organization_id": "199449505448",
+  "privacy_setting": "unlocked",
+  "is_series_parent": false,
+  "show_pick_a_seat": false,
+  "facebook_event_id": "211210556675092",
+  "capacity_is_custom": null,
+  "listing_properties": {
+    "is_paid": true,
+    "seatmap_thumbnail_url": null
+  },
+  "is_reserved_seating": false,
+  "ticket_availability": {
+    "is_sold_out": false,
+    "start_sales_date": {
+      "utc": "2022-03-17T07:00:00Z",
+      "local": "2022-03-17T07:00:00",
+      "timezone": "Europe/London"
+    },
+    "waitlist_available": false,
+    "maximum_ticket_price": {
+      "value": 5300,
+      "display": "53.00 GBP",
+      "currency": "GBP",
+      "major_value": "53.00"
+    },
+    "minimum_ticket_price": {
+      "value": 4770,
+      "display": "47.70 GBP",
+      "currency": "GBP",
+      "major_value": "47.70"
+    },
+    "has_available_tickets": true
+  },
+  "is_externally_ticketed": false,
+  "show_seatmap_thumbnail": false,
+  "show_colors_in_seatmap_thumbnail": false
+}

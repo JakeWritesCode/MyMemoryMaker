@@ -3,6 +3,7 @@
 
 SEARCH_ENTITY_SOURCES = [
     "manually_added",
+    "eventbrite"
 ]
 
 """Filters configuration"""

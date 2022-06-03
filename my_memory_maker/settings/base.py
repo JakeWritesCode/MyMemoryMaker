@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     # Apps
     "users",
     "search",
+    "integrations",
     # 3rd party modules
     "crispy_forms",
 ]
@@ -142,5 +143,7 @@ MESSAGE_TAGS = {
     messages.ERROR: "alert-danger",
 }
 
+# API Keys
 GOOGLE_MAPS_API_KEY = getenv("GOOGLE_MAPS_API_KEY")
 GOOGLE_MAPS_API_SECRET = getenv("GOOGLE_MAPS_API_SECRET")
+EVENTBRITE_API_KEY = getenv("EVENTBRITE_API_KEY")

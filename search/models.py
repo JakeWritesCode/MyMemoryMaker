@@ -71,6 +71,7 @@ class SearchEntity(models.Model):
         blank=True,
     )
     approval_timestamp = models.DateTimeField(null=True, blank=True)
+    last_updated = models.DateTimeField(null=True, blank=True)
     headline = models.CharField(max_length=2048)
     description = models.TextField()
     price_lower = models.FloatField()
@@ -149,6 +150,7 @@ class Event(SearchEntity):
     dates = ArrayField(ArrayField(models.DateTimeField(), size=2), verbose_name="Event dates")
     activities = models.ManyToManyField(Activity)
     places = models.ManyToManyField(Place)
+    external_link = models.CharField(max_length=5000, null=True, blank=True)
 
     def __str__(self):
         """String representation."""
