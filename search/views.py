@@ -249,7 +249,6 @@ def edit_place(request, place_id: str):
             "image_form": image_form,
             "filter_setter_form": filter_setter_form,
             "entity_type": "Place",
-            "partial_to_render": "partials/search_entity_card.html",
             "partial_target": reverse(edit_place, args=[place.id]),
             "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
         },

@@ -209,7 +209,6 @@ class TestEditActivity(TestCase):
         assert isinstance(response.context["image_form"], SearchImageForm)
         assert isinstance(response.context["filter_setter_form"], FilterSettingForm)
         assert response.context["entity_type"] == "Activity"
-        assert response.context["partial_to_render"] == "partials/search_entity_card.html"
         assert response.context["partial_target"] == self.url
 
     def test_successful_post_request_saves_form(self):
@@ -597,7 +596,6 @@ class TestEditPlace(TestCase):
         assert isinstance(response.context["form"], NewPlaceForm)
         assert isinstance(response.context["filter_setter_form"], FilterSettingForm)
         assert response.context["entity_type"] == "Place"
-        assert response.context["partial_to_render"] == "partials/search_entity_card.html"
         assert response.context["partial_target"] == reverse(views.edit_place, args=[self.place.id])
         assert response.context["GOOGLE_MAPS_API_KEY"] == settings.GOOGLE_MAPS_API_KEY
 
