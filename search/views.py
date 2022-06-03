@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """Views for search."""
 
+# Standard Library
+from ast import literal_eval
+
 # 3rd-party
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
@@ -8,7 +11,6 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
-from ast import literal_eval
 
 # Project
 from search.constants import FILTERS
