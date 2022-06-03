@@ -88,7 +88,9 @@ function initNewEntityForm() {
     catch (err) {}
     tinymce.init({
         selector: '#id_description',
+        plugins: 'link',
         menubar: false,
+        toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | link',
         setup: function (ed) {
             ed.on('change', function (e) {
                 updatePreviewCard("search-entity-description", ed.getContent());
