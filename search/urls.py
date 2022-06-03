@@ -13,6 +13,7 @@ urlpatterns = [
     path("new-place", views.new_place, name="new-place"),
     path("edit-place/<place_id>", views.edit_place, name="edit-place"),
     path("new-event", views.new_event, name="new-event"),
+    path("edit-event/<event_id>", views.edit_event, name="edit-event"),
     path("search-results", views.search_results, name="search-results"),
     # Whole pages
     path("", views.search_view, name="search-home"),

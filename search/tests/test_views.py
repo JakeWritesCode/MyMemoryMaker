@@ -13,6 +13,7 @@ from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 from PIL import Image
 
 # Project
@@ -20,6 +21,7 @@ from search import views
 from search.constants import FILTERS
 from search.filters import FilterSearchForm
 from search.filters import FilterSettingForm
+from search.forms import EventDatesForm
 from search.forms import NewActivityForm
 from search.forms import NewEventForm
 from search.forms import NewPlaceForm
@@ -209,8 +211,21 @@ class TestEditActivity(TestCase):
         assert isinstance(response.context["image_form"], SearchImageForm)
         assert isinstance(response.context["filter_setter_form"], FilterSettingForm)
         assert response.context["entity_type"] == "Activity"
-        assert response.context["partial_to_render"] == "partials/search_entity_card.html"
         assert response.context["partial_target"] == self.url
+
+    def test_filters_form_populated_with_correct_filter_info(self):
+        """The filter form should be populated with the attributes from the instance."""
+        new_filters = {x[0]: True for x in FILTERS.values()}
+        unset_filters = [x[1:] for x in FILTERS.values()]
+        self.activity.attributes = self.activity.attributes | new_filters
+        self.activity.save()
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        for filtername in new_filters.keys():
+            assert response.context["filter_setter_form"][filtername].value() is True
+        for filter_set in unset_filters:
+            for filter_field in filter_set:
+                assert response.context["filter_setter_form"][filter_field].value() is None
 
     def test_successful_post_request_saves_form(self):
         """A successful post request should save all data."""
@@ -256,6 +271,23 @@ class TestEditActivity(TestCase):
         assert response.status_code == OK
 
         self.assertTemplateUsed(response, "partials/new-activity-complete.html")
+
+    def test_successful_post_marks_activity_as_approved(self):
+        """A successful post request should mark the activity as approved."""
+        post_data = (
+            self.fake_post_data_filters | self.fake_post_data_main_form | self.fake_post_data_image
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, data=post_data, follow=True)
+        assert response.status_code == OK
+
+        self.activity.refresh_from_db()
+        assert self.activity.approved_by == self.user
+        self.assertAlmostEquals(
+            self.activity.approval_timestamp,
+            timezone.now(),
+            delta=datetime.timedelta(minutes=1),
+        )
 
 
 class TestNewPlace(TestCase):
@@ -405,6 +437,219 @@ class TestNewPlace(TestCase):
         )
 
 
+class TestEditPlace(TestCase):
+    """Tests for the edit place dialog."""
+
+    def setUp(self) -> None:  # noqa: D102
+        self.view = views.edit_place
+        self.activity = ActivityFactory()
+        self.place = PlaceFactory()
+        self.place.activities.add(self.activity)
+        self.image_obj = SearchImageFactory()
+        self.place.images.add(self.image_obj)
+        self.url = reverse(self.view, args=[self.place.id])
+        self.user = CustomUserFactory()
+        self.user.is_staff = True
+        self.user.save()
+
+        self.fake_post_data_main_form = {
+            "headline": "Test headline",
+            "description": "Test description",
+            "price_upper": 5,
+            "price_lower": 1,
+            "duration_upper": 500,
+            "duration_lower": 100,
+            "people_lower": 2,
+            "people_upper": 5,
+            "synonyms_keywords": [],
+            "location_lat": 1,
+            "location_long": 1.23,
+            "activities": [self.activity.id],
+            "google_maps_place_id": "1ac2",
+            "place_search": "A place",
+            "address": "an address",
+            "google_maps_rating": 1.23,
+        }
+
+        self.fake_post_data_filters = {}
+        for _, filter_list in FILTERS.items():
+            for filter_str in filter_list:
+                self.fake_post_data_filters[filter_str] = True
+
+        im = Image.new(mode="RGB", size=(200, 200))  # create a new image using PIL
+        self.im_io = BytesIO()  # a BytesIO object for saving image
+        im.save(self.im_io, "JPEG")  # save the image to im_io
+        self.im_io.seek(0)  # seek to the beginning
+
+        self.image = SimpleUploadedFile(
+            "random-name.jpg",
+            self.im_io.getvalue(),
+            "image/jpeg",
+        )
+
+        self.fake_post_data_image = {
+            "alt_text": "This is an image.",
+            "permissions_confirmation": True,
+            "uploaded_image": self.image,
+        }
+
+    def test_view_requires_login(self):
+        """View should require user login."""
+        response = self.client.get(self.url, follow=True)
+        self.assertRedirects(response, reverse(log_in) + f"?next={self.url}")
+
+    def test_view_requires_staff(self):
+        """View should require user login."""
+        user = CustomUserFactory()
+        self.client.force_login(user)
+        response = self.client.get(self.url, follow=True)
+        self.assertRedirects(response, reverse("admin:login") + f"?next={self.url}")
+
+        user.is_staff = True
+        user.save()
+        response = self.client.get(self.url, follow=True)
+        assert response.wsgi_request.path_info == self.url
+
+    def test_template_basic_get(self):
+        """On a get request, we should get the full edit search entity template."""
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "edit_search_entity.html")
+
+    def test_form_populated_with_instance_info(self):
+        """The main form should have the instance assigned."""
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        assert response.context["form"].instance == self.place
+
+    def test_image_form_has_instance_and_configured(self):
+        """The image form should be configured."""
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        assert response.context["image_form"].instance == self.image_obj
+        assert response.context["image_form"].fields["permissions_confirmation"].required is False
+
+    def test_filters_form_populated_with_correct_filter_info(self):
+        """The filter form should be populated with the attributes from the instance."""
+        new_filters = {x[0]: True for x in FILTERS.values()}
+        unset_filters = [x[1:] for x in FILTERS.values()]
+        self.place.attributes = self.place.attributes | new_filters
+        self.place.save()
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        for filtername in new_filters.keys():
+            assert response.context["filter_setter_form"][filtername].value() is True
+        for filter_set in unset_filters:
+            for filter_field in filter_set:
+                assert response.context["filter_setter_form"][filter_field].value() is None
+
+    def test_template_post(self):
+        """On a POST request, we should jsut return the form partial."""
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "partials/new_place.html")
+
+    def test_image_form_permissions_required_not_required_if_link_url(self):
+        """If there's a link_url, don't require the upload permission checkbox."""
+        self.client.force_login(self.user)
+        post_data = {"link_url": "Abc123"}
+        response = self.client.post(self.url, data=post_data)
+        assert response.context["image_form"].fields["permissions_confirmation"].required is False
+
+    def test_successful_post_request_saves_form(self):
+        """A successful post request should save all data."""
+        post_data = (
+            self.fake_post_data_filters | self.fake_post_data_main_form | self.fake_post_data_image
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, data=post_data, follow=True)
+        assert response.status_code == OK
+
+        self.image_obj.refresh_from_db()
+        assert self.image_obj.alt_text == "This is an image."
+
+        places = Place.objects.all()
+        assert len(places) == 1
+        self.fake_post_data_main_form.pop("place_search")
+        self.fake_post_data_main_form.pop("address")
+        self.fake_post_data_main_form.pop("activities")
+        self.fake_post_data_main_form.pop("google_maps_rating")
+        for key, expected in self.fake_post_data_main_form.items():
+            assert getattr(places[0], key) == expected
+
+        for filter_list in FILTERS.values():
+            for filter in filter_list:
+                assert filter in places[0].attributes.keys()
+
+    def test_image_form_saves_each_attribute_separately(self):
+        """The image form should save each changed attr separately."""
+        self.fake_post_data_image = {"alt_text": "Wazzap!", "uploaded_image": ""}
+        post_data = (
+            self.fake_post_data_filters | self.fake_post_data_main_form | self.fake_post_data_image
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, data=post_data, follow=True)
+        assert response.status_code == OK
+
+        self.image_obj.refresh_from_db()
+        assert self.image_obj.alt_text == "Wazzap!"
+
+    def test_save_saves_google_maps_data_in_attributes(self):
+        """Save should save the correct google maps data in attributes."""
+        post_data = (
+            self.fake_post_data_filters | self.fake_post_data_main_form | self.fake_post_data_image
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, data=post_data, follow=True)
+        assert response.status_code == OK
+
+        self.place.refresh_from_db()
+        assert self.place.attributes["google_maps_data"] == str(
+            {
+                "rating": 1.23,
+                "address": "an address",
+            },
+        )
+
+    def test_save_renders_correct_template(self):
+        """Save should render the correct template."""
+        post_data = (
+            self.fake_post_data_filters | self.fake_post_data_main_form | self.fake_post_data_image
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, data=post_data, follow=True)
+        assert response.status_code == OK
+
+        self.assertTemplateUsed(response, "partials/new-place-complete.html")
+
+    def test_context(self):
+        """Test context."""
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        assert isinstance(response.context["form"], NewPlaceForm)
+        assert isinstance(response.context["filter_setter_form"], FilterSettingForm)
+        assert response.context["entity_type"] == "Place"
+        assert response.context["partial_target"] == reverse(views.edit_place, args=[self.place.id])
+        assert response.context["GOOGLE_MAPS_API_KEY"] == settings.GOOGLE_MAPS_API_KEY
+
+    def test_successful_post_marks_place_as_approved(self):
+        """A successful post request should mark the place as approved."""
+        post_data = (
+            self.fake_post_data_filters | self.fake_post_data_main_form | self.fake_post_data_image
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, data=post_data, follow=True)
+        assert response.status_code == OK
+
+        self.place.refresh_from_db()
+        assert self.place.approved_by == self.user
+        self.assertAlmostEquals(
+            self.place.approval_timestamp,
+            timezone.now(),
+            delta=datetime.timedelta(minutes=1),
+        )
+
+
 class TestNewEvent(TestCase):
     """Tests for the new_event view."""
 
@@ -531,6 +776,224 @@ class TestNewEvent(TestCase):
         assert SearchImage.objects.count() == 0
 
 
+class TestEditEvent(TestCase):
+    """Tests for the edit event dialog."""
+
+    def setUp(self) -> None:  # noqa: D102
+        self.view = views.edit_event
+        self.activity = ActivityFactory()
+        self.place = PlaceFactory()
+        self.event = EventFactory()
+        self.event.activities.add(self.activity)
+        self.event.places.add(self.place)
+        self.image_obj = SearchImageFactory()
+        self.event.images.add(self.image_obj)
+        self.url = reverse(self.view, args=[self.event.id])
+        self.user = CustomUserFactory()
+        self.user.is_staff = True
+        self.user.save()
+
+        self.dates = [
+            datetime.datetime(2022, 1, 1, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2023, 1, 1, tzinfo=datetime.timezone.utc),
+        ]
+
+        self.fake_post_data_dates_form = {
+            "from_date": "01/01/2022, 00:00",
+            "to_date": "01/01/2023, 00:00",
+        }
+
+        self.fake_post_data_main_form = {
+            "headline": "Test headline",
+            "description": "Test description",
+            "price_upper": 5,
+            "price_lower": 1,
+            "duration_upper": 500,
+            "duration_lower": 100,
+            "people_lower": 2,
+            "people_upper": 5,
+            "synonyms_keywords": [],
+            "activities": [self.activity.id],
+            "places": [self.place.id],
+        }
+
+        self.fake_post_data_filters = {}
+        for _, filter_list in FILTERS.items():
+            for filter_str in filter_list:
+                self.fake_post_data_filters[filter_str] = True
+
+        im = Image.new(mode="RGB", size=(200, 200))  # create a new image using PIL
+        self.im_io = BytesIO()  # a BytesIO object for saving image
+        im.save(self.im_io, "JPEG")  # save the image to im_io
+        self.im_io.seek(0)  # seek to the beginning
+
+        self.image = SimpleUploadedFile(
+            "random-name.jpg",
+            self.im_io.getvalue(),
+            "image/jpeg",
+        )
+
+        self.fake_post_data_image = {
+            "alt_text": "This is an image.",
+            "permissions_confirmation": True,
+            "uploaded_image": self.image,
+        }
+
+    def test_view_requires_login(self):
+        """View should require user login."""
+        response = self.client.get(self.url, follow=True)
+        self.assertRedirects(response, reverse(log_in) + f"?next={self.url}")
+
+    def test_view_requires_staff(self):
+        """View should require user login."""
+        user = CustomUserFactory()
+        self.client.force_login(user)
+        response = self.client.get(self.url, follow=True)
+        self.assertRedirects(response, reverse("admin:login") + f"?next={self.url}")
+
+        user.is_staff = True
+        user.save()
+        response = self.client.get(self.url, follow=True)
+        assert response.wsgi_request.path_info == self.url
+
+    def test_template_basic_get(self):
+        """On a get request, we should get the full edit search entity template."""
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "edit_search_entity.html")
+
+    def test_form_populated_with_instance_info(self):
+        """The main form should have the instance assigned."""
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        assert response.context["form"].instance == self.event
+
+    def test_image_form_has_instance_and_configured(self):
+        """The image form should be configured."""
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        assert response.context["image_form"].instance == self.image_obj
+        assert response.context["image_form"].fields["permissions_confirmation"].required is False
+
+    def test_filters_form_populated_with_correct_filter_info(self):
+        """The filter form should be populated with the attributes from the instance."""
+        new_filters = {x[0]: True for x in FILTERS.values()}
+        unset_filters = [x[1:] for x in FILTERS.values()]
+        self.event.attributes = self.event.attributes | new_filters
+        self.event.save()
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        for filtername in new_filters.keys():
+            assert response.context["filter_setter_form"][filtername].value() is True
+        for filter_set in unset_filters:
+            for filter_field in filter_set:
+                assert response.context["filter_setter_form"][filter_field].value() is None
+
+    def test_template_post(self):
+        """On a POST request, we should jsut return the form partial."""
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "partials/new_event.html")
+
+    def test_image_form_permissions_required_not_required(self):
+        """Permissions should be not required."""
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, data={})
+        assert response.context["image_form"].fields["permissions_confirmation"].required is False
+
+    def test_successful_post_request_saves_form(self):
+        """A successful post request should save all data."""
+        post_data = (
+            self.fake_post_data_filters
+            | self.fake_post_data_main_form
+            | self.fake_post_data_image
+            | self.fake_post_data_dates_form
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, data=post_data, follow=True)
+        assert response.status_code == OK
+
+        self.image_obj.refresh_from_db()
+        assert self.image_obj.alt_text == "This is an image."
+
+        events = Event.objects.all()
+        assert len(events) == 1
+        self.fake_post_data_main_form.pop("activities")
+        self.fake_post_data_main_form.pop("places")
+        for key, expected in self.fake_post_data_main_form.items():
+            assert getattr(events[0], key) == expected
+
+        assert list(events[0].activities.all()) == [self.activity]
+        assert list(events[0].places.all()) == [self.place]
+
+        for filter_list in FILTERS.values():
+            for filter in filter_list:
+                assert filter in events[0].attributes.keys()
+
+        assert events[0].dates == [self.dates]
+
+    def test_image_form_saves_each_attribute_separately(self):
+        """The image form should save each changed attr separately."""
+        self.fake_post_data_image = {"alt_text": "Wazzap!"}
+        post_data = (
+            self.fake_post_data_filters
+            | self.fake_post_data_main_form
+            | self.fake_post_data_image
+            | self.fake_post_data_dates_form
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, data=post_data, follow=True)
+        assert response.status_code == OK
+
+        self.image_obj.refresh_from_db()
+        assert self.image_obj.alt_text == "Wazzap!"
+
+    def test_save_renders_correct_template(self):
+        """Save should render the correct template."""
+        post_data = (
+            self.fake_post_data_filters
+            | self.fake_post_data_main_form
+            | self.fake_post_data_image
+            | self.fake_post_data_dates_form
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, data=post_data, follow=True)
+        assert response.status_code == OK
+
+        self.assertTemplateUsed(response, "partials/new-event-complete.html")
+
+    def test_context(self):
+        """Test context."""
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        assert isinstance(response.context["form"], NewEventForm)
+        assert isinstance(response.context["filter_setter_form"], FilterSettingForm)
+        assert isinstance(response.context["event_dates_form"], EventDatesForm)
+        assert response.context["entity_type"] == "Event"
+        assert response.context["partial_target"] == reverse(views.edit_event, args=[self.event.id])
+        assert response.context["GOOGLE_MAPS_API_KEY"] == settings.GOOGLE_MAPS_API_KEY
+
+    def test_successful_post_marks_event_as_approved(self):
+        """A successful post request should mark the event as approved."""
+        post_data = (
+            self.fake_post_data_filters
+            | self.fake_post_data_main_form
+            | self.fake_post_data_image
+            | self.fake_post_data_dates_form
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, data=post_data, follow=True)
+        assert response.status_code == OK
+
+        self.event.refresh_from_db()
+        assert self.event.approved_by == self.user
+        self.assertAlmostEquals(
+            self.event.approval_timestamp,
+            timezone.now(),
+            delta=datetime.timedelta(minutes=1),
+        )
+
+
 class TestSearchView(TestCase):
     """Tests for search_view."""
 
@@ -566,9 +1029,10 @@ class TestSearchResults(TestCase):
 
     def test_results(self):
         """Functional test to make sure that all results are returned."""
-        activity = ActivityFactory()
-        event = EventFactory()
-        place = PlaceFactory()
+        user = CustomUserFactory()
+        activity = ActivityFactory(approved_by=user, approval_timestamp=timezone.now())
+        event = EventFactory(approved_by=user, approval_timestamp=timezone.now())
+        place = PlaceFactory(approved_by=user, approval_timestamp=timezone.now())
         response = self.client.get(self.url)
         assert activity.headline in str(response.content)
         assert event.headline in str(response.content)
