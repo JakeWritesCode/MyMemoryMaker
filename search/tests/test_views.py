@@ -13,6 +13,7 @@ from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 from PIL import Image
 
 # Project
@@ -270,6 +271,23 @@ class TestEditActivity(TestCase):
         assert response.status_code == OK
 
         self.assertTemplateUsed(response, "partials/new-activity-complete.html")
+
+    def test_successful_post_marks_activity_as_approved(self):
+        """A successful post request should mark the activity as approved."""
+        post_data = (
+            self.fake_post_data_filters | self.fake_post_data_main_form | self.fake_post_data_image
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, data=post_data, follow=True)
+        assert response.status_code == OK
+
+        self.activity.refresh_from_db()
+        assert self.activity.approved_by == self.user
+        self.assertAlmostEquals(
+            self.activity.approval_timestamp,
+            timezone.now(),
+            delta=datetime.timedelta(minutes=1),
+        )
 
 
 class TestNewPlace(TestCase):
@@ -614,6 +632,23 @@ class TestEditPlace(TestCase):
         assert response.context["partial_target"] == reverse(views.edit_place, args=[self.place.id])
         assert response.context["GOOGLE_MAPS_API_KEY"] == settings.GOOGLE_MAPS_API_KEY
 
+    def test_successful_post_marks_place_as_approved(self):
+        """A successful post request should mark the place as approved."""
+        post_data = (
+            self.fake_post_data_filters | self.fake_post_data_main_form | self.fake_post_data_image
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, data=post_data, follow=True)
+        assert response.status_code == OK
+
+        self.place.refresh_from_db()
+        assert self.place.approved_by == self.user
+        self.assertAlmostEquals(
+            self.place.approval_timestamp,
+            timezone.now(),
+            delta=datetime.timedelta(minutes=1),
+        )
+
 
 class TestNewEvent(TestCase):
     """Tests for the new_event view."""
@@ -937,6 +972,26 @@ class TestEditEvent(TestCase):
         assert response.context["entity_type"] == "Event"
         assert response.context["partial_target"] == reverse(views.edit_event, args=[self.event.id])
         assert response.context["GOOGLE_MAPS_API_KEY"] == settings.GOOGLE_MAPS_API_KEY
+
+    def test_successful_post_marks_event_as_approved(self):
+        """A successful post request should mark the event as approved."""
+        post_data = (
+            self.fake_post_data_filters
+            | self.fake_post_data_main_form
+            | self.fake_post_data_image
+            | self.fake_post_data_dates_form
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, data=post_data, follow=True)
+        assert response.status_code == OK
+
+        self.event.refresh_from_db()
+        assert self.event.approved_by == self.user
+        self.assertAlmostEquals(
+            self.event.approval_timestamp,
+            timezone.now(),
+            delta=datetime.timedelta(minutes=1),
+        )
 
 
 class TestSearchView(TestCase):

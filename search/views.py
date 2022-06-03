@@ -13,6 +13,8 @@ from django.shortcuts import render
 from django.urls import reverse
 
 # Project
+from django.utils import timezone
+
 from search.constants import FILTERS
 from search.filters import FilterQueryProcessor
 from search.filters import FilterSearchForm
@@ -111,7 +113,9 @@ def edit_activity(request, activity_id: str):
             image.save()
             form.image = image
             form.filters_json = filter_settings
-            # Save the new activity
+            activity.approval_timestamp = timezone.now()
+            activity.approved_by = request.user
+            # Save the activity
             form.save(commit=True)
             return render(request, "partials/new-activity-complete.html", status=200)
 
@@ -240,7 +244,9 @@ def edit_place(request, place_id: str):
             filter_settings["google_maps_data"] = gmaps_data
             form.filters_json = filter_settings
             form.image = image
-            # Save the new activity
+            # Save the place
+            place.approval_timestamp = timezone.now()
+            place.approved_by = request.user
             form.save(commit=True)
             return render(request, "partials/new-place-complete.html", status=200)
 
@@ -367,7 +373,9 @@ def edit_event(request, event_id: str):
                     event_dates_form.cleaned_data["to_date"],
                 ),
             ]
-            # Save the new activity
+            # Save the event
+            event.approved_by = request.user
+            event.approval_timestamp = timezone.now()
             form.save(commit=True)
             return render(request, "partials/new-event-complete.html", status=200)
 
