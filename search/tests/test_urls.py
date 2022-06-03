@@ -25,9 +25,17 @@ class TestURLs(SimpleTestCase):
         """Test url."""
         assert reverse(views.new_place) == "/search/new-place"
 
+    def test_edit_place_url(self):
+        """Test url."""
+        assert reverse(views.edit_place, args=["a123"]) == "/search/edit-place/a123"
+
     def test_search_results_url(self):
         """Test url."""
         assert reverse(views.search_results) == "/search/search-results"
+
+    def test_edit_event_url(self):
+        """Test url."""
+        assert reverse(views.edit_event, args=["a123"]) == "/search/edit-event/a123"
 
     def test_search_view_url(self):
         """Test url."""
