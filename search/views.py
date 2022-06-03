@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
+from ast import literal_eval
 
 # Project
 from search.constants import FILTERS
@@ -20,6 +21,7 @@ from search.forms import NewEventForm
 from search.forms import NewPlaceForm
 from search.forms import SearchImageForm
 from search.models import Activity
+from search.models import Place
 
 
 @login_required
@@ -118,7 +120,6 @@ def edit_activity(request, activity_id: str):
             "image_form": image_form,
             "filter_setter_form": filter_setter_form,
             "entity_type": "Activity",
-            "partial_to_render": "partials/search_entity_card.html",
             "partial_target": reverse(edit_activity, args=[activity.id]),
         },
     )
@@ -173,6 +174,81 @@ def new_place(request):
         request,
         "partials/new_place.html",
         {"form": form, "image_form": image_form, "filter_setter_form": filter_setter_form},
+    )
+
+
+@login_required
+@staff_member_required
+def edit_place(request, place_id: str):
+    """
+    Edit an existing place.
+
+    In this view we render three separate forms to look like a single form.
+    """
+    template = "edit_search_entity.html"
+    place = get_object_or_404(Place, id=place_id)
+    image = place.images.first()
+    filters = {}
+    for key, val in place.attributes.items():
+        filters[key] = True if val == "True" else False
+    gmaps_data = literal_eval(place.attributes["google_maps_data"])
+    gmaps_initial = {"google_maps_rating": gmaps_data["rating"], "address": gmaps_data["address"]}
+
+    form = NewPlaceForm(user=request.user, instance=place, initial=gmaps_initial)
+    image_form = SearchImageForm(user=request.user, instance=image, image_required=False)
+    filter_setter_form = FilterSettingForm(initial=filters)
+
+    if request.method == "POST":
+        # Validate the image form first.
+        template = "partials/new_place.html"
+        if request.POST.get("link_url"):
+            image_required = False
+        else:
+            image_required = True
+        image_form = SearchImageForm(
+            request.user,
+            request.POST,
+            request.FILES,
+            image_required=image_required,
+        )
+        image_form.is_valid()
+
+        # Then bind the filters form, and parse the results to JSON.
+        filter_setter_form = FilterSettingForm(request.POST)
+        filter_settings = filter_setter_form.save()
+        # Manually update each image attribute individually.
+        for attr in ["link_url", "uploaded_image", "alt_text"]:
+            if image_form.cleaned_data[attr]:
+                setattr(image, attr, image_form.cleaned_data[attr])
+
+        # Finally, bin the main form and validate.
+        form = NewPlaceForm(request.user, request.POST, instance=place)
+        if form.is_valid():
+            # Now the form is valid, pass in the data from the other two forms.
+            # We've got some supplementary google maps data we want to add to attributes here
+            gmaps_data = {
+                "rating": form.cleaned_data["google_maps_rating"],
+                "address": form.cleaned_data["address"],
+            }
+            filter_settings["google_maps_data"] = gmaps_data
+            form.filters_json = filter_settings
+            form.image = image
+            # Save the new activity
+            form.save(commit=True)
+            return render(request, "partials/new-place-complete.html", status=200)
+
+    return render(
+        request,
+        template,
+        {
+            "form": form,
+            "image_form": image_form,
+            "filter_setter_form": filter_setter_form,
+            "entity_type": "Place",
+            "partial_to_render": "partials/search_entity_card.html",
+            "partial_target": reverse(edit_place, args=[place.id]),
+            "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+        },
     )
 
 
