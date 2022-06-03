@@ -212,6 +212,20 @@ class TestEditActivity(TestCase):
         assert response.context["entity_type"] == "Activity"
         assert response.context["partial_target"] == self.url
 
+    def test_filters_form_populated_with_correct_filter_info(self):
+        """The filter form should be populated with the attributes from the instance."""
+        new_filters = {x[0]: True for x in FILTERS.values()}
+        unset_filters = [x[1:] for x in FILTERS.values()]
+        self.activity.attributes = self.activity.attributes | new_filters
+        self.activity.save()
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        for filtername in new_filters.keys():
+            assert response.context["filter_setter_form"][filtername].value() is True
+        for filter_set in unset_filters:
+            for filter_field in filter_set:
+                assert response.context["filter_setter_form"][filter_field].value() is None
+
     def test_successful_post_request_saves_form(self):
         """A successful post request should save all data."""
         post_data = (
