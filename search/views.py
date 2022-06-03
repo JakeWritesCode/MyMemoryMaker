@@ -11,10 +11,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
-
-# Project
 from django.utils import timezone
 
+# Project
 from search.constants import FILTERS
 from search.filters import FilterQueryProcessor
 from search.filters import FilterSearchForm

@@ -62,6 +62,7 @@ FILTERS = {
         "charity_and_causes",
         "wedding",
         "festival",
+        "educational",
     ],
     "venue": [
         "home",
