@@ -352,11 +352,8 @@ def edit_event(request, event_id: str):
         dates_form_valid = event_dates_form.is_valid()
         # Manually update each image attribute individually.
         for attr in ["link_url", "uploaded_image", "alt_text"]:
-            try:
-                if image_form.cleaned_data[attr]:
-                    setattr(image, attr, image_form.cleaned_data[attr])
-            except KeyError:
-                continue
+            if image_form.cleaned_data[attr]:
+                setattr(image, attr, image_form.cleaned_data[attr])
 
         # Finally, bind the main form and validate.
         form = NewEventForm(request.user, request.POST, instance=event)
