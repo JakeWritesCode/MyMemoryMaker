@@ -13,6 +13,7 @@ from crispy_forms.helper import FormHelper
 from django import forms
 from django.test import SimpleTestCase
 from django.test import TestCase
+from django.utils import timezone
 
 # Project
 from search.constants import FILTERS
@@ -26,6 +27,7 @@ from search.models import Place
 from search.tests.factories import ActivityFactory
 from search.tests.factories import EventFactory
 from search.tests.factories import PlaceFactory
+from users.tests.factories import CustomUserFactory
 
 
 class TestFilterSettingForm(SimpleTestCase):
@@ -374,10 +376,23 @@ class TestFilterQueryProcessor(TestCase):
 
     def test__perform_datetime_query_returns_all_results_if_bad_request(self):
         """If the function can't convert the types, just return everything."""
-        places = [PlaceFactory()]
+        events = [EventFactory()]
 
         get_param = {}
-        assert self.processor(get_param)._perform_datetime_query(places) is places
+        assert self.processor(get_param)._perform_datetime_query(events) == events
+
+    def test__perform_datetime_query_does_not_show_past_events(self):
+        """Function should always filter out past events."""
+        past_dates = [
+            [
+                timezone.now() - datetime.timedelta(days=7),
+                timezone.now() - datetime.timedelta(days=4),
+            ],
+        ]
+        events = [EventFactory(), EventFactory(dates=past_dates)]
+
+        get_param = {}
+        assert self.processor(get_param)._perform_datetime_query(events) == [events[0]]
 
     def test__perform_distance_query_filters_objects_by_distance(self):
         """If the 4 search params are not received, return all objects."""
@@ -409,6 +424,13 @@ class TestFilterQueryProcessor(TestCase):
         }
         assert self.processor(get_param)._perform_distance_query(places) is places
 
+    def test_get_results_for_object_type_does_not_show_unapproved_items(self):
+        """Filters should ot show unapproved items."""
+        activity = ActivityFactory()
+        processor = self.processor({})
+        result = processor._get_results_for_object_type(Activity)
+        assert activity not in result
+
     def test_get_results_for_object_type_calls_correct_functions_for_activity(self):
         """Function should call all correct functions."""
         processor = self.processor({})
@@ -436,9 +458,10 @@ class TestFilterQueryProcessor(TestCase):
 
     def test_get_results_returns_randomised_results_list(self):
         """Function should return randomised results list."""
-        activity = ActivityFactory()
-        event = EventFactory()
-        place = PlaceFactory()
+        user = CustomUserFactory()
+        activity = ActivityFactory(approved_by=user, approval_timestamp=timezone.now())
+        event = EventFactory(approved_by=user, approval_timestamp=timezone.now())
+        place = PlaceFactory(approved_by=user, approval_timestamp=timezone.now())
         results = FilterQueryProcessor({}).get_results()
         assert activity in results
         assert event in results
