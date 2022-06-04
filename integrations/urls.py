@@ -22,4 +22,9 @@ urlpatterns = [
         views.parse_eventbrite_data_into_events,
         name="parse_eventbrite_data_into_events",
     ),
+    path(
+        "parse_categories",
+        views.parse_categories,
+        name="parse_categories",
+    ),
 ]

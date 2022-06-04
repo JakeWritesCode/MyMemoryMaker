@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """Views for integrations. Most of these will just be ways to manually call tasks."""
 # 3rd-party
+import json
+
+import requests
 from django.http import HttpResponse
 
 # Project
@@ -28,3 +31,25 @@ def parse_eventbrite_data_into_events(request):
     downloader = EventBriteEventParser()
     downloader.process_data()
     return HttpResponse("Complete", status=200)
+
+def parse_categories(request):
+    category_mapping = {}
+    response = requests.get("https://www.eventbriteapi.com/v3/categories/?token=4HA7TMIXBZANQUNK62EE")
+    json_response = json.loads(response.content)
+    for cat in json_response["categories"]:
+        category_mapping[cat["name"]] = {
+            "id": cat["id"],
+            "subcategories": []
+        }
+    for i in range(1, 6):
+        response = requests.get(
+            f"https://www.eventbriteapi.com/v3/subcategories/?token=4HA7TMIXBZANQUNK62EE&page={i}")
+        json_response = json.loads(response.content)
+        try:
+            for subcat in json_response["subcategories"]:
+                category_mapping[subcat["parent_category"]["name"]]["subcategories"].append(
+                    {"id": subcat["id"], "name": subcat["name"]}
+                )
+        except KeyError:
+            hello  =1
+    hello = 1

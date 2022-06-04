@@ -46,9 +46,16 @@ class EventIDDownloader:
 
     def _fetch_page_content(self, page_id: int):
         """Perform a GET request for that page's events."""
-        response = requests.get(
-            f"https://www.eventbrite.co.uk/d/united-kingdom/all-events/?page={page_id}"
-        )
+        consecutive_failures = 0
+        while consecutive_failures < 5:
+            response = requests.get(
+                f"https://www.eventbrite.co.uk/d/united-kingdom/all-events/?page={page_id}"
+            )
+            if response.status_code == OK:
+                break
+
+        if consecutive_failures == 4:
+            raise APIError("The page dd not load correctly.")
         data = str(response.content)
         return data
 
@@ -120,7 +127,7 @@ class EventRawDataDownloader:
         all_events = EventBriteEventID.objects.filter(
             last_seen__gt=timezone.now() - timedelta(hours=EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS)
         )
-        for event_id in all_events[:100]:
+        for event_id in all_events[:10]:
             consecutive_errors = 0
             while True:
                 try:
