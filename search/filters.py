@@ -303,12 +303,26 @@ class FilterQueryProcessor:
         except (ValueError, TypeError):
             datetime_to = None
 
+        date_match = []
+        for event in list_of_results:
+            # Only show events in the future
+            final_date = sorted([x[1] for x in event.dates])[-1]
+            if final_date > timezone.now():
+                date_match.append(event)
+        list_of_results = date_match
+
         if not datetime_from and not datetime_to:
             return list_of_results
 
         date_match = []
         for event in list_of_results:
             added = False
+
+            # Only show events in the future
+            final_date = sorted([x[1] for x in event.dates])[-1]
+            if final_date < timezone.now():
+                continue
+
             for date_set in event.dates:
                 if added:
                     continue
@@ -352,7 +366,7 @@ class FilterQueryProcessor:
 
     def _get_results_for_object_type(self, query_obj: Type[Union[Activity, Event, Place]]):
         """Run the query and get the results for each type."""
-        queryset = query_obj.objects.filter()
+        queryset = query_obj.objects.filter(approved_by__isnull=False)
         queryset = self._append_slider_queries(queryset)
         queryset = self._append_search_queries(queryset)
         queryset = self._append_null_boolean_filter_queries(queryset)

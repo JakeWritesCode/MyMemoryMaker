@@ -82,13 +82,15 @@ function initNewEntityForm() {
             fr.readAsDataURL(files[0]);
         }
     }
-    try{
+    try {
         tinymce.get("id_description").remove()
+    } catch (err) {
     }
-    catch (err) {}
     tinymce.init({
         selector: '#id_description',
+        plugins: 'link',
         menubar: false,
+        toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | link',
         setup: function (ed) {
             ed.on('change', function (e) {
                 updatePreviewCard("search-entity-description", ed.getContent());
@@ -101,16 +103,18 @@ function initNewEntityForm() {
 
 function initNewActivityForm() {
     initNewEntityForm()
-        htmx.on("htmx:load", function (evt) {
+    htmx.on("htmx:load", function (evt) {
         initNewActivityForm()
     });
 }
 
 function initNewPlaceForm() {
     initNewEntityForm()
-    const input = document.getElementById('id_place_search');
-    new mdb.Select(document.getElementById('id_activities'), {"filter": true})
+    if (document.getElementsByClassName("select-wrapper").length === 0) {
+        new mdb.Select(document.getElementById('id_activities'), {"filter": true})
+    }
 
+    const input = document.getElementById('id_place_search');
     const options = {
         componentRestrictions: {country: "uk"},
         fields: ["geometry", "name", "url", "photos", "place_id", "price_level", "rating", "formatted_address"],
@@ -148,8 +152,10 @@ function initNewPlaceForm() {
 
 function initNewEventForm() {
     initNewEntityForm()
-    new mdb.Select(document.getElementById('id_activities'), {"filter": true})
-    new mdb.Select(document.getElementById('id_places'), {"filter": true})
+    if (document.getElementsByClassName("select-wrapper").length === 0) {
+        new mdb.Select(document.getElementById('id_activities'), {"filter": true})
+        new mdb.Select(document.getElementById('id_places'), {"filter": true})
+    }
 
     const eventDateTimeFrom = document.querySelector('#datetime-start-picker');
     new mdb.Datetimepicker(eventDateTimeFrom, {
