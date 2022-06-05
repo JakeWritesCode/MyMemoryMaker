@@ -24,6 +24,7 @@ from integrations.constants import EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS
 from integrations.exceptions import APIError
 from integrations.models import EventBriteEventID
 from integrations.models import EventBriteRawEventData
+from integrations.utils import http_request_with_backoff
 from search.constants import SEARCH_ENTITY_SOURCES
 from search.models import Event
 from search.models import Place
@@ -51,16 +52,11 @@ class EventIDDownloader:
 
     def _fetch_page_content(self, page_id: int):
         """Perform a GET request for that page's events."""
-        consecutive_failures = 0
-        while consecutive_failures < 5:
-            response = requests.get(
-                f"https://www.eventbrite.co.uk/d/united-kingdom/all-events/?page={page_id}",
-            )
-            if response.status_code == OK:
-                break
+        url = f"https://www.eventbrite.co.uk/d/united-kingdom/all-events/?page={page_id}"
+        response = http_request_with_backoff("get", url)
+        if response.status_code != OK:
+            raise APIError(f"The page {url} did not return the correct status.")
 
-        if consecutive_failures == 4:
-            raise APIError("The page dd not load correctly.")
         data = str(response.content)
         return data
 
@@ -72,7 +68,6 @@ class EventIDDownloader:
         number but the X is actually the number of events, not pages. Check for the text
         'Nothing matched your search, but you might like these options." to denote end of listings.
         """
-        # TODO - Add a test that checks that page 5000 shows that text.
         if "Nothing matched your search, but you might like these options." in page_content:
             return False
         return True
@@ -113,6 +108,7 @@ class EventIDDownloader:
             event_ids = self._get_event_ids_from_page(page_content)
             for event_id in event_ids:
                 event, _ = EventBriteEventID.objects.get_or_create(event_id=event_id)
+                event.last_seen = timezone.now()
                 event.save()
             logging.info(f"EventBrite event ID downloader completed downloading page {page_number}")
 

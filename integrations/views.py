@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Views for integrations. Most of these will just be ways to manually call tasks."""
-# 3rd-party
-import json
+# Standard Library
 
-import requests
+# 3rd-party
+from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse
 
 # Project
@@ -12,6 +12,7 @@ from integrations.eventbrite import EventIDDownloader
 from integrations.eventbrite import EventRawDataDownloader
 
 
+@staff_member_required
 def get_eventbrite_event_ids(request):
     """Manually start the Eventbrite event ID download process."""
     downloader = EventIDDownloader()
@@ -19,6 +20,7 @@ def get_eventbrite_event_ids(request):
     return HttpResponse("Complete", status=200)
 
 
+@staff_member_required
 def get_eventbrite_raw_event_data(request):
     """Manually start the Eventbrite event data download process."""
     downloader = EventRawDataDownloader()
@@ -26,6 +28,7 @@ def get_eventbrite_raw_event_data(request):
     return HttpResponse("Complete", status=200)
 
 
+@staff_member_required
 def parse_eventbrite_data_into_events(request):
     """Manually start the Eventbrite event parsing process."""
     downloader = EventBriteEventParser()

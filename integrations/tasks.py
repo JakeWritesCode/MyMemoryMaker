@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+"""Integrations tasks."""
 # Project
 from integrations.eventbrite import EventBriteEventParser
 from integrations.eventbrite import EventIDDownloader

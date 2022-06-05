@@ -10,7 +10,7 @@ from . import views
 urlpatterns = [
     # Form partials
     path(
-        "get_eventbrite_event_ids", views.get_eventbrite_event_ids, name="get_eventbrite_event_ids"
+        "get_eventbrite_event_ids", views.get_eventbrite_event_ids, name="get_eventbrite_event_ids",
     ),
     path(
         "get_eventbrite_raw_event_data",
