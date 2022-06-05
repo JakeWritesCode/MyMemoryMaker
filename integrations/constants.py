@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""Integration constants."""
+
 EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS = 1
 
 # Map EventBrite categories and subcategories to our filters.
