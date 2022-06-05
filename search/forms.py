@@ -178,6 +178,8 @@ class NewEventForm(NewSearchEntityForm):
         self.fields["headline"].widget.attrs[
             "placeholder"
         ] = "Give us a one sentence summary of your event."
+        if self.instance:
+            self.fields["activities"].required = False
 
     class Meta:  # noqa: D106
         model = Event
