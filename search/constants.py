@@ -64,7 +64,7 @@ FILTERS = {
         "mexican",
         "vegan_speciality",
         "vegetarian_speciality",
-        "other_food_and_drink"
+        "other_food_and_drink",
     ],
     "other_categories": [
         "outdoor",
