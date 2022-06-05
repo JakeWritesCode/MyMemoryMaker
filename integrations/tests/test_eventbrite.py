@@ -2,7 +2,11 @@
 """Tests for EventBrite API integration."""
 
 # Standard Library
+import json
 import pathlib
+from datetime import timedelta
+
+from django.utils import timezone
 from http.client import NOT_FOUND
 from http.client import OK
 from unittest.mock import MagicMock
@@ -10,13 +14,16 @@ from unittest.mock import call
 from unittest.mock import patch
 
 # 3rd-party
+from django.conf import settings
 from django.test import TestCase
 
 # Project
 from integrations.eventbrite import EventIDDownloader
+from integrations.eventbrite import EventRawDataDownloader
 from integrations.eventbrite import get_or_create_api_user
 from integrations.exceptions import APIError
 from integrations.models import EventBriteEventID
+from integrations.tests.factories import EventBriteEventIDFactory
 from users.models import CustomUser
 
 
@@ -157,3 +164,63 @@ class TestEventIDDownloader(TestCase):
             )
         self.downloader.get_event_ids()
         assert EventBriteEventID.objects.count() == len(self.expected_ids)
+
+
+class TestEventRawDataDownloader(TestCase):
+    """Tests for the EventRawDataDownloader class."""
+
+    def setUp(self) -> None:  # noqa: D102
+        self.downloader = EventRawDataDownloader()
+        self.event_ids = [
+            EventBriteEventIDFactory(),
+            EventBriteEventIDFactory(),
+            EventBriteEventIDFactory(),
+        ]
+        settings.EVENTBRITE_API_KEY = "ABC123"
+
+        file = pathlib.Path(__file__).parent.resolve()
+        with open(f"{file}/mock_api_data/eventbrite_event_data.json", "r") as sample_return:
+             self.sample_json = json.load(sample_return)
+
+    @patch("integrations.eventbrite.http_request_with_backoff")
+    def test__get_event_data_calls_correct_api_url(self, mock_get):
+        """Function should call the correct API URL."""
+        mock_get.return_value = MagicMock(status_code=OK, content=b"{}")
+        self.downloader._get_event_data("1234")
+        mock_get.assert_called_once_with(
+            "get",
+            f"https://www.eventbriteapi.com/v3/events/1234/"
+            f"?expand=category,subcategory,venue,format,listing_properties,ticket_availability"
+            f"&token={settings.EVENTBRITE_API_KEY}"
+        )
+
+    @patch("integrations.eventbrite.http_request_with_backoff")
+    def test__get_event_data_raises_apierror_if_incorrect_status(self, mock_get):
+        """Function should raise an API error if the response was not correct."""
+        mock_get.return_value = MagicMock(status_code=NOT_FOUND, content=b"{}")
+        with self.assertRaises(APIError) as e:
+            self.downloader._get_event_data("1234")
+        assert "The API did not return a correct response." in str(e.exception)
+
+    @patch("integrations.eventbrite.http_request_with_backoff")
+    def test__get_event_data_returns_loaded_json(self, mock_get):
+        """Function should return the loaded JSON response."""
+        mock_get.return_value = MagicMock(status_code=OK, content=b'{"Hey": "There!"}')
+        response = self.downloader._get_event_data("1234")
+        assert response == {"Hey": "There!"}
+
+    def test_get_recently_seen_events_only_get_events_last_seen_in_timeframe(self):
+        """Function should only download events recently seen on ID download."""
+        self.downloader._get_event_data = MagicMock(return_value=self.sample_json)
+        self.downloader.get_recently_seen_events()
+        self.downloader._get_event_data.assert_has_calls(
+            [call(x.event_id) for x in self.event_ids], any_order=True,
+        )
+
+        for event_id in self.event_ids:
+            event_id.last_seen = timezone.now() - timedelta(days=10)
+            event_id.save()
+
+        self.downloader._get_event_data.reset_mock()
+        self.downloader.get_recently_seen_events()
+        self.downloader._get_event_data.assert_not_called()

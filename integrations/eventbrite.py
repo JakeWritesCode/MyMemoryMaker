@@ -126,7 +126,7 @@ class EventRawDataDownloader:
             f"?expand=category,subcategory,venue,format,listing_properties,ticket_availability"
             f"&token={settings.EVENTBRITE_API_KEY}"
         )
-        response = requests.get(url)
+        response = http_request_with_backoff("get", url)
         if response.status_code != OK:
             raise APIError("The API did not return a correct response.")
         return json.loads(response.content)
@@ -136,7 +136,7 @@ class EventRawDataDownloader:
         all_events = EventBriteEventID.objects.filter(
             last_seen__gt=timezone.now() - timedelta(hours=EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS),
         )
-        for event_id in all_events[:10]:
+        for event_id in all_events:
             consecutive_errors = 0
             while True:
                 try:
