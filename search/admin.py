@@ -42,4 +42,4 @@ class EventAdmin(SearchEntityAdmin):
 admin.site.register(models.SearchImage)
 admin.site.register(models.Activity, ActivityAdmin)
 admin.site.register(models.Place, PlaceAdmin)
-admin.site.register(models.Event)
+admin.site.register(models.Event, EventAdmin)
