@@ -33,7 +33,6 @@ RUN mkdir -p /opt/app/pip_cache
 RUN mkdir -p /opt/app/MyMemoryMaker
 COPY . /opt/app/MyMemoryMaker
 WORKDIR /opt/app/MyMemoryMaker
-run echo $AWS_S3_ACCESS_KEY_ID
 RUN pip install -r requirements/production.txt
 RUN python manage.py collectstatic --no-input
 RUN chown -R www-data:www-data /opt/app
