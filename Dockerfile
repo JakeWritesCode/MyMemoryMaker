@@ -59,4 +59,4 @@ RUN /etc/init.d/celeryd start
 # Start Server
 EXPOSE 8020
 STOPSIGNAL SIGTERM
-#CMD ["/opt/app/MyMemoryMaker/deployment/start_server.sh"]
+CMD ["/opt/app/MyMemoryMaker/deployment/start_server.sh"]
