@@ -53,7 +53,6 @@ RUN chown -R celery:celery /var/run/celery/ /var/log/celery/
 RUN chmod 755 /etc/init.d/celeryd
 RUN chown root:root /etc/init.d/celeryd
 COPY ./deployment/celery /etc/default/celeryd
-RUN /etc/init.d/celeryd start
 
 
 # Start Server
