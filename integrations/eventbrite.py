@@ -18,6 +18,8 @@ from django.utils import timezone
 from pytz import UTC
 
 # Project
+from integrations.constants import BLEACH_ALLOWED_ATTRIBUTES
+from integrations.constants import BLEACH_ALLOWED_TAGS
 from integrations.constants import EVENTBRITE_CATEGORY_MAPPING
 from integrations.constants import EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS
 from integrations.exceptions import APIError
@@ -247,7 +249,7 @@ class EventBriteEventParser:
             mmm_place.location_long = gmaps_place["geometry"]["location"]["lng"]
             mmm_place.attributes = {
                 "google_maps_data": {
-                    "rating": gmaps_place["rating"],
+                    "rating": gmaps_place.get("rating", None),
                     "address": gmaps_place["formatted_address"],
                 },
             } | event.attributes
@@ -260,13 +262,20 @@ class EventBriteEventParser:
 
     def _update_description(self, event, event_id):
         """The description is a separate API call. This is untrusted HTML, so bleach it."""
-        url = f"https://www.eventbriteapi.com/v3/events/{event_id}/description/?token={settings.EVENTBRITE_API_KEY}"
+        url = (
+            f"https://www.eventbriteapi.com/v3/events/{event_id}/"
+            f"description/?token={settings.EVENTBRITE_API_KEY}"
+        )
         response = http_request_with_backoff("get", url)
         if response.status_code != OK:
             raise ValueError("Unable to update description.")
         data = json.loads(response.content)
         description = data["description"]
-        description = bleach.clean(description)
+        description = bleach.clean(
+            description,
+            tags=BLEACH_ALLOWED_TAGS,
+            attributes=BLEACH_ALLOWED_ATTRIBUTES,
+        )
         event.description = description
 
     def _populate_event(self, event: Event, raw_data: EventBriteRawEventData):
@@ -316,7 +325,7 @@ class EventBriteEventParser:
             event.places.add(place)
         except (KeyError, ValueError) as e:
             logging.error(
-                f"Unable to create a new event for id {raw_data.event_id.event_id}, error {e}."
+                f"Unable to create a new event for id {raw_data.event_id.event_id}, error {e}.",
             )
             return False
 

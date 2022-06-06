@@ -1,7 +1,30 @@
 # -*- coding: utf-8 -*-
 """Integration constants."""
 
-EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS = 1
+EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS = 48
+
+BLEACH_ALLOWED_TAGS = [
+    "div",
+    "p",
+    "iframe",
+    "li",
+    "ul",
+    "strong",
+    "span",
+    "a",
+    "img",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+]
+BLEACH_ALLOWED_ATTRIBUTES = {
+    "a": ["href", "title"],
+    "abbr": ["title"],
+    "acronym": ["title"],
+    "iframe": ["src", "allowfullscreen", "frameborder"],
+}
 
 # Map EventBrite categories and subcategories to our filters.
 EVENTBRITE_CATEGORY_MAPPING = {

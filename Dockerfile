@@ -27,17 +27,36 @@ ARG DATABASE_URL
 ENV DATABASE_URL=$DATABASE_URL
 ARG DJANGO_SECRET_KEY
 ENV DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY
+ARG CELERY_BROKER_URL
+ENV CELERY_BROKER_URL=$CELERY_BROKER_URL
+ARG EVENTBRITE_API_KEY
+ENV EVENTBRITE_API_KEY=$EVENTBRITE_API_KEY
+
 
 RUN mkdir -p /opt/app
 RUN mkdir -p /opt/app/pip_cache
 RUN mkdir -p /opt/app/MyMemoryMaker
 COPY . /opt/app/MyMemoryMaker
 WORKDIR /opt/app/MyMemoryMaker
+RUN pip install --upgrade pip
 RUN pip install -r requirements/production.txt
 RUN python manage.py collectstatic --no-input
 RUN chown -R www-data:www-data /opt/app
 
+# Celery worker and celery beat
+COPY ./deployment/celeryd /etc/init.d/celeryd
+RUN useradd -ms /bin/bash celery
+RUN usermod -a -G celery celery
+RUN mkdir /var/run/celery
+RUN mkdir /var/log/celery
+RUN chown -R celery:celery /var/run/celery/ /var/log/celery/
+RUN chmod 755 /etc/init.d/celeryd
+RUN chown root:root /etc/init.d/celeryd
+COPY ./deployment/celery /etc/default/celeryd
+RUN /etc/init.d/celeryd start
+
+
 # Start Server
 EXPOSE 8020
 STOPSIGNAL SIGTERM
-CMD ["/opt/app/MyMemoryMaker/deployment/start_server.sh"]
+#CMD ["/opt/app/MyMemoryMaker/deployment/start_server.sh"]
