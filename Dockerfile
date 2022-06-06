@@ -61,7 +61,6 @@ COPY ./deployment/celery /etc/default/celerybeat
 RUN /etc/init.d/celeryd start
 RUN /etc/init.d/celerybeat start
 
-
 # Start Server
 EXPOSE 8020
 STOPSIGNAL SIGTERM
