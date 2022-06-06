@@ -10,6 +10,7 @@ django-celery-results==2.3.1
 django-crispy-forms==1.14.0
 django-storages==1.12.3
 geopy==2.2.0
+gevent==21.12.0
 googlemaps==4.6.0
 gunicorn==20.1.0
 pillow==9.1.0
