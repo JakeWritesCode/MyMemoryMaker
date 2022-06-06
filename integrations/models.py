@@ -16,8 +16,8 @@ class EventBriteEventID(models.Model):
     """
 
     event_id = models.BigIntegerField(primary_key=True)
-    first_fetched = models.DateTimeField(auto_now=True)
-    last_seen = models.DateTimeField(auto_now=True)
+    first_fetched = models.DateTimeField(auto_now_add=True)
+    last_seen = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(null=True, blank=True)
 
 

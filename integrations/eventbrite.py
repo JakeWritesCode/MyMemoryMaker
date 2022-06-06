@@ -4,7 +4,6 @@
 import json
 import logging
 import re
-import time
 from datetime import datetime
 from datetime import timedelta
 from http.client import OK
@@ -12,7 +11,6 @@ from http.client import OK
 # 3rd-party
 import googlemaps
 import pytz
-import requests
 from django.conf import settings
 from django.core.files.temp import NamedTemporaryFile
 from django.utils import timezone
@@ -137,19 +135,7 @@ class EventRawDataDownloader:
             last_seen__gt=timezone.now() - timedelta(hours=EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS),
         )
         for event_id in all_events:
-            consecutive_errors = 0
-            while True:
-                try:
-                    event_data = self._get_event_data(event_id.event_id)
-                    consecutive_errors = 0
-                    break
-                except APIError:
-                    if consecutive_errors > 5:
-                        logging.error(
-                            f"The EventBrite API returned {consecutive_errors} errors. Aborting.",
-                        )
-                        return False
-                    time.sleep(1)
+            event_data = self._get_event_data(event_id.event_id)
             try:
                 raw_data = EventBriteRawEventData.objects.get(event_id=event_id)
             except EventBriteRawEventData.DoesNotExist:
@@ -181,17 +167,16 @@ class EventBriteEventParser:
     def _determine_filters(self, raw_data: EventBriteRawEventData):
         """Figure out which filters apply based on the filter mapping."""
         filters = {}
-        if raw_data.data["category_id"]:
-            for _, cat_data in EVENTBRITE_CATEGORY_MAPPING.items():
+
+        for _, cat_data in EVENTBRITE_CATEGORY_MAPPING.items():
+            if raw_data.data["category_id"]:
                 if cat_data["id"] == raw_data.data["category_id"]:
                     filters |= {our_filter: True for our_filter in cat_data["our_filters"]}
 
-                    if raw_data.data["subcategory_id"]:
-                        for _, subcat_data in EVENTBRITE_CATEGORY_MAPPING.items():
-                            if subcat_data["id"] == raw_data.data["subcategory_id"]:
-                                filters |= {
-                                    our_filter: True for our_filter in subcat_data["our_filters"]
-                                }
+            if raw_data.data["subcategory_id"]:
+                for subcat_data in cat_data["subcategories"]:
+                    if subcat_data["id"] == raw_data.data["subcategory_id"]:
+                        filters |= {our_filter: True for our_filter in subcat_data["our_filters"]}
 
         return filters
 
@@ -265,7 +250,7 @@ class EventBriteEventParser:
                 "google_maps_data": {
                     "rating": gmaps_place["rating"],
                     "address": gmaps_place["formatted_address"],
-                }
+                },
             } | event.attributes
             mmm_place.created_by = get_or_create_api_user()
             mmm_place.save()

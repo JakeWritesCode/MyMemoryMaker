@@ -2,11 +2,10 @@
 """Tests for EventBrite API integration."""
 
 # Standard Library
+import datetime
 import json
 import pathlib
 from datetime import timedelta
-
-from django.utils import timezone
 from http.client import NOT_FOUND
 from http.client import OK
 from unittest.mock import MagicMock
@@ -14,16 +13,22 @@ from unittest.mock import call
 from unittest.mock import patch
 
 # 3rd-party
+import pytz
 from django.conf import settings
 from django.test import TestCase
+from django.utils import timezone
 
 # Project
+from integrations.eventbrite import EventBriteEventParser
 from integrations.eventbrite import EventIDDownloader
 from integrations.eventbrite import EventRawDataDownloader
 from integrations.eventbrite import get_or_create_api_user
 from integrations.exceptions import APIError
 from integrations.models import EventBriteEventID
+from integrations.models import EventBriteRawEventData
 from integrations.tests.factories import EventBriteEventIDFactory
+from integrations.tests.factories import EventBriteRawEventDataFactory
+from search.tests.factories import EventFactory
 from users.models import CustomUser
 
 
@@ -180,7 +185,7 @@ class TestEventRawDataDownloader(TestCase):
 
         file = pathlib.Path(__file__).parent.resolve()
         with open(f"{file}/mock_api_data/eventbrite_event_data.json", "r") as sample_return:
-             self.sample_json = json.load(sample_return)
+            self.sample_json = json.load(sample_return)
 
     @patch("integrations.eventbrite.http_request_with_backoff")
     def test__get_event_data_calls_correct_api_url(self, mock_get):
@@ -191,7 +196,7 @@ class TestEventRawDataDownloader(TestCase):
             "get",
             f"https://www.eventbriteapi.com/v3/events/1234/"
             f"?expand=category,subcategory,venue,format,listing_properties,ticket_availability"
-            f"&token={settings.EVENTBRITE_API_KEY}"
+            f"&token={settings.EVENTBRITE_API_KEY}",
         )
 
     @patch("integrations.eventbrite.http_request_with_backoff")
@@ -214,13 +219,93 @@ class TestEventRawDataDownloader(TestCase):
         self.downloader._get_event_data = MagicMock(return_value=self.sample_json)
         self.downloader.get_recently_seen_events()
         self.downloader._get_event_data.assert_has_calls(
-            [call(x.event_id) for x in self.event_ids], any_order=True,
+            [call(x.event_id) for x in self.event_ids],
+            any_order=True,
         )
 
-        for event_id in self.event_ids:
+        for event_id in EventBriteEventID.objects.all():
             event_id.last_seen = timezone.now() - timedelta(days=10)
             event_id.save()
 
         self.downloader._get_event_data.reset_mock()
         self.downloader.get_recently_seen_events()
         self.downloader._get_event_data.assert_not_called()
+
+    def test_get_recently_seen_events_creates_a_new_db_model_and_saves_json(self):
+        """If there is no current EventBriteRawEventData, create one and save JSON."""
+        assert EventBriteRawEventData.objects.count() == 0
+        self.downloader._get_event_data = MagicMock(return_value=self.sample_json)
+        self.downloader.get_recently_seen_events()
+        for event_id in self.event_ids:
+            raw_datasets = EventBriteRawEventData.objects.filter(event_id=event_id).all()
+            assert len(raw_datasets) == 1
+            assert raw_datasets[0].data == self.sample_json
+
+    def test_get_recently_seen_events_updates_existing_model_and_saves_json(self):
+        """If there is a current EventBriteRawEventData, save JSON."""
+        for event_id in self.event_ids:
+            EventBriteRawEventDataFactory(event_id=event_id)
+
+        assert EventBriteRawEventData.objects.count() == 3
+        self.downloader._get_event_data = MagicMock(return_value=self.sample_json)
+        self.downloader.get_recently_seen_events()
+        assert EventBriteRawEventData.objects.count() == 3
+        for event_id in self.event_ids:
+            raw_datasets = EventBriteRawEventData.objects.filter(event_id=event_id).all()
+            assert len(raw_datasets) == 1
+            assert raw_datasets[0].data == self.sample_json
+
+
+class TestEventBriteEventParser(TestCase):
+    """Tests for the TestEventBriteEventParser."""
+
+    @patch("integrations.eventbrite.googlemaps")
+    def setUp(self, gmaps_mock) -> None:  # noqa: D102
+        self.raw_data = [
+            EventBriteRawEventDataFactory(),
+            EventBriteRawEventDataFactory(),
+            EventBriteRawEventDataFactory(),
+        ]
+        self.gmaps_mock = gmaps_mock
+        self.gmaps_mock.Client = MagicMock()
+        self.parser = EventBriteEventParser()
+
+    def test_init(self):
+        """Test class init."""
+        assert isinstance(self.parser.gmaps_client, MagicMock)
+
+    def test__has_event_changed(self):
+        """Function should return True if event has changed, False if not."""
+        event = EventFactory(last_updated=timezone.now())
+        assert self.parser._has_event_changed(event, self.raw_data[0]) is False
+        event.last_updated = timezone.now() - timedelta(days=1000)
+        event.save()
+        assert self.parser._has_event_changed(event, self.raw_data[0]) is True
+
+    def test__parse_datetime(self):
+        """Function should parse datetime."""
+        expected_datetime = datetime.datetime(2021, 1, 1, tzinfo=pytz.UTC)
+        assert self.parser._parse_datetime("2021-01-01T00:00:00Z", "UTC") == expected_datetime
+
+    mapping_patch = {
+        "test_category": {
+            "id": 101,
+            "our_filters": ["Test", "filter"],
+            "subcategories": [
+                {"name": "test subcategory", "id": 103, "our_filters": ["Barry", "White"]},
+            ],
+        },
+    }
+
+    @patch.dict("integrations.eventbrite.EVENTBRITE_CATEGORY_MAPPING", mapping_patch)
+    def test__determine_filters_adds_correct_filter_for_parent_category_and_sub_category(self):
+        """If the event data has a category, determine the correct filter from mapping."""
+        self.raw_data[0].data["category_id"] = 101
+        self.raw_data[0].data["subcategory_id"] = None
+        self.raw_data[0].save()
+        assert self.parser._determine_filters(self.raw_data[0]) == {"Test": True, "filter": True}
+
+        self.raw_data[0].data["category_id"] = None
+        self.raw_data[0].data["subcategory_id"] = 103
+        self.raw_data[0].save()
+        assert self.parser._determine_filters(self.raw_data[0]) == {"Barry": True, "White": True}
