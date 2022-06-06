@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from integrations.eventbrite import EventBriteEventParser
 from integrations.eventbrite import EventIDDownloader
 from integrations.eventbrite import EventRawDataDownloader
+from integrations.tasks import eventbrite_full_download
 
 
 @staff_member_required
@@ -34,3 +35,9 @@ def parse_eventbrite_data_into_events(request):
     downloader = EventBriteEventParser()
     downloader.process_data()
     return HttpResponse("Complete", status=200)
+
+@staff_member_required
+def start_eventbrite_async_download(request):
+    """Manually start the Eventbrite download process as a celery task."""
+    eventbrite_full_download.delay()
+    return HttpResponse("Started", status=200)

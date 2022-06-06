@@ -22,4 +22,8 @@ urlpatterns = [
         views.parse_eventbrite_data_into_events,
         name="parse_eventbrite_data_into_events",
     ),
+    path("start_eventbrite_async_download",
+         views.start_eventbrite_async_download,
+         name="start_eventbrite_async_download"
+    ),
 ]

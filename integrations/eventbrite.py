@@ -9,6 +9,7 @@ from datetime import timedelta
 from http.client import OK
 
 # 3rd-party
+import bleach
 import googlemaps
 import pytz
 from django.conf import settings
@@ -206,10 +207,6 @@ class EventBriteEventParser:
         This is not guaranteed to work 100% of the time, but we'll follow this process:
         1. Get the venue name and try and find it using the Places API.
         2. We're provided with the lat and long, so check that we've got the right place.
-        3. If not, use the address to do an address lookup.
-        4. Check against the lat and long.
-        5. If nothing works, just manually set the lat, long and address in the place
-        and leave it up to manual moderation.
         """
         search_point = (
             raw_data.data["venue"]["address"]["latitude"],
@@ -228,6 +225,8 @@ class EventBriteEventParser:
             if len(existing_places) > 0:
                 mmm_place = existing_places[0]
                 image = mmm_place.images.first()
+                if not image:
+                    image = SearchImage()
             else:
                 mmm_place = Place()
                 image = SearchImage()
@@ -259,15 +258,28 @@ class EventBriteEventParser:
                 mmm_place.images.add(image)
             return mmm_place
 
+    def _update_description(self, event, event_id):
+        """The description is a separate API call. This is untrusted HTML, so bleach it."""
+        url = f"https://www.eventbriteapi.com/v3/events/{event_id}/description/?token={settings.EVENTBRITE_API_KEY}"
+        response = http_request_with_backoff("get", url)
+        if response.status_code != OK:
+            raise ValueError("Unable to update description.")
+        data = json.loads(response.content)
+        description = data["description"]
+        description = bleach.clean(description)
+        event.description = description
+
     def _populate_event(self, event: Event, raw_data: EventBriteRawEventData):
         """Populate the event with the latest data from the API."""
+        event.last_updated = timezone.now()
+        event.approved_by = None
+        event.approval_timestamp = None
+        event.created_by = get_or_create_api_user()
+
+        # Update the stuff that we need, or else fail with log.
         try:
-            event.last_updated = timezone.now()
-            event.approved_by = None
-            event.approval_timestamp = None
-            event.created_by = get_or_create_api_user()
             event.headline = raw_data.data["name"]["text"]
-            event.description = raw_data.data["description"]["html"]
+            self._update_description(event, raw_data.event_id.event_id)
             event.price_lower = float(
                 raw_data.data["ticket_availability"]["minimum_ticket_price"]["major_value"],
             )
@@ -284,33 +296,29 @@ class EventBriteEventParser:
             )
             event.duration_lower = ((event_end - event_start).total_seconds()) / 3600
             event.duration_upper = ((event_end - event_start).total_seconds()) / 3600
-
-            # TODO - What are we going to do with this?
             event.people_lower = 1
             event.people_upper = 100
-
             event.source_type = SEARCH_ENTITY_SOURCES[1]
-
             event.source_id = raw_data.event_id.event_id
-
             event.dates = [[event_start, event_end]]
-
             event.attributes = {
                 "eventbrite_event_id": raw_data.event_id.event_id,
             } | self._determine_filters(raw_data)
-
             new_image = SearchImage(
                 link_url=raw_data.data["logo"]["original"]["url"],
                 alt_text=raw_data.data["name"]["text"],
                 uploaded_by=get_or_create_api_user(),
             )
             new_image.save()
-
+            place = self._build_place(event, raw_data)
             event.save()
             event.images.add(new_image)
-            event.places.add(self._build_place(event, raw_data))
-        except (KeyError, TypeError):
-            return
+            event.places.add(place)
+        except (KeyError, ValueError) as e:
+            logging.error(
+                f"Unable to create a new event for id {raw_data.event_id.event_id}, error {e}."
+            )
+            return False
 
     def process_data(self):
         """Process the latest EventBrite data into actual events."""
