@@ -361,7 +361,7 @@ class TestNewEventForm(TestCase):
         assert "form-control" in self.form.fields["people_lower"].widget.attrs["class"]
         assert "form-control" in self.form.fields["people_upper"].widget.attrs["class"]
         assert not self.form.fields["description"].required
-        assert self.form.fields["activities"].required
+        assert not self.form.fields["activities"].required
         assert (
             self.form.fields["synonyms_keywords"].widget.attrs["placeholder"]
             == "Please seperate words or phrases with commas."
