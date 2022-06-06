@@ -50,8 +50,16 @@ RUN useradd -ms /bin/bash celery
 RUN usermod -a -G celery celery
 RUN chmod 755 /etc/init.d/celeryd
 RUN chown root:root /etc/init.d/celeryd
+RUN mkdir -p /var/run/celery
+RUN mkdir -p /var/log/celery
+RUN chown celery:celery /var/log/celery
+RUN chown celery:celery /var/run/celery
+RUN chmod g+w /var/run/celery
+RUN chmod g+w /var/log/celery
 COPY ./deployment/celery /etc/default/celeryd
 COPY ./deployment/celery /etc/default/celerybeat
+RUN /etc/init.d/celeryd start
+RUN /etc/init.d/celerybeat start
 
 
 # Start Server
