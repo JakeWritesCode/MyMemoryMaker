@@ -6,6 +6,9 @@ CELERY_APP="my_memory_maker.celery:app"
 # Where to chdir at start.
 CELERYD_CHDIR="/opt/app/MyMemoryMaker"
 
+# Where to chdir at start.
+CELERYBEAT_CHDIR="/opt/Myproject/"
+
 # Extra command-line arguments to the worker
 CELERYD_OPTS="--time-limit=300 --concurrency=8"
 

@@ -5,3 +5,4 @@ nginx -g "daemon off;"
 chown -R celery:celery /var/run/celery
 chown -R celery:celery /var/log/celery
 /etc/init.d/celeryd start
+/etc/init.d/celerybeat start
