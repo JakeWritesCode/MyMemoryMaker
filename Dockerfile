@@ -47,8 +47,8 @@ RUN chown -R www-data:www-data /opt/app
 COPY ./deployment/celeryd /etc/init.d/celeryd
 RUN useradd -ms /bin/bash celery
 RUN usermod -a -G celery celery
-RUN mkdir /var/run/celery
-RUN mkdir /var/log/celery
+RUN mkdir -p /var/run/celery
+RUN mkdir -p /var/log/celery
 RUN chown -R celery:celery /var/run/celery/ /var/log/celery/
 RUN chmod 755 /etc/init.d/celeryd
 RUN chown root:root /etc/init.d/celeryd
