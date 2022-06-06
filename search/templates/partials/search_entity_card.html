@@ -24,7 +24,7 @@
                         <h2 class="h3" id="search-entity-headline">
                             {% if headline %}{{ headline }}{% else %}My New Submission{% endif %}</h2>
                         <p id="search-entity-description">
-                            {% if description %}{{ description }}{% else %}My description{% endif %}</p>
+                            {% if description %}{{ description|truncatechars:200 }}{% else %}My description{% endif %}</p>
                     </div>
                     <div class="">
                         <span class="material-icons material-icons-outlined search-entity-icon">favorite</span>

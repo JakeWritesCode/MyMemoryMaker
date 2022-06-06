@@ -196,7 +196,7 @@ class EventBriteEventParser:
             temp_image.write(block)
         image.uploaded_by = get_or_create_api_user()
         image.alt_text = place.headline
-        image.uploaded_image.save(gmaps_data["photo_reference"], temp_image)
+        image.uploaded_image.save(f"{gmaps_data['photo_reference']}.jpeg", temp_image)
         image.save()
 
     def _build_place(self, event: Event, raw_data: EventBriteRawEventData):
@@ -245,7 +245,7 @@ class EventBriteEventParser:
             mmm_place.source_id = raw_data.event_id.event_id
             mmm_place.google_maps_place_id = gmaps_place["place_id"]
             mmm_place.location_lat = gmaps_place["geometry"]["location"]["lat"]
-            mmm_place.location_lat = gmaps_place["geometry"]["location"]["lng"]
+            mmm_place.location_long = gmaps_place["geometry"]["location"]["lng"]
             mmm_place.attributes = {
                 "google_maps_data": {
                     "rating": gmaps_place["rating"],
@@ -282,8 +282,8 @@ class EventBriteEventParser:
                 raw_data.data["end"]["utc"],
                 raw_data.data["end"]["timezone"],
             )
-            event.duration_lower = ((event_end - event_start).total_seconds()) / 60
-            event.duration_upper = ((event_end - event_start).total_seconds()) / 60
+            event.duration_lower = ((event_end - event_start).total_seconds()) / 3600
+            event.duration_upper = ((event_end - event_start).total_seconds()) / 3600
 
             # TODO - What are we going to do with this?
             event.people_lower = 1
@@ -309,7 +309,7 @@ class EventBriteEventParser:
             event.save()
             event.images.add(new_image)
             event.places.add(self._build_place(event, raw_data))
-        except KeyError:
+        except (KeyError, TypeError):
             return
 
     def process_data(self):
