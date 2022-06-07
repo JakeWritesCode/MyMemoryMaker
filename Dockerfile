@@ -52,8 +52,6 @@ RUN chmod 755 /etc/init.d/celeryd
 RUN chown root:root /etc/init.d/celeryd
 COPY ./deployment/celery /etc/default/celeryd
 COPY ./deployment/celery /etc/default/celerybeat
-RUN /etc/init.d/celeryd start
-RUN /etc/init.d/celerybeat start
 
 # Start Server
 EXPOSE 8020
