@@ -14,6 +14,7 @@ import googlemaps
 import pytz
 from django.conf import settings
 from django.core.files.temp import NamedTemporaryFile
+from django.db import IntegrityError
 from django.utils import timezone
 from pytz import UTC
 
@@ -130,7 +131,8 @@ class EventRawDataDownloader:
         response = http_request_with_backoff("get", url)
         if response.status_code != OK:
             raise APIError(
-                f"The API did not return a correct response. {response.status_code}, {response.content}"
+                f"The API did not return a correct response. "
+                f"{response.status_code}, {response.content}",
             )
         return json.loads(response.content)
 
@@ -325,7 +327,7 @@ class EventBriteEventParser:
             event.save()
             event.images.add(new_image)
             event.places.add(place)
-        except (KeyError, ValueError, TypeError) as e:
+        except (KeyError, ValueError, TypeError, IntegrityError) as e:
             logging.error(
                 f"Unable to create a new event for id {raw_data.event_id.event_id}, error {e}.",
             )
