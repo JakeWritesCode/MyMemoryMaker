@@ -14,7 +14,9 @@ import googlemaps
 import pytz
 from django.conf import settings
 from django.core.files.temp import NamedTemporaryFile
+from django.db import IntegrityError
 from django.utils import timezone
+from googlemaps.exceptions import TransportError
 from pytz import UTC
 
 # Project
@@ -325,7 +327,7 @@ class EventBriteEventParser:
             event.save()
             event.images.add(new_image)
             event.places.add(place)
-        except (KeyError, ValueError, TypeError) as e:
+        except (KeyError, ValueError, TypeError, IntegrityError, TransportError, APIError) as e:
             logging.error(
                 f"Unable to create a new event for id {raw_data.event_id.event_id}, error {e}.",
             )
