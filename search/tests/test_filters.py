@@ -233,12 +233,9 @@ class TestFilterQueryProcessor(TestCase):
 
     def test_parse_datepicker_datetime(self):
         """Function should parse a datepicker request into a datetime object."""
-        assert (
-            self.processor({}).parse_datepicker_datetime(
-                "12/05/1994, 04:30",
-            )
-            == datetime.datetime(1994, 5, 12, 4, 30)
-        )
+        assert self.processor({}).parse_datepicker_datetime(
+            "12/05/1994, 04:30",
+        ) == datetime.datetime(1994, 5, 12, 4, 30)
 
     def test_append_slider_queries_gets_the_intersection_right(self):
         """The function should return entities that have an intersection with user upper / lower."""

@@ -10,7 +10,9 @@ from . import views
 urlpatterns = [
     # Form partials
     path(
-        "get_eventbrite_event_ids", views.get_eventbrite_event_ids, name="get_eventbrite_event_ids",
+        "get_eventbrite_event_ids",
+        views.get_eventbrite_event_ids,
+        name="get_eventbrite_event_ids",
     ),
     path(
         "get_eventbrite_raw_event_data",
@@ -22,8 +24,9 @@ urlpatterns = [
         views.parse_eventbrite_data_into_events,
         name="parse_eventbrite_data_into_events",
     ),
-    path("start_eventbrite_async_download",
-         views.start_eventbrite_async_download,
-         name="start_eventbrite_async_download"
+    path(
+        "start_eventbrite_async_download",
+        views.start_eventbrite_async_download,
+        name="start_eventbrite_async_download",
     ),
 ]
