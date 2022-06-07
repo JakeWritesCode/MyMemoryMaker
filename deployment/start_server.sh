@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e
 # start-server.sh
 
 mkdir -p /var/run/celery
