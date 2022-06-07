@@ -129,7 +129,9 @@ class EventRawDataDownloader:
         )
         response = http_request_with_backoff("get", url)
         if response.status_code != OK:
-            raise APIError("The API did not return a correct response.")
+            raise APIError(
+                f"The API did not return a correct response. {response.status_code}, {response.content}"
+            )
         return json.loads(response.content)
 
     def get_recently_seen_events(self):
