@@ -32,6 +32,7 @@ def parse_eventbrite_data_into_events():
 
 @shared_task(time_limit=2400)
 def eventbrite_full_download():
+    """Perform a full download loop for EventBrite."""
     downloader = EventIDDownloader()
     downloader.get_event_ids()
     downloader = EventRawDataDownloader()
