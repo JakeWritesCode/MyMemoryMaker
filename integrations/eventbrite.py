@@ -325,7 +325,7 @@ class EventBriteEventParser:
             event.save()
             event.images.add(new_image)
             event.places.add(place)
-        except (KeyError, ValueError) as e:
+        except (KeyError, ValueError, TypeError) as e:
             logging.error(
                 f"Unable to create a new event for id {raw_data.event_id.event_id}, error {e}.",
             )
