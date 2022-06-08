@@ -224,20 +224,27 @@ class EventBriteEventParser:
             location=search_point,
             radius=radius,
         )
-        if len(gmaps_places["results"]) > 0:
-            gmaps_place = gmaps_places["results"][0]
-            # Do we already have a place? If so, use it but update it anyway.
-            existing_places = Place.objects.filter(google_maps_place_id=gmaps_place["place_id"])
-            if len(existing_places) > 0:
-                mmm_place = existing_places[0]
-                image = mmm_place.images.first()
-                if not image:
-                    image = SearchImage()
-            else:
-                mmm_place = Place()
-                image = SearchImage()
+        if len(gmaps_places["results"]) == 0:
+            raise ValueError(
+                f"Unable to find a matching Google Maps place for {raw_data.data['venue']['name']}"
+            )
 
-            # Update place data
+        gmaps_place = gmaps_places["results"][0]
+        # Do we already have a place? If so, use it but update it anyway.
+        existing_places = Place.objects.filter(google_maps_place_id=gmaps_place["place_id"])
+        if len(existing_places) > 0:
+            mmm_place = existing_places[0]
+            image = mmm_place.images.first()
+            if not image:
+                image = SearchImage()
+            new_place = False
+        else:
+            mmm_place = Place()
+            image = SearchImage()
+            new_place = True
+
+        # Update place data
+        if new_place:
             mmm_place.headline = gmaps_place["name"]
             mmm_place.description = gmaps_place["name"]
             mmm_place.price_lower = event.price_lower
@@ -251,18 +258,18 @@ class EventBriteEventParser:
             mmm_place.google_maps_place_id = gmaps_place["place_id"]
             mmm_place.location_lat = gmaps_place["geometry"]["location"]["lat"]
             mmm_place.location_long = gmaps_place["geometry"]["location"]["lng"]
-            mmm_place.attributes = {
-                "google_maps_data": {
-                    "rating": gmaps_place.get("rating", None),
-                    "address": gmaps_place["formatted_address"],
-                },
-            } | event.attributes
             mmm_place.created_by = get_or_create_api_user()
-            mmm_place.save()
-            if len(gmaps_place["photos"]) > 0:
-                self._build_photo_from_gmaps_data(image, gmaps_place["photos"][0], mmm_place)
-                mmm_place.images.add(image)
-            return mmm_place
+        mmm_place.attributes = mmm_place.attributes | {
+            "google_maps_data": {
+                "rating": gmaps_place.get("rating", None),
+                "address": gmaps_place["formatted_address"],
+            },
+        } | event.attributes
+        mmm_place.save()
+        if len(gmaps_place["photos"]) > 0:
+            self._build_photo_from_gmaps_data(image, gmaps_place["photos"][0], mmm_place)
+            mmm_place.images.add(image)
+        return mmm_place
 
     def _update_description(self, event, event_id):
         """The description is a separate API call. This is untrusted HTML, so bleach it."""

@@ -28,7 +28,12 @@ from integrations.models import EventBriteEventID
 from integrations.models import EventBriteRawEventData
 from integrations.tests.factories import EventBriteEventIDFactory
 from integrations.tests.factories import EventBriteRawEventDataFactory
+from search.constants import SEARCH_ENTITY_SOURCES
+from search.models import Place
+from search.models import SearchImage
 from search.tests.factories import EventFactory
+from search.tests.factories import PlaceFactory
+from search.tests.factories import SearchImageFactory
 from users.models import CustomUser
 
 
@@ -267,8 +272,21 @@ class TestEventBriteEventParser(TestCase):
             EventBriteRawEventDataFactory(),
         ]
         self.gmaps_mock = gmaps_mock
-        self.gmaps_mock.Client = MagicMock()
         self.parser = EventBriteEventParser()
+
+        self.mock_google_maps_place = {
+            "place_id": "1234ABCD",
+            "name": "A Place",
+            "geometry": {
+                "location": {
+                    "lat": 12.345,
+                    "lng": 1.234,
+                }
+            },
+            "rating": 4.55,
+            "formatted_address": "1234, Place Avenue, Townland",
+            "photos": [{"photo_reference": "gbdbdfbgdbgxbdthDGfgv"}],
+        }
 
     def test_init(self):
         """Test class init."""
@@ -309,3 +327,129 @@ class TestEventBriteEventParser(TestCase):
         self.raw_data[0].data["subcategory_id"] = 103
         self.raw_data[0].save()
         assert self.parser._determine_filters(self.raw_data[0]) == {"Barry": True, "White": True}
+
+    def test__build_photo_from_gmaps_data_creates_or_updates_photo(self):
+        """Function should update the suppleid image with bytecode from google maps."""
+        self.parser.gmaps_client.places_photo = MagicMock(return_value=[b"ab", b"12", b"cd", b""])
+        image = SearchImageFactory()
+        place = PlaceFactory()
+        gmaps_data = {"photo_reference": "ABC123"}
+        self.parser._build_photo_from_gmaps_data(image, gmaps_data, place)
+        image.refresh_from_db()
+        assert image.uploaded_image.file.read() == b"ab12cd"
+        assert image.alt_text == place.headline
+        assert image.uploaded_by == get_or_create_api_user()
+
+    def test__build_place_raises_valuerror_if_a_place_cannot_be_found(self):
+        """Function should raise a ValueError if google maps cannot find a place."""
+        self.parser.gmaps_client.places = MagicMock(return_value={"results": []})
+        event = EventFactory()
+        raw_data = EventBriteRawEventDataFactory()
+        with self.assertRaises(ValueError) as e:
+            self.parser._build_place(event, raw_data)
+        assert (
+            f"Unable to find a matching Google Maps place for {raw_data.data['venue']['name']}"
+            in str(e.exception)
+        )
+
+    def test__build_place_creates_a_new_place_if_one_doesnt_exist(self):
+        """If there is no matching place with the Google maps place ID, create a new one."""
+        assert Place.objects.count() == 0
+        event = EventFactory()
+        raw_data = EventBriteRawEventDataFactory()
+        self.parser.gmaps_client.places = MagicMock(
+            return_value={"results": [self.mock_google_maps_place]}
+        )
+        self.parser._build_place(event, raw_data)
+        places = Place.objects.all()
+        assert len(places) == 1
+        assert places[0].google_maps_place_id == self.mock_google_maps_place["place_id"]
+
+    def test__build_place_edits_existing_place_if_one_does_not_exist(self):
+        """If there is a matching place with the Google maps place ID, create a new one."""
+        assert Place.objects.count() == 0
+        event = EventFactory()
+        raw_data = EventBriteRawEventDataFactory()
+        self.parser.gmaps_client.places = MagicMock(
+            return_value={"results": [self.mock_google_maps_place]}
+        )
+        self.parser._build_place(event, raw_data)
+        self.parser._build_place(event, raw_data)
+        places = Place.objects.all()
+        assert len(places) == 1
+        assert places[0].google_maps_place_id == self.mock_google_maps_place["place_id"]
+
+    def test__build_place_updates_correct_fields_for_a_new_place(self):
+        """If a new place has been created, check that the fields are correct."""
+        assert Place.objects.count() == 0
+        event = EventFactory()
+        raw_data = EventBriteRawEventDataFactory()
+        self.parser.gmaps_client.places = MagicMock(
+            return_value={"results": [self.mock_google_maps_place]}
+        )
+        self.parser._build_place(event, raw_data)
+        new_place = Place.objects.first()
+        assert new_place.headline == self.mock_google_maps_place["name"]
+        assert new_place.description == self.mock_google_maps_place["name"]
+        assert new_place.price_lower == event.price_lower
+        assert new_place.price_upper == event.price_upper
+        assert new_place.duration_lower == int(event.duration_lower)
+        assert new_place.duration_upper == int(event.duration_upper)
+        assert new_place.people_lower == int(event.people_lower)
+        assert new_place.people_upper == int(event.people_upper)
+        assert new_place.source_type == SEARCH_ENTITY_SOURCES[1]
+        assert new_place.source_id == str(raw_data.event_id.event_id)
+        assert new_place.google_maps_place_id == self.mock_google_maps_place["place_id"]
+        assert new_place.location_lat == self.mock_google_maps_place["geometry"]["location"]["lat"]
+        assert new_place.location_long == self.mock_google_maps_place["geometry"]["location"]["lng"]
+        assert new_place.created_by == get_or_create_api_user()
+        assert (
+            new_place.attributes
+            == {
+                "google_maps_data": str(
+                    {
+                        "rating": self.mock_google_maps_place.get("rating", None),
+                        "address": self.mock_google_maps_place["formatted_address"],
+                    }
+                ),
+            }
+            | event.attributes
+        )
+        assert list(new_place.images.all()) == [SearchImage.objects.first()]
+
+    def test__build_place_updates_correct_fields_for_an_existing_place(self):
+        """Function should only update a limited number of fields on existing places."""
+        assert Place.objects.count() == 0
+        event = EventFactory(attributes={"event_filter": "True"})
+        place = PlaceFactory(
+            google_maps_place_id=self.mock_google_maps_place["place_id"],
+            attributes={
+                "some_existing_filter": True,
+                "google_maps_data": str(
+                    {
+                        "rating": 1.23,
+                        "address": "existing address",
+                    }
+                ),
+            },
+        )
+        raw_data = EventBriteRawEventDataFactory()
+        assert Place.objects.count() == 1
+        self.parser.gmaps_client.places = MagicMock(
+            return_value={"results": [self.mock_google_maps_place]}
+        )
+        self.parser._build_place(event, raw_data)
+        assert Place.objects.count() == 1
+        place.refresh_from_db()
+
+        assert place.attributes == {
+            "some_existing_filter": "True",
+            "event_filter": "True",
+            "google_maps_data": str(
+                {
+                    "rating": self.mock_google_maps_place.get("rating", None),
+                    "address": self.mock_google_maps_place["formatted_address"],
+                }
+            ),
+        }
+        assert list(place.images.all()) == [SearchImage.objects.first()]

@@ -86,7 +86,8 @@ class SearchEntity(models.Model):
         choices=[(choice, choice) for choice in SEARCH_ENTITY_SOURCES],
         verbose_name="Source of entity.",
     )
-    source_id = models.UUIDField(
+    source_id = models.CharField(
+        max_length=250,
         verbose_name="Pseudo-FK to the source data table (if any)",
         null=True,
         blank=True,
