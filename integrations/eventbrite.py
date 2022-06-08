@@ -132,7 +132,8 @@ class EventRawDataDownloader:
         response = http_request_with_backoff("get", url)
         if response.status_code != OK:
             raise APIError(
-                f"The API did not return a correct response. {response.status_code}, {response.content}"
+                f"The API did not return a correct response. "
+                f"{response.status_code}, {response.content}",
             )
         return json.loads(response.content)
 
@@ -299,7 +300,6 @@ class EventBriteEventParser:
         # Update the stuff that we need, or else fail with log.
         try:
             event.headline = raw_data.data["name"]["text"]
-            self._update_description(event, raw_data.event_id.event_id)
             event.price_lower = float(
                 raw_data.data["ticket_availability"]["minimum_ticket_price"]["major_value"],
             )
@@ -329,12 +329,13 @@ class EventBriteEventParser:
                 alt_text=raw_data.data["name"]["text"],
                 uploaded_by=get_or_create_api_user(),
             )
+            self._update_description(event, raw_data.event_id.event_id)
             new_image.save()
             place = self._build_place(event, raw_data)
             event.save()
             event.images.add(new_image)
             event.places.add(place)
-        except (KeyError, ValueError, TypeError, IntegrityError, TransportError, APIError) as e:
+        except (KeyError, ValueError, TypeError, IntegrityError, TransportError) as e:
             logging.error(
                 f"Unable to create a new event for id {raw_data.event_id.event_id}, error {e}.",
             )

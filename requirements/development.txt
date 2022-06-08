@@ -2,7 +2,6 @@
 -r production.txt
 
 black==22.3.0
-click==8.0.1
 factory-boy==3.2.1
 flake8==4.0.1
 flake8-blind-except==0.2.0

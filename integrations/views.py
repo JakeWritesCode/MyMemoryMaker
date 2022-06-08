@@ -36,6 +36,7 @@ def parse_eventbrite_data_into_events(request):
     downloader.process_data()
     return HttpResponse("Complete", status=200)
 
+
 @staff_member_required
 def start_eventbrite_async_download(request):
     """Manually start the Eventbrite download process as a celery task."""

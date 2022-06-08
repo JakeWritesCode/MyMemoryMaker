@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     # 3rd party modules
     "crispy_forms",
     "django_celery_results",
-    'django_celery_beat',
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -154,7 +154,7 @@ EVENTBRITE_API_KEY = getenv("EVENTBRITE_API_KEY")
 CELERY_TIMEZONE = "Europe/London"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_CACHE_BACKEND = 'django-cache'
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_CACHE_BACKEND = "django-cache"
 CELERY_BROKER_URL = getenv("CELERY_BROKER_URL")
-CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERYBEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
