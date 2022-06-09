@@ -143,13 +143,16 @@ class EventRawDataDownloader:
             last_seen__gt=timezone.now() - timedelta(hours=EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS),
         )
         for event_id in all_events:
-            event_data = self._get_event_data(event_id.event_id)
             try:
-                raw_data = EventBriteRawEventData.objects.get(event_id=event_id)
-            except EventBriteRawEventData.DoesNotExist:
-                raw_data = EventBriteRawEventData(event_id=event_id)
-            raw_data.data = event_data
-            raw_data.save()
+                event_data = self._get_event_data(event_id.event_id)
+                try:
+                    raw_data = EventBriteRawEventData.objects.get(event_id=event_id)
+                except EventBriteRawEventData.DoesNotExist:
+                    raw_data = EventBriteRawEventData(event_id=event_id)
+                raw_data.data = event_data
+                raw_data.save()
+            except APIError:
+                continue
 
 
 class EventBriteEventParser:
@@ -227,7 +230,7 @@ class EventBriteEventParser:
         )
         if len(gmaps_places["results"]) == 0:
             raise ValueError(
-                f"Unable to find a matching Google Maps place for {raw_data.data['venue']['name']}"
+                f"Unable to find a matching Google Maps place for {raw_data.data['venue']['name']}",
             )
 
         gmaps_place = gmaps_places["results"][0]
@@ -260,12 +263,18 @@ class EventBriteEventParser:
             mmm_place.location_lat = gmaps_place["geometry"]["location"]["lat"]
             mmm_place.location_long = gmaps_place["geometry"]["location"]["lng"]
             mmm_place.created_by = get_or_create_api_user()
-        mmm_place.attributes = mmm_place.attributes | {
-            "google_maps_data": {
-                "rating": gmaps_place.get("rating", None),
-                "address": gmaps_place["formatted_address"],
-            },
-        } | event.attributes
+            if not mmm_place.attributes:
+                mmm_place.attributes = {}
+        mmm_place.attributes = (
+            mmm_place.attributes
+            | {
+                "google_maps_data": {
+                    "rating": gmaps_place.get("rating", None),
+                    "address": gmaps_place["formatted_address"],
+                },
+            }
+            | event.attributes
+        )
         mmm_place.save()
         if len(gmaps_place["photos"]) > 0:
             self._build_photo_from_gmaps_data(image, gmaps_place["photos"][0], mmm_place)
@@ -359,5 +368,11 @@ class EventBriteEventParser:
                     continue
             except Event.DoesNotExist:
                 event = Event()
+            except Event.MultipleObjectsReturned:
+                event = Event.objects.filter(
+                    attributes__eventbrite_event_id=event_id.event_id,
+                ).first()
+                event.delete()
+                continue
 
             self._populate_event(event, event_raw_data)
