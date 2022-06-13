@@ -584,25 +584,6 @@ class TestEventBriteEventParser(TestCase):
         self.parser._update_description.assert_called_once_with(event, raw_data.event_id.event_id)
         assert event.places.first() == expected_place
 
-    def test_process_data_only_processes_events_that_were_seen_recently(self):
-        """Function should only try to process event that were seen recently."""
-        self.parser._populate_event = MagicMock()
-        raw_data = EventBriteRawEventDataFactory()
-        event = EventFactory(
-            attributes={"eventbrite_event_id": raw_data.event_id.event_id},
-            last_updated=timezone.now() - timedelta(days=365),
-        )
-        self.parser.process_data()
-        self.parser._populate_event.assert_any_call(event, raw_data)
-
-        raw_data.event_id.last_seen = timezone.now() - timedelta(
-            hours=EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS + 1,
-        )
-        raw_data.event_id.save()
-
-        self.parser._populate_event.reset_mock()
-        assert call(event, raw_data) not in self.parser._populate_event.call_args_list
-
     def test_process_data_ignores_event_ids_with_no_raw_data(self):
         """If there is not raw event data downloaded, move on."""
         EventBriteRawEventData.objects.all().delete()
@@ -620,24 +601,6 @@ class TestEventBriteEventParser(TestCase):
         self.parser._populate_event = MagicMock()
         self.parser.process_data()
         self.parser._populate_event.assert_not_called()
-
-    def test_process_data_passes_an_existing_event_if_one_exists(self):
-        """If there is an existing event, pass it to the _populate_event func with the raw data."""
-        calls = []
-        for rd in self.raw_data:
-            calls.append(
-                call(
-                    EventFactory(
-                        attributes={"eventbrite_event_id": rd.event_id.event_id},
-                        last_updated=timezone.now() - timedelta(days=365),
-                    ),
-                    rd,
-                ),
-            )
-
-        self.parser._populate_event = MagicMock()
-        self.parser.process_data()
-        self.parser._populate_event.assert_has_calls(calls, any_order=True)
 
     def test_process_data_creates_a_new_event_if_one_does_not_exist(self):
         """If no event exists, pass a new event into _populate_event."""
@@ -661,3 +624,54 @@ class TestEventBriteEventParser(TestCase):
         self.parser._populate_event = MagicMock()
         self.parser.process_data()
         assert Event.objects.count() == 1
+
+
+class FlakyTests(TestCase):
+    """These tests are flaky in the other class, for reasons known only to themselves."""
+
+    @patch("integrations.eventbrite.googlemaps")
+    def setUp(self, gmaps_mock) -> None:  # noqa: D102
+        self.gmaps_mock = gmaps_mock
+        self.raw_data = [
+            EventBriteRawEventDataFactory(),
+            EventBriteRawEventDataFactory(),
+            EventBriteRawEventDataFactory(),
+        ]
+        self.parser = EventBriteEventParser()
+
+    def test_a_process_data_only_processes_events_that_were_seen_recently(self):
+        """Function should only try to process event that were seen recently."""
+        self.parser._populate_event = MagicMock()
+        raw_data = EventBriteRawEventDataFactory()
+        event = EventFactory(
+            attributes={"eventbrite_event_id": raw_data.event_id.event_id},
+            last_updated=timezone.now() - timedelta(days=365),
+        )
+        self.parser.process_data()
+        self.parser._populate_event.assert_any_call(event, raw_data)
+
+        raw_data.event_id.last_seen = timezone.now() - timedelta(
+            hours=EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS + 1,
+        )
+        raw_data.event_id.save()
+
+        self.parser._populate_event.reset_mock()
+        assert call(event, raw_data) not in self.parser._populate_event.call_args_list
+
+    def test_process_data_passes_an_existing_event_if_one_exists(self):
+        """If there is an existing event, pass it to the _populate_event func with the raw data."""
+        calls = []
+        for rd in self.raw_data:
+            calls.append(
+                call(
+                    EventFactory(
+                        attributes={"eventbrite_event_id": rd.event_id.event_id},
+                        last_updated=timezone.now() - timedelta(days=365),
+                    ),
+                    rd,
+                ),
+            )
+
+        self.parser._populate_event = MagicMock()
+        self.parser.process_data()
+        self.parser._populate_event.assert_has_calls(calls, any_order=True)
