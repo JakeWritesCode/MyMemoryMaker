@@ -164,7 +164,10 @@ class EventBriteEventParser:
 
     def _has_event_changed(self, event: Event, raw_data: EventBriteRawEventData):
         """Has the event changed compared to the last time we looked."""
-        last_updated = datetime.strptime(raw_data.data["changed"], "%Y-%m-%dT%H:%M:%SZ")
+        try:
+            last_updated = datetime.strptime(raw_data.data["changed"], "%Y-%m-%dT%H:%M:%SZ")
+        except TypeError:  # Event has not changed date.
+            return True
         last_updated = timezone.make_aware(last_updated, timezone=UTC)
         if last_updated > event.last_updated:
             return True
