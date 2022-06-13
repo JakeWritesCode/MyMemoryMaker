@@ -107,3 +107,15 @@ class TestEvent(TestCase):
         """Test string representation."""
         event = EventFactory()
         assert str(event) == f"Event: {event.headline}"
+
+    def test_distance_from_returns_correct_distance(self):
+        """Function should return the correct distance."""
+        place = PlaceFactory()
+        event = EventFactory()
+        event.places.add(place)
+        new_lat, new_long = 1, 2
+        expected_distance = distance(
+            (place.location_lat, place.location_long),
+            (new_lat, new_long),
+        ).miles
+        assert event.distance_from(new_lat, new_long) == expected_distance

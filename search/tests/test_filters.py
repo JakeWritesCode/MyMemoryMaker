@@ -11,6 +11,7 @@ from unittest.mock import patch
 # 3rd-party
 from crispy_forms.helper import FormHelper
 from django import forms
+from django.conf import settings
 from django.test import SimpleTestCase
 from django.test import TestCase
 from django.utils import timezone
@@ -421,12 +422,21 @@ class TestFilterQueryProcessor(TestCase):
         }
         assert self.processor(get_param)._perform_distance_query(places) is places
 
-    def test_get_results_for_object_type_does_not_show_unapproved_items(self):
-        """Filters should ot show unapproved items."""
+    def test_get_results_for_object_type_does_not_show_unapproved_items_if_settings(self):
+        """Filters should not show unapproved items if SEARCH_SHOW_UNMODERATED_RESULTS=False."""
+        settings.SEARCH_SHOW_UNMODERATED_RESULTS = False
         activity = ActivityFactory()
         processor = self.processor({})
         result = processor._get_results_for_object_type(Activity)
         assert activity not in result
+
+    def test_get_results_for_object_type_does_show_unapproved_items_if_settings(self):
+        """Filters should ot show unapproved items if SEARCH_SHOW_UNMODERATED_RESULTS=True."""
+        settings.SEARCH_SHOW_UNMODERATED_RESULTS = True
+        activity = ActivityFactory()
+        processor = self.processor({})
+        result = processor._get_results_for_object_type(Activity)
+        assert activity in result
 
     def test_get_results_for_object_type_calls_correct_functions_for_activity(self):
         """Function should call all correct functions."""

@@ -167,7 +167,9 @@ class EventBriteEventParser:
         try:
             last_updated = datetime.strptime(raw_data.data["changed"], "%Y-%m-%dT%H:%M:%SZ")
         except TypeError:  # Event has not changed date.
-            return True
+            if not event.headline:
+                return True
+            return False
         last_updated = timezone.make_aware(last_updated, timezone=UTC)
         if last_updated > event.last_updated:
             return True

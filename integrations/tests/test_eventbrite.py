@@ -304,6 +304,18 @@ class TestEventBriteEventParser(TestCase):
         event.save()
         assert self.parser._has_event_changed(event, self.raw_data[0]) is True
 
+    def test__has_event_changed_returns_true_if_eventbrite_has_no_changed_date(self):
+        """If there is no changed date from eventbrite and no headline, return True."""
+        event = Event()
+        self.raw_data[0].data["changed"] = None
+        assert self.parser._has_event_changed(event, self.raw_data[0]) is True
+
+    def test__has_event_changed_false_if_eventbrite_has_no_changed_date_and_event_populated(self):
+        """If there is no changed date from eventbrite and a headline, return False."""
+        event = EventFactory
+        self.raw_data[0].data["changed"] = None
+        assert self.parser._has_event_changed(event, self.raw_data[0]) is False
+
     def test__parse_datetime(self):
         """Function should parse datetime."""
         expected_datetime = datetime.datetime(2021, 1, 1, tzinfo=pytz.UTC)
