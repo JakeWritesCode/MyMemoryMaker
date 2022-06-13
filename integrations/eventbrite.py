@@ -289,7 +289,10 @@ class EventBriteEventParser:
         )
         response = http_request_with_backoff("get", url)
         if response.status_code != OK:
-            raise ValueError("Unable to update description.")
+            raise ValueError(
+                f"Unable to update description. Response code="
+                f"{response.status_code}, error={response.content}",
+            )
         data = json.loads(response.content)
         description = data["description"]
         description = bleach.clean(

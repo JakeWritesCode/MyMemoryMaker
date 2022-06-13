@@ -19,6 +19,9 @@ from django.test import TestCase
 from django.utils import timezone
 
 # Project
+from integrations.constants import BLEACH_ALLOWED_ATTRIBUTES
+from integrations.constants import BLEACH_ALLOWED_TAGS
+from integrations.constants import EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS
 from integrations.eventbrite import EventBriteEventParser
 from integrations.eventbrite import EventIDDownloader
 from integrations.eventbrite import EventRawDataDownloader
@@ -29,6 +32,7 @@ from integrations.models import EventBriteRawEventData
 from integrations.tests.factories import EventBriteEventIDFactory
 from integrations.tests.factories import EventBriteRawEventDataFactory
 from search.constants import SEARCH_ENTITY_SOURCES
+from search.models import Event
 from search.models import Place
 from search.models import SearchImage
 from search.tests.factories import EventFactory
@@ -281,7 +285,7 @@ class TestEventBriteEventParser(TestCase):
                 "location": {
                     "lat": 12.345,
                     "lng": 1.234,
-                }
+                },
             },
             "rating": 4.55,
             "formatted_address": "1234, Place Avenue, Townland",
@@ -358,7 +362,7 @@ class TestEventBriteEventParser(TestCase):
         event = EventFactory()
         raw_data = EventBriteRawEventDataFactory()
         self.parser.gmaps_client.places = MagicMock(
-            return_value={"results": [self.mock_google_maps_place]}
+            return_value={"results": [self.mock_google_maps_place]},
         )
         self.parser._build_place(event, raw_data)
         places = Place.objects.all()
@@ -371,7 +375,7 @@ class TestEventBriteEventParser(TestCase):
         event = EventFactory()
         raw_data = EventBriteRawEventDataFactory()
         self.parser.gmaps_client.places = MagicMock(
-            return_value={"results": [self.mock_google_maps_place]}
+            return_value={"results": [self.mock_google_maps_place]},
         )
         self.parser._build_place(event, raw_data)
         self.parser._build_place(event, raw_data)
@@ -385,7 +389,7 @@ class TestEventBriteEventParser(TestCase):
         event = EventFactory()
         raw_data = EventBriteRawEventDataFactory()
         self.parser.gmaps_client.places = MagicMock(
-            return_value={"results": [self.mock_google_maps_place]}
+            return_value={"results": [self.mock_google_maps_place]},
         )
         self.parser._build_place(event, raw_data)
         new_place = Place.objects.first()
@@ -410,7 +414,7 @@ class TestEventBriteEventParser(TestCase):
                     {
                         "rating": self.mock_google_maps_place.get("rating", None),
                         "address": self.mock_google_maps_place["formatted_address"],
-                    }
+                    },
                 ),
             }
             | event.attributes
@@ -429,14 +433,14 @@ class TestEventBriteEventParser(TestCase):
                     {
                         "rating": 1.23,
                         "address": "existing address",
-                    }
+                    },
                 ),
             },
         )
         raw_data = EventBriteRawEventDataFactory()
         assert Place.objects.count() == 1
         self.parser.gmaps_client.places = MagicMock(
-            return_value={"results": [self.mock_google_maps_place]}
+            return_value={"results": [self.mock_google_maps_place]},
         )
         self.parser._build_place(event, raw_data)
         assert Place.objects.count() == 1
@@ -449,7 +453,199 @@ class TestEventBriteEventParser(TestCase):
                 {
                     "rating": self.mock_google_maps_place.get("rating", None),
                     "address": self.mock_google_maps_place["formatted_address"],
-                }
+                },
             ),
         }
         assert list(place.images.all()) == [SearchImage.objects.first()]
+
+    @patch("integrations.eventbrite.http_request_with_backoff")
+    def test__update_description_calls_correct_api_endpoint(self, mock_get):
+        """Function should call the correct API endpoint to get the event description."""
+        mock_get.return_value = MagicMock(
+            status_code=OK,
+            content=json.dumps({"description": "My description"}),
+        )
+        event = EventFactory()
+        self.parser._update_description(event, 123456)
+
+        mock_get.assert_called_once_with(
+            "get",
+            f"https://www.eventbriteapi.com/v3/events/123456/"
+            f"description/?token={settings.EVENTBRITE_API_KEY}",
+        )
+
+    @patch("integrations.eventbrite.http_request_with_backoff")
+    def test__update_description_raises_valueerror_if_response_is_not_ok(self, mock_get):
+        """Function should raise a ValueError if the HTTP repsonse is not OK."""
+        mock_get.return_value = MagicMock(
+            status_code=NOT_FOUND,
+            content=json.dumps({"error": "Not found"}),
+        )
+        event = EventFactory()
+        with self.assertRaises(ValueError) as e:
+            self.parser._update_description(event, 123456)
+        assert f"Unable to update description. Response code=" f"{NOT_FOUND}, error=" in str(
+            e.exception,
+        )
+
+    @patch("integrations.eventbrite.bleach")
+    @patch("integrations.eventbrite.http_request_with_backoff")
+    def test__update_description_bleaches_description_and_adds_to_event(
+        self,
+        mock_get,
+        mock_bleach,
+    ):
+        """Function should bleach the returned description with the standard list of tags."""
+        mock_get.return_value = MagicMock(
+            status_code=OK,
+            content=json.dumps({"description": "My description"}),
+        )
+        mock_bleach.clean.return_value = "bleached description"
+        event = EventFactory()
+        self.parser._update_description(event, 123456)
+        mock_bleach.clean.assert_called_once_with(
+            "My description",
+            tags=BLEACH_ALLOWED_TAGS,
+            attributes=BLEACH_ALLOWED_ATTRIBUTES,
+        )
+        assert event.description == "bleached description"
+
+    def test__populate_event_catches_errors_and_returns_false(self):
+        """
+        We need this download to be as robust as possible, even at the expense of data loss.
+
+        In the event of failure, catch the error and return False so we can carry on.
+        """
+        event = EventFactory()
+        raw_data = EventBriteRawEventDataFactory()
+        raw_data.data = {}
+        assert not self.parser._populate_event(event, raw_data)
+
+    def test__populate_event_populates_all_correct_event_data(self):
+        """
+        We need this download to be as robust as possible, even at the expense of data loss.
+
+        In the event of failure, catch the error and return False so we can carry on.
+        """
+        event = Event()
+        raw_data = EventBriteRawEventDataFactory()
+        self.parser._determine_filters = MagicMock(return_value={"filter": True})
+        self.parser._update_description = MagicMock()
+        expected_place = PlaceFactory()
+        self.parser._build_place = MagicMock(return_value=expected_place)
+        self.parser._populate_event(event, raw_data)
+        event.refresh_from_db()
+        assert abs(event.last_updated - timezone.now()) < timedelta(seconds=2)
+        assert event.approved_by is None
+        assert event.approval_timestamp is None
+        assert event.created_by == get_or_create_api_user()
+        assert event.headline == "RUSU Summer Ball 2022"
+        assert event.price_lower == 47.70
+        assert event.price_upper == 53.00
+        assert event.duration_upper == 10
+        assert event.duration_lower == 10
+        assert event.people_lower == 1
+        assert event.people_upper == 100
+        assert event.source_type == SEARCH_ENTITY_SOURCES[1]
+        assert event.source_id == str(raw_data.event_id.event_id)
+        assert event.dates == [
+            [
+                datetime.datetime(2022, 6, 11, 18, 0, 0, tzinfo=pytz.timezone("UTC")),
+                datetime.datetime(2022, 6, 12, 4, 0, 0, tzinfo=pytz.timezone("UTC")),
+            ],
+        ]
+
+        assert event.attributes == {
+            "eventbrite_event_id": str(raw_data.event_id.event_id),
+            "filter": "True",
+        }
+
+        image = event.images.first()
+        assert (
+            image.link_url == "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2F"
+            "images%2F288423859%2F323983990069%2F1%2Foriginal.20220520-130035?"
+            "auto=format%2Ccompress&q=75&sharp=10&s=feb08bd7a75000b1081d14690fca591e"
+        )
+        assert image.alt_text == "RUSU Summer Ball 2022"
+        assert image.uploaded_by == get_or_create_api_user()
+
+        self.parser._update_description.assert_called_once_with(event, raw_data.event_id.event_id)
+        assert event.places.first() == expected_place
+
+    def test_process_data_only_processes_events_that_were_seen_recently(self):
+        """Function should only try to process event that were seen recently."""
+        self.parser._populate_event = MagicMock()
+        raw_data = EventBriteRawEventDataFactory()
+        event = EventFactory(
+            attributes={"eventbrite_event_id": raw_data.event_id.event_id},
+            last_updated=timezone.now() - timedelta(days=365),
+        )
+        self.parser.process_data()
+        self.parser._populate_event.assert_any_call(event, raw_data)
+
+        raw_data.event_id.last_seen = timezone.now() - timedelta(
+            hours=EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS + 1,
+        )
+        raw_data.event_id.save()
+
+        self.parser._populate_event.reset_mock()
+        assert call(event, raw_data) not in self.parser._populate_event.call_args_list
+
+    def test_process_data_ignores_event_ids_with_no_raw_data(self):
+        """If there is not raw event data downloaded, move on."""
+        EventBriteRawEventData.objects.all().delete()
+        assert EventBriteEventID.objects.count() > 0
+        self.parser._populate_event = MagicMock()
+        self.parser.process_data()
+        self.parser._populate_event.assert_not_called()
+
+    def test_process_data_does_not_process_events_that_have_not_changed(self):
+        """If the event has not changed, do not reprocess."""
+        for rd in self.raw_data:
+            EventFactory(attributes={"eventbrite_event_id": rd.event_id.event_id})
+
+        self.parser._has_event_changed = MagicMock(return_value=False)
+        self.parser._populate_event = MagicMock()
+        self.parser.process_data()
+        self.parser._populate_event.assert_not_called()
+
+    def test_process_data_passes_an_existing_event_if_one_exists(self):
+        """If there is an existing event, pass it to the _populate_event func with the raw data."""
+        calls = []
+        for rd in self.raw_data:
+            calls.append(
+                call(
+                    EventFactory(
+                        attributes={"eventbrite_event_id": rd.event_id.event_id},
+                        last_updated=timezone.now() - timedelta(days=365),
+                    ),
+                    rd,
+                ),
+            )
+
+        self.parser._populate_event = MagicMock()
+        self.parser.process_data()
+        self.parser._populate_event.assert_has_calls(calls, any_order=True)
+
+    def test_process_data_creates_a_new_event_if_one_does_not_exist(self):
+        """If no event exists, pass a new event into _populate_event."""
+        self.parser._populate_event = MagicMock()
+        self.parser.process_data()
+        for mock_call in self.parser._populate_event.call_args_list:
+            assert isinstance(mock_call[0][0], Event)
+            assert mock_call[0][0].headline == ""
+
+    def test_process_data_deletes_an_event_if_there_are_duplicates(self):
+        """If there are duplicate events, delete one."""
+        EventFactory(
+            attributes={"eventbrite_event_id": self.raw_data[0].event_id.event_id},
+            last_updated=timezone.now() - timedelta(days=365),
+        )
+        EventFactory(
+            attributes={"eventbrite_event_id": self.raw_data[0].event_id.event_id},
+            last_updated=timezone.now() - timedelta(days=365),
+        )
+        assert Event.objects.count() == 2
+        self.parser._populate_event = MagicMock()
+        self.parser.process_data()
+        assert Event.objects.count() == 1
