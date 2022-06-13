@@ -71,6 +71,7 @@ class SearchEntity(models.Model):
         blank=True,
     )
     approval_timestamp = models.DateTimeField(null=True, blank=True)
+    last_updated = models.DateTimeField(null=True, blank=True)
     headline = models.CharField(max_length=2048)
     description = models.TextField()
     price_lower = models.FloatField()
@@ -85,7 +86,8 @@ class SearchEntity(models.Model):
         choices=[(choice, choice) for choice in SEARCH_ENTITY_SOURCES],
         verbose_name="Source of entity.",
     )
-    source_id = models.UUIDField(
+    source_id = models.CharField(
+        max_length=250,
         verbose_name="Pseudo-FK to the source data table (if any)",
         null=True,
         blank=True,
@@ -149,6 +151,7 @@ class Event(SearchEntity):
     dates = ArrayField(ArrayField(models.DateTimeField(), size=2), verbose_name="Event dates")
     activities = models.ManyToManyField(Activity)
     places = models.ManyToManyField(Place)
+    external_link = models.CharField(max_length=5000, null=True, blank=True)
 
     def __str__(self):
         """String representation."""

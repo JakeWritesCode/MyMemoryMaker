@@ -90,6 +90,9 @@ function initNewEntityForm() {
         selector: '#id_description',
         plugins: 'link',
         menubar: false,
+        valid_elements: "+*[*]",
+        forced_root_block : "div",
+
         toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | link',
         setup: function (ed) {
             ed.on('change', function (e) {

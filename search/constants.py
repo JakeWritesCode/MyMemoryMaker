@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """Constants for the search app."""
 
-SEARCH_ENTITY_SOURCES = [
-    "manually_added",
-]
+SEARCH_ENTITY_SOURCES = ["manually_added", "eventbrite"]
 
 """Filters configuration"""
 FILTERS = {
@@ -30,6 +28,23 @@ FILTERS = {
         "science_and_tech",
         "other_hobbies",
     ],
+    "music": [
+        "alternative",
+        "blues_and_jazz",
+        "classical",
+        "country",
+        "electronic",
+        "folk",
+        "hip_hop_and_rap",
+        "indie",
+        "metal",
+        "pop",
+        "rnb",
+        "rock",
+        "acoustic",
+        "punk",
+        "other_music",
+    ],
     "food_and_drink": [
         "nightlife",
         "restaurants",
@@ -49,6 +64,7 @@ FILTERS = {
         "mexican",
         "vegan_speciality",
         "vegetarian_speciality",
+        "other_food_and_drink",
     ],
     "other_categories": [
         "outdoor",
@@ -63,6 +79,10 @@ FILTERS = {
         "wedding",
         "festival",
         "educational",
+        "seasonal_and_holiday",
+        "politics",
+        "dating",
+        "pets",
     ],
     "venue": [
         "home",

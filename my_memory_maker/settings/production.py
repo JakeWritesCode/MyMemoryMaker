@@ -13,6 +13,7 @@ from my_memory_maker.settings.base import *  # noqa: F403 F401
 
 DEBUG = getenv("DEBUG", False)  # noqa: F405
 ALLOWED_HOSTS = [getenv("DJANGO_ALLOWED_HOSTS")]
+STATIC_URL = "/staticfiles/"
 
 if len(sys.argv) > 0 and sys.argv[1] != "collectstatic":
     if getenv("DATABASE_URL", None) is None:

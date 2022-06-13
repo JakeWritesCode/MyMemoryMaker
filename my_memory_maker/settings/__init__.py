@@ -1,2 +1,2 @@
 # -*- coding: utf-8 -*-
-"""Settings for django-boilerplate."""
+"""Third party integrations."""

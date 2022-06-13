@@ -26,8 +26,11 @@ INSTALLED_APPS = [
     # Apps
     "users",
     "search",
+    "integrations",
     # 3rd party modules
     "crispy_forms",
+    "django_celery_results",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -142,5 +145,16 @@ MESSAGE_TAGS = {
     messages.ERROR: "alert-danger",
 }
 
+# API Keys
 GOOGLE_MAPS_API_KEY = getenv("GOOGLE_MAPS_API_KEY")
 GOOGLE_MAPS_API_SECRET = getenv("GOOGLE_MAPS_API_SECRET")
+EVENTBRITE_API_KEY = getenv("EVENTBRITE_API_KEY")
+
+# Celery Configuration Options
+CELERY_TIMEZONE = "Europe/London"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_CACHE_BACKEND = "django-cache"
+CELERY_BROKER_URL = getenv("CELERY_BROKER_URL")
+CELERYBEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"

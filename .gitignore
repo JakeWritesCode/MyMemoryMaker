@@ -7,3 +7,4 @@ scrapbook.ipynb
 .idea
 /collectedstatic/
 /staticfiles/
+dev_env_vars.sh

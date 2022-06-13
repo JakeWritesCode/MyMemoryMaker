@@ -2,11 +2,14 @@
 """Forms for search."""
 
 # 3rd-party
+import bleach
 from django import forms
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError
 
 # Project
+from integrations.constants import BLEACH_ALLOWED_ATTRIBUTES
+from integrations.constants import BLEACH_ALLOWED_TAGS
 from search.constants import SEARCH_ENTITY_SOURCES
 from search.models import Activity
 from search.models import Event
@@ -100,6 +103,14 @@ class NewSearchEntityForm(forms.ModelForm):
         self.instance.images.add(image)
         return self.instance
 
+    def clean_description(self):
+        """Bleach the data."""
+        return bleach.clean(
+            self.cleaned_data["description"],
+            tags=BLEACH_ALLOWED_TAGS,
+            attributes=BLEACH_ALLOWED_ATTRIBUTES,
+        )
+
 
 class NewActivityForm(NewSearchEntityForm):
     """New activity form (same as a search entity form)."""
@@ -178,6 +189,8 @@ class NewEventForm(NewSearchEntityForm):
         self.fields["headline"].widget.attrs[
             "placeholder"
         ] = "Give us a one sentence summary of your event."
+        if self.instance:
+            self.fields["activities"].required = False
 
     class Meta:  # noqa: D106
         model = Event
