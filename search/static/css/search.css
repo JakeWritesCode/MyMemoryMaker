@@ -95,6 +95,10 @@ body {
     .results-column {
         flex-grow: 1;
     }
+
+    .see-more-column.inactive {
+        display: none;
+    }
 }
 
 @media (max-width: 767px) {
