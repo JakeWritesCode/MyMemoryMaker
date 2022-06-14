@@ -626,7 +626,7 @@ class TestEventBriteEventParser(TestCase):
         assert Event.objects.count() == 1
 
 
-class FlakyTests(TestCase):
+class TestFlaky(TestCase):
     """These tests are flaky in the other class, for reasons known only to themselves."""
 
     @patch("integrations.eventbrite.googlemaps")
