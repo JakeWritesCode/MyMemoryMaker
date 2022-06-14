@@ -231,6 +231,9 @@ function runSearch() {
 
     // Populate total results into button for mobile
     document.getElementById("welcome-banner").classList.remove("active")
+
+    // Scrool back to the top of the results
+    document.getElementById("results-column").scrollTop = 0;
 }
 
 class ClassWatcher {
@@ -274,4 +277,27 @@ class ClassWatcher {
             }
         }
     }
+}
+
+function loadSeeMore(seeMoreURL) {
+    // Send a GET request to the search URL and add the returned HTML into the
+    // target div, HTMX style.
+
+    const resultsTarget = document.getElementById("see-more-target")
+    fetch(seeMoreURL, {
+        method: 'GET',
+    })
+        .then(response => response.text())
+        .then(html => {
+                resultsTarget.innerHTML = html;
+            }
+        )
+    document.getElementById("results-column").classList.add("hide")
+    document.getElementById("see-more-column").classList.remove("inactive")
+}
+
+function backToResults() {
+    // Go back to the results list
+    document.getElementById("results-column").classList.remove("hide")
+    document.getElementById("see-more-column").classList.add("inactive")
 }

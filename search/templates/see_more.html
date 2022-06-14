@@ -1,0 +1,185 @@
+<!--- See more detail screen for a given search entity -->
+{% load literal_eval %}
+{% load filter_name_human_readable %}
+
+{% block content %}
+    <div class="row p-3">
+        <!-- Image -->
+        <div class="col-12 col-lg-6 col-xl-5">
+            <img src="{{ search_entity.images.first.display_url }}"
+                 alt="{{ search_entity.images.first.alt_text }}"
+                 class="search-entity-image"
+            >
+        </div>
+        <!-- Entity data -->
+        <div class="col-12 col-lg-6 col-xl-7">
+            <div class="row">
+                <div class="col-12 text-right">
+                    <button class="btn btn-primary float-right" onclick="backToResults()">Back to results</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 mt-2">
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <strong>Please note:</strong>
+                        We aim to make this information as accurate as possible, but some information
+                        on this page may be out of date or incorrect. Please check the latest details on
+                        the book now link before attending the event or place.
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 my-2">
+                    <h2 class="h3">{{ search_entity.headline }}</h2>
+                </div>
+            </div>
+            {% if not entity_type in "Activity" %}
+                <div class="row">
+                    <div class="col-12 mb-2">
+                        <i class="fa-solid fa-location-pin fa-xl mx-2"></i>
+                        {% if entity_type == "Place" %}
+                            {{ search_entity.places.first.headline }},
+                            {{ search_entity.attributes.google_maps_data|literal_eval:"address" }}
+                        {% endif %}
+                        {% if entity_type == "Event" %}
+                            {{ search_entity.places.first.headline }},
+                            {{ search_entity.places.first.attributes.google_maps_data|literal_eval:"address" }}
+                        {% endif %}
+                    </div>
+                    <div class="col-12 pl-2 mb-2">
+                        <i class="fa-solid fa-star fa-xl ml-2 mr-2"></i>
+                        {% if entity_type == "Place" %}
+                            {{ search_entity.attributes.google_maps_data|literal_eval:"rating" }}
+                        {% endif %}
+                        {% if entity_type == "Event" %}
+                            {{ search_entity.places.first.attributes.google_maps_data|literal_eval:"rating" }}
+                        {% endif %}
+                    </div>
+                    <div class="col-12 pl-2 mb-2">
+                        {% if entity_type == "Place" %}
+                            <a class="btn btn-primary"
+                               target="_blank"
+                               href="https://www.google.com/maps/place/?q=place_id:{{ search_entity.google_maps_place_id }}">
+                                View on Google Maps</a>
+                        {% endif %}
+                        {% if entity_type == "Event" %}
+                            <a class="btn btn-primary"
+                               target="_blank"
+                               href="https://www.google.com/maps/place/?q=place_id:{{ search_entity.places.first.google_maps_place_id }}">View
+                                on
+                                Google Maps</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            <div class="row">
+                <div class="col-12 mb-2">
+                    {% for filter in search_entity.active_filters %}
+                        <span class="badge badge-light mx-1">{{ filter|filter_name_human_readable }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 mb-2">
+                    <div class="row">
+                        <div class="col-12 col-lg-4">
+                            £{{ search_entity.price_lower }} - £{{ search_entity.price_upper }}
+                        </div>
+                        <div class="col-12 col-lg-4">
+                            {{ search_entity.duration_lower }} hours - {{ search_entity.duration_upper }} hours
+                        </div>
+                        <div class="col-12 col-lg-4">
+                            {{ search_entity.people_lower }} people - {{ search_entity.people }} people
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% if entity_type == "Event" %}
+                <div class="row">
+                    <div class="col mb-2">
+                        <a class="btn btn-primary" href="{{ search_entity.external_link }}">Book Now!</a>
+                    </div>
+                </div>
+            {% endif %}
+            <div class="row">
+                <div class="col-12 mt-3 mb-2">
+                    <h3>Description: </h3>
+                    {{ search_entity.description|safe }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 mb-2">
+                    <p>Source: {{ search_entity.source_type|filter_name_human_readable }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if entity_type != "Activity" %}
+        {% if search_entity.activities.count > 0 %}
+            <div class="row p-3">
+                <div class="col-12 my-4">
+                    <div class="row">
+                        <div class="col-12 mb-2">
+                            <h3 class="mb-2">Related Activities:</h3>
+                            {% for result in search_entity.activities.all %}
+                                {% include "partials/search_entity_card.html" with headline=result.headline description=result.description|safe filters=result.active_filters price_lower=result.price_lower|floatformat price_upper=result.price_upper|floatformat duration_lower=result.duration_lower duration_upper=result.duration_upper people_lower=result.people_lower people_upper=result.people_upper source_type=result.source_type image=result.images.first.display_url entity_id=result.id entity_type=result.class_name %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    {% if entity_type == "Activity" %}
+        {% if search_entity.place_set.count > 0 %}
+            <div class="row p-3">
+                <div class="col-12 my-4">
+                    <div class="row">
+                        <div class="col-12 mb-2">
+                            <h3 class="mb-2">Related Places:</h3>
+                            {% for result in search_entity.place_set.all %}
+                                {% include "partials/search_entity_card.html" with headline=result.headline description=result.description|safe filters=result.active_filters price_lower=result.price_lower|floatformat price_upper=result.price_upper|floatformat duration_lower=result.duration_lower duration_upper=result.duration_upper people_lower=result.people_lower people_upper=result.people_upper source_type=result.source_type image=result.images.first.display_url entity_id=result.id entity_type=result.class_name %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    {% if entity_type == "Event" %}
+        {% if search_entity.places.count > 0 %}
+            <div class="row p-3">
+                <div class="col-12 my-4">
+                    <div class="row">
+                        <div class="col-12 mb-2">
+                            <h3 class="mb-2">Related Places:</h3>
+                            {% for result in search_entity.places.all %}
+                                {% include "partials/search_entity_card.html" with headline=result.headline description=result.description|safe filters=result.active_filters price_lower=result.price_lower|floatformat price_upper=result.price_upper|floatformat duration_lower=result.duration_lower duration_upper=result.duration_upper people_lower=result.people_lower people_upper=result.people_upper source_type=result.source_type image=result.images.first.display_url entity_id=result.id entity_type=result.class_name %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    {% if entity_type != "Event" %}
+        {% if search_entity.events.count > 0 %}
+            <div class="row p-3">
+                <div class="col-12 my-4">
+                    <div class="row">
+                        <div class="col-12 mb-2">
+                            <h3 class="mb-2">Related Places:</h3>
+                            {% for result in search_entity.event_set.all %}
+                                {% include "partials/search_entity_card.html" with headline=result.headline description=result.description|safe filters=result.active_filters price_lower=result.price_lower|floatformat price_upper=result.price_upper|floatformat duration_lower=result.duration_lower duration_upper=result.duration_upper people_lower=result.people_lower people_upper=result.people_upper source_type=result.source_type image=result.images.first.display_url entity_id=result.id entity_type=result.class_name %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+    <div class="row" style="height: 50px"></div>
+{% endblock %}

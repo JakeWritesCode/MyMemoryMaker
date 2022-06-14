@@ -117,6 +117,9 @@ class SearchEntity(models.Model):
             if self.attributes[filter_name] == "True"
         ]
 
+    @property
+    def class_name(self):
+        return self.__class__.__name__
 
 class Activity(SearchEntity):
     """Something to do, without a specific date or place."""

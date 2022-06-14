@@ -69,7 +69,7 @@
                     </div>
                 </div>
                 <div class="d-flex">
-                    <a href="{{ link }}" class="btn btn-primary {% if link == None %}disabled{% endif %}">See More</a>
+                    <button onclick="loadSeeMore('{% url "see-more" entity_type entity_id %}')" class="btn btn-primary">See More</button>
                 </div>
                 <div class="d-flex mt-3 flex-grow-1">
                     <div class="flex-grow-1 align-text-bottom align-self-end">

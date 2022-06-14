@@ -338,6 +338,7 @@ class EventBriteEventParser:
             event.source_type = SEARCH_ENTITY_SOURCES[1]
             event.source_id = raw_data.event_id.event_id
             event.dates = [[event_start, event_end]]
+            event.external_link = raw_data.data["url"]
             event.attributes = {
                 "eventbrite_event_id": raw_data.event_id.event_id,
             } | self._determine_filters(raw_data)

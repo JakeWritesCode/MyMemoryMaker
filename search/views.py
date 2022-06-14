@@ -3,11 +3,13 @@
 
 # Standard Library
 from ast import literal_eval
+from http.client import NOT_FOUND
 
 # 3rd-party
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
@@ -428,4 +430,20 @@ def new_entity_wizard(request):
         {
             "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
         },
+    )
+
+
+def see_more(request, entity_type, entity_id):
+    """The detail page of a given card. Show details for the entity and other related entities."""
+    available_types = [["Activity", Activity], ["Event", Event], ["Place", Place]]
+    if entity_type not in [x[0] for x in available_types]:
+        return HttpResponse("The entity type you requested does not exist.", status=NOT_FOUND)
+    entity = [x[1] for x in available_types if entity_type == x[0]][0]
+    try:
+        entity_instance = entity.objects.get(id=entity_id)
+    except (Activity.DoesNotExist, Place.DoesNotExist, Event.DoesNotExist):
+        return HttpResponse("The entity ID you requested does not exist.", status=NOT_FOUND)
+
+    return render(
+        request, "see_more.html", {"search_entity": entity_instance, "entity_type": entity_type}
     )
