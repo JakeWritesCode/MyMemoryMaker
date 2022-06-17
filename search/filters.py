@@ -16,6 +16,7 @@ from crispy_forms.layout import Field
 from crispy_forms.layout import Layout
 from crispy_forms.layout import Row
 from django import forms
+from django.conf import settings
 from django.db.models import Q
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -366,7 +367,9 @@ class FilterQueryProcessor:
 
     def _get_results_for_object_type(self, query_obj: Type[Union[Activity, Event, Place]]):
         """Run the query and get the results for each type."""
-        queryset = query_obj.objects.filter(approved_by__isnull=False)
+        queryset = query_obj.objects.all()
+        if not settings.SEARCH_SHOW_UNMODERATED_RESULTS:
+            queryset = queryset.filter(approved_by__isnull=False)
         queryset = self._append_slider_queries(queryset)
         queryset = self._append_search_queries(queryset)
         queryset = self._append_null_boolean_filter_queries(queryset)

@@ -43,9 +43,9 @@
                             </div>
                             <div id="preview-container" class="d-none">
                                 <div class="col-12 px-0 my-4">
-                                    <h3>Your Place Preview</h3>
+                                    <h3>Your {{ entity_type }} Preview</h3>
                                     <p>Here's what your card will look like on our site.</p>
-                                    {% include "partials/search_entity_card.html" %}
+                                    {% include "partials/search_entity_card.html" with image=image_form.instance.display_url%}
                                 </div>
                             </div>
                         </div>
@@ -58,14 +58,15 @@
     <script>
         const eType = "{{ entity_type }}"
         if (eType === "Activity") {
-            initNewActivityForm()
+            initNewActivityForm(true)
         }
         if (eType === "Place") {
-            initNewPlaceForm()
+            initNewPlaceForm(true)
         }
         if (eType === "Event") {
-            initNewEventForm()
+            initNewEventForm(true)
         }
+        document.getElementById("preview-container").classList.remove("d-none")
     </script>
 
 {% endblock %}

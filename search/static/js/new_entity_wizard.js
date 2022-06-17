@@ -38,7 +38,7 @@ function selectEntityType(typeSelected) {
     document.getElementById("preview-container").classList.remove("d-none")
 }
 
-function initNewEntityForm() {
+function initNewEntityForm(prePopulated=false) {
     const headline = document.getElementById("id_headline")
     headline.addEventListener("change", function () {
         updatePreviewCard("search-entity-headline", headline.value)
@@ -67,6 +67,15 @@ function initNewEntityForm() {
     peopleUpper.addEventListener("change", function () {
         updatePreviewCard("search-entity-people-upper", peopleUpper.value)
     })
+    if (prePopulated) {
+        updatePreviewCard("search-entity-headline", headline.value)
+        updatePreviewCard("search-entity-price-lower", priceLower.value)
+        updatePreviewCard("search-entity-price-upper", priceUpper.value)
+        updatePreviewCard("search-entity-duration-lower", durationLower.value)
+        updatePreviewCard("search-entity-duration-upper", durationUpper.value)
+        updatePreviewCard("search-entity-people-lower", peopleLower.value)
+        updatePreviewCard("search-entity-people-upper", peopleUpper.value)
+    }
 
     // Dynamically render the image that is loaded into the filefield.
     document.getElementById('id_uploaded_image').onchange = function (evt) {
@@ -97,6 +106,9 @@ function initNewEntityForm() {
         setup: function (ed) {
             ed.on('change', function (e) {
                 updatePreviewCard("search-entity-description", ed.getContent());
+                if (prePopulated) {
+                    updatePreviewCard("search-entity-description", ed.getContent());
+                }
             });
         }
     });
@@ -104,15 +116,15 @@ function initNewEntityForm() {
     htmx.process(document.body);
 }
 
-function initNewActivityForm() {
+function initNewActivityForm(prePopulated=false) {
     initNewEntityForm()
     htmx.on("htmx:load", function (evt) {
-        initNewActivityForm()
+        initNewActivityForm(prePopulated)
     });
 }
 
-function initNewPlaceForm() {
-    initNewEntityForm()
+function initNewPlaceForm(prePopulated=false) {
+    initNewEntityForm(prePopulated)
     if (document.getElementsByClassName("select-wrapper").length === 0) {
         new mdb.Select(document.getElementById('id_activities'), {"filter": true})
     }
@@ -149,12 +161,12 @@ function initNewPlaceForm() {
     });
 
     htmx.on("htmx:load", function (evt) {
-        initNewPlaceForm()
+        initNewPlaceForm(prePopulated)
     });
 }
 
-function initNewEventForm() {
-    initNewEntityForm()
+function initNewEventForm(prePopulated=false) {
+    initNewEntityForm(prePopulated)
     if (document.getElementsByClassName("select-wrapper").length === 0) {
         new mdb.Select(document.getElementById('id_activities'), {"filter": true})
         new mdb.Select(document.getElementById('id_places'), {"filter": true})
@@ -171,6 +183,6 @@ function initNewEventForm() {
     });
 
     htmx.on("htmx:load", function (evt) {
-        initNewEventForm()
+        initNewEventForm(prePopulated)
     });
 }

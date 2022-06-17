@@ -4,7 +4,9 @@
 
 # Standard Library
 import datetime
+import uuid
 from http.client import CREATED
+from http.client import NOT_FOUND
 from http.client import OK
 from io import BytesIO
 
@@ -212,6 +214,7 @@ class TestEditActivity(TestCase):
         assert isinstance(response.context["filter_setter_form"], FilterSettingForm)
         assert response.context["entity_type"] == "Activity"
         assert response.context["partial_target"] == self.url
+        assert response.context["entity_id"] == str(self.activity.id)
 
     def test_filters_form_populated_with_correct_filter_info(self):
         """The filter form should be populated with the attributes from the instance."""
@@ -631,6 +634,7 @@ class TestEditPlace(TestCase):
         assert response.context["entity_type"] == "Place"
         assert response.context["partial_target"] == reverse(views.edit_place, args=[self.place.id])
         assert response.context["GOOGLE_MAPS_API_KEY"] == settings.GOOGLE_MAPS_API_KEY
+        assert response.context["entity_id"] == str(self.place.id)
 
     def test_successful_post_marks_place_as_approved(self):
         """A successful post request should mark the place as approved."""
@@ -972,6 +976,7 @@ class TestEditEvent(TestCase):
         assert response.context["entity_type"] == "Event"
         assert response.context["partial_target"] == reverse(views.edit_event, args=[self.event.id])
         assert response.context["GOOGLE_MAPS_API_KEY"] == settings.GOOGLE_MAPS_API_KEY
+        assert response.context["entity_id"] == str(self.event.id)
 
     def test_successful_post_marks_event_as_approved(self):
         """A successful post request should mark the event as approved."""
@@ -1057,3 +1062,37 @@ class TestNewEntityWizard(TestCase):
         """Test that the view renders the correct context."""
         response = self.client.get(self.url)
         assert response.context["GOOGLE_MAPS_API_KEY"] == settings.GOOGLE_MAPS_API_KEY
+
+
+class TestSeeMore(TestCase):
+    """Tests for the see more view."""
+
+    def setUp(self) -> None:  # noqa: D102
+        self.event = EventFactory()
+        self.place = PlaceFactory()
+        self.event.places.add(self.place)
+        self.view = views.see_more
+        self.url = reverse(self.view, args=["Event", self.event.id])
+
+    def test_view_returns_error_message_if_entity_type_is_not_correct(self):
+        """If the entity type is incorrect return a 404."""
+        response = self.client.get(reverse(self.view, args=["Not", "a123"]))
+        assert response.status_code == NOT_FOUND
+        assert "The entity type you requested does not exist." in str(response.content)
+
+    def test_view_returns_error_message_if_entity_id_is_not_correct(self):
+        """If the entity id is incorrect return a 404."""
+        response = self.client.get(reverse(self.view, args=["Event", uuid.uuid4()]))
+        assert response.status_code == NOT_FOUND
+        assert "The entity ID you requested does not exist." in str(response.content)
+
+    def test_template(self):
+        """Test that the view returns the correct template."""
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "see_more.html")
+
+    def test_context(self):
+        """Test that the view renders the correct context."""
+        response = self.client.get(self.url)
+        assert response.context["search_entity"] == self.event
+        assert response.context["entity_type"] == "Event"

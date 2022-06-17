@@ -117,6 +117,11 @@ class SearchEntity(models.Model):
             if self.attributes[filter_name] == "True"
         ]
 
+    @property
+    def class_name(self):
+        """Return the class name."""
+        return self.__class__.__name__
+
 
 class Activity(SearchEntity):
     """Something to do, without a specific date or place."""
@@ -156,3 +161,10 @@ class Event(SearchEntity):
     def __str__(self):
         """String representation."""
         return f"Event: {self.headline}"
+
+    def distance_from(self, from_lat, from_long):
+        """Distance from in this case should be from the place."""
+        place = self.places.first()
+        if not place:
+            raise ValueError("This event does not have a place attached!")
+        return place.distance_from(from_lat, from_long)

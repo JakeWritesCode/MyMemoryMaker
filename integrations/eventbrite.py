@@ -164,7 +164,12 @@ class EventBriteEventParser:
 
     def _has_event_changed(self, event: Event, raw_data: EventBriteRawEventData):
         """Has the event changed compared to the last time we looked."""
-        last_updated = datetime.strptime(raw_data.data["changed"], "%Y-%m-%dT%H:%M:%SZ")
+        try:
+            last_updated = datetime.strptime(raw_data.data["changed"], "%Y-%m-%dT%H:%M:%SZ")
+        except TypeError:  # Event has not changed date.
+            if not event.headline:
+                return True
+            return False
         last_updated = timezone.make_aware(last_updated, timezone=UTC)
         if last_updated > event.last_updated:
             return True
@@ -333,6 +338,7 @@ class EventBriteEventParser:
             event.source_type = SEARCH_ENTITY_SOURCES[1]
             event.source_id = raw_data.event_id.event_id
             event.dates = [[event_start, event_end]]
+            event.external_link = raw_data.data["url"]
             event.attributes = {
                 "eventbrite_event_id": raw_data.event_id.event_id,
             } | self._determine_filters(raw_data)
