@@ -448,5 +448,5 @@ def see_more(request, entity_type, entity_id):
         return HttpResponse("The entity ID you requested does not exist.", status=NOT_FOUND)
 
     return render(
-        request, "see_more.html", {"search_entity": entity_instance, "entity_type": entity_type}
+        request, "see_more.html", {"search_entity": entity_instance, "entity_type": entity_type},
     )
