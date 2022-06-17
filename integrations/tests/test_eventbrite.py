@@ -21,7 +21,6 @@ from django.utils import timezone
 # Project
 from integrations.constants import BLEACH_ALLOWED_ATTRIBUTES
 from integrations.constants import BLEACH_ALLOWED_TAGS
-from integrations.constants import EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS
 from integrations.eventbrite import EventBriteEventParser
 from integrations.eventbrite import EventIDDownloader
 from integrations.eventbrite import EventRawDataDownloader
@@ -625,4 +624,3 @@ class TestEventBriteEventParser(TestCase):
         self.parser._populate_event = MagicMock()
         self.parser.process_data()
         assert Event.objects.count() == 1
-

@@ -119,7 +119,9 @@ class SearchEntity(models.Model):
 
     @property
     def class_name(self):
+        """Return the class name."""
         return self.__class__.__name__
+
 
 class Activity(SearchEntity):
     """Something to do, without a specific date or place."""

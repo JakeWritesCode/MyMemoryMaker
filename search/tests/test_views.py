@@ -5,7 +5,8 @@
 # Standard Library
 import datetime
 import uuid
-from http.client import CREATED, NOT_FOUND
+from http.client import CREATED
+from http.client import NOT_FOUND
 from http.client import OK
 from io import BytesIO
 
@@ -1095,4 +1096,3 @@ class TestSeeMore(TestCase):
         response = self.client.get(self.url)
         assert response.context["search_entity"] == self.event
         assert response.context["entity_type"] == "Event"
-
