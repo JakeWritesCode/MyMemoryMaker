@@ -109,7 +109,7 @@ class TestEvent(TestCase):
         assert str(event) == f"Event: {event.headline}"
 
     def test_distance_from_returns_correct_distance(self):
-        """Function should return the correct distance."""
+        """Function should return the correct distance from the connected place."""
         place = PlaceFactory()
         event = EventFactory()
         event.places.add(place)

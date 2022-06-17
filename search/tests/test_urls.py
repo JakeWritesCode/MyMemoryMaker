@@ -44,3 +44,7 @@ class TestURLs(SimpleTestCase):
     def test_new_submission_url(self):
         """Test url."""
         assert reverse(views.new_entity_wizard) == "/search/new-submission"
+
+    def test_see_more_url(self):
+        """Test url."""
+        assert reverse(views.see_more, args=["Event", "a123"]) == "/search/see-more/Event/a123"

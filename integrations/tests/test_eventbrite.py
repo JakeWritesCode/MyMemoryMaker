@@ -558,6 +558,7 @@ class TestEventBriteEventParser(TestCase):
         assert event.duration_lower == 10
         assert event.people_lower == 1
         assert event.people_upper == 100
+        assert event.external_link == raw_data.data["url"]
         assert event.source_type == SEARCH_ENTITY_SOURCES[1]
         assert event.source_id == str(raw_data.event_id.event_id)
         assert event.dates == [
