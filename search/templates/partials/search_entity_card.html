@@ -24,7 +24,8 @@
                         <h2 class="h3" id="search-entity-headline">
                             {% if headline %}{{ headline }}{% else %}My New Submission{% endif %}</h2>
                         <div id="search-entity-description">
-                            {% if description %}{{ description|striptags|truncatewords:50 }}{% else %}My description{% endif %}</div>
+                            {% if description %}{{ description|striptags|truncatewords:50 }}{% else %}My
+                                description{% endif %}</div>
                     </div>
                     <div class="">
                         <span class="material-icons material-icons-outlined search-entity-icon">favorite</span>
@@ -69,7 +70,15 @@
                     </div>
                 </div>
                 <div class="d-flex">
-                    <button onclick="loadSeeMore('{% url "see-more" entity_type entity_id %}')" class="btn btn-primary">See More</button>
+                    {% if entity_id %}
+                        <button onclick="loadSeeMore('{% url "see-more" entity_type entity_id %}')"
+                                class="btn btn-primary">See More
+                        </button>
+                    {% else %}
+                        <button onclick="" disabled
+                                class="btn btn-primary">See More
+                        </button>
+                    {% endif %}
                 </div>
                 <div class="d-flex mt-3 flex-grow-1">
                     <div class="flex-grow-1 align-text-bottom align-self-end">
