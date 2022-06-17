@@ -2,9 +2,11 @@
 """Template tag to format the string filters to something human readable."""
 
 
+# Standard Library
+from ast import literal_eval
+
 # 3rd-party
 from django import template
-from ast import literal_eval
 
 register = template.Library()
 

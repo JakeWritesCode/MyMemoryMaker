@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """Tests for templatetags."""
 
+# 3rd-party
 from django.test import TestCase
+
+# Project
 from search.templatetags.literal_eval import ast_literal_eval
 
 
