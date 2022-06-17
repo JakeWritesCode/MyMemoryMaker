@@ -129,6 +129,7 @@ def edit_activity(request, activity_id: str):
             "filter_setter_form": filter_setter_form,
             "entity_type": "Activity",
             "partial_target": reverse(edit_activity, args=[activity.id]),
+            "entity_id": activity_id,
         },
     )
 
@@ -261,6 +262,7 @@ def edit_place(request, place_id: str):
             "entity_type": "Place",
             "partial_target": reverse(edit_place, args=[place.id]),
             "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+            "entity_id": place_id,
         },
     )
 
@@ -391,6 +393,7 @@ def edit_event(request, event_id: str):
             "entity_type": "Event",
             "partial_target": reverse(edit_event, args=[event.id]),
             "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+            "entity_id": event_id,
         },
     )
 
