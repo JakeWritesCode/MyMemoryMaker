@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Exo:wght@700&display=swap');
 
 :root {
     --mymemorymaker-primary: #11a7b5;
@@ -99,6 +100,10 @@ body {
     .see-more-column.inactive {
         display: none;
     }
+
+    .strapline {
+        font-size: 4rem;
+    }
 }
 
 @media (max-width: 767px) {
@@ -127,6 +132,11 @@ body {
     .results-column.inactive, .see-more-column.inactive {
         display: none;
     }
+
+    .strapline {
+        font-family: "Exo", sans-serif;
+        font-size: 2rem;
+    }
 }
 
 .results-column.hide {
@@ -140,7 +150,19 @@ body {
 
 .results-column {
     background: rgba(232, 247, 248, 1);
-    background: linear-gradient(0deg, rgba(232, 247, 248, 1) 74%, rgba(124, 207, 214, 1) 82%, rgba(17, 167, 181, 1) 88%, rgba(11, 102, 161, 1) 93%, rgba(11, 102, 161, 1) 100%);
+
+}
+
+.strapline {
+    font-family: "Exo", sans-serif;
+}
+
+.results-backround {
+    background-image: url(/static/image/search-hobby-background.svg);
+    position: absolute;
+    width: 100%;
+    opacity: 0.1;
+    height: 100%;
 }
 
 #second-navbar {
