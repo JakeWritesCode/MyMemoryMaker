@@ -182,14 +182,13 @@ class TestFilterSelectForm(SimpleTestCase):
         assert "d-none" in self.form.fields["place_select"].widget.attrs["class"]
         assert "form-control" in self.form.fields["datetime_from"].widget.attrs["class"]
         assert "form-control" in self.form.fields["datetime_to"].widget.attrs["class"]
-        assert isinstance(self.form.fields["distance_lower"].widget, forms.HiddenInput)
-        assert isinstance(self.form.fields["distance_upper"].widget, forms.HiddenInput)
-        assert isinstance(self.form.fields["price_lower"].widget, forms.HiddenInput)
-        assert isinstance(self.form.fields["price_upper"].widget, forms.HiddenInput)
-        assert isinstance(self.form.fields["people_lower"].widget, forms.HiddenInput)
-        assert isinstance(self.form.fields["people_upper"].widget, forms.HiddenInput)
-        assert isinstance(self.form.fields["duration_upper"].widget, forms.HiddenInput)
-        assert isinstance(self.form.fields["duration_lower"].widget, forms.HiddenInput)
+
+        for field in ["distance_lower", "distance_upper", "price_lower", "price_upper", "duration_lower", "duration_upper", "people_lower", "people_upper"]:
+            upper_lower = "from" if field.split("_")[1] == "lower" else "to"
+            name = field.split('_')[0]
+            assert self.form.fields[field].widget.attrs["aria-describedby"] == f"{upper_lower}-{name}-addon"
+            assert "form-control search-on-change" in self.form.fields[field].widget.attrs["class"]
+            assert self.form.fields[field].label.lower() == upper_lower
 
         for field in self.form.fields.values():
             assert "search-on-change" in field.widget.attrs["class"]

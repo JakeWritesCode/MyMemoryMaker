@@ -22,7 +22,7 @@ from users.models import CustomUser
 def search_image_upload_path(instance, filename):
     """Change the filename of an image on upload."""
     ext = filename.split('.')[-1]
-    upload_date = datetime.strftime(timezone.now(), "%Y-%m-%d%H%M%S")
+    upload_date = datetime.strftime(timezone.now(), "%Y-%m-%d%H%M")
     filename = "%s_%s.%s" % (instance.id, upload_date, ext)
     return os.path.join('searchimages', filename)
 

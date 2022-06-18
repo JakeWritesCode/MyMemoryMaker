@@ -2,15 +2,29 @@
 """Tests for the search models."""
 
 # 3rd-party
+import datetime
+
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.utils import timezone
 from geopy.distance import distance
 
 # Project
+from search.models import search_image_upload_path
 from search.tests.factories import ActivityFactory
 from search.tests.factories import EventFactory
 from search.tests.factories import PlaceFactory
 from search.tests.factories import SearchImageFactory
+
+
+class TestSearchImageUploadPath(TestCase):
+    """Test for the uploaded image file setter."""
+
+    def test_filename(self):
+        """Test the function returns the correct filename."""
+        image = SearchImageFactory()
+        expected_time = datetime.datetime.strftime(timezone.now(), "%Y-%m-%d%H%M")
+        assert str(search_image_upload_path(image, "barry.jpeg")) == f'searchimages/{image.id}_{expected_time}.jpeg'
 
 
 class TestSearchImages(TestCase):
