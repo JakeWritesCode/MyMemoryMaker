@@ -25,7 +25,7 @@ from search.forms import NewActivityForm
 from search.forms import NewEventForm
 from search.forms import NewPlaceForm
 from search.forms import SearchImageForm
-from search.models import Activity
+from search.models import Activity, SearchImage
 from search.models import Event
 from search.models import Place
 
@@ -197,6 +197,8 @@ def edit_place(request, place_id: str):
     template = "edit_search_entity.html"
     place = get_object_or_404(Place, id=place_id)
     image = place.images.first()
+    if not image:
+        image = SearchImage(uploaded_by=request.user)
     filters = {}
     for key, val in place.attributes.items():
         filters[key] = True if val == "True" else False
