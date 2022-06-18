@@ -21,8 +21,15 @@
             <div class="col-12 col-md-6 col-lg-8 mt-3 mt-md-0 d-flex flex-column">
                 <div class="d-flex">
                     <div class="flex-grow-1">
-                        <h2 class="h3" id="search-entity-headline">
-                            {% if headline %}{{ headline }}{% else %}My New Submission{% endif %}</h2>
+                        {% if entity_id %}
+                            <a onclick="loadSeeMore('{% url "see-more" entity_type entity_id %}')" class="no-link pointer">
+                                <h2 class="h3" id="search-entity-headline">
+                                    {% if headline %}{{ headline }}{% else %}My New Submission{% endif %}</h2>
+                            </a>
+                        {% else %}
+                            <h2 class="h3" id="search-entity-headline">
+                                {% if headline %}{{ headline }}{% else %}My New Submission{% endif %}</h2>
+                        {% endif %}
                         <div id="search-entity-description">
                             {% if description %}{{ description|striptags|truncatewords:50 }}{% else %}My
                                 description{% endif %}</div>

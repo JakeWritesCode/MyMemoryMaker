@@ -27,7 +27,11 @@
             {% include "partials/filter_search_form.html" %}
         </div>
         <div class="results-column inactive" id="results-column">
-            <div class="mt-4 d-none d-md-block welcome-banner active" id="welcome-banner">
+            <div class="results-background mt-0 pt-0">
+                <img src="{% static "image/search-hobby-background.svg" %}" alt="results background"
+                     class="results-background-image">
+            </div>
+            <div class="d-none pt-4 d-md-block welcome-banner active" id="welcome-banner">
                 {% include "partials/welcome_banner.html" %}
             </div>
             <div id="search-results-target" class="">
@@ -35,9 +39,14 @@
             </div>
         </div>
         <div class="see-more-column inactive" id="see-more-column">
+            <div class="results-background mt-0 pt-0">
+                <img src="{% static "image/search-hobby-background.svg" %}" alt="results background"
+                     class="results-background-image">
+            </div>
             <div id="see-more-target">
             </div>
         </div>
+    </div>
     </div>
 
     <script>
@@ -48,7 +57,10 @@
             filterColumn.classList.add("active")
             const resultsColumn = document.getElementById("results-column")
             resultsColumn.classList.remove("active")
+            resultsColumn.classList.remove("hide")
             resultsColumn.classList.add("inactive")
+            const seeMoreColumn = document.getElementById("see-more-column")
+            seeMoreColumn.classList.add("inactive")
             document.getElementById("search-filter-column-select").classList.add("text-mymemorymaker-primary")
             document.getElementById("search-results-column-select").classList.remove("text-mymemorymaker-primary")
         })

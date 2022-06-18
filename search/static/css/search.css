@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Exo:wght@700&display=swap');
 
 :root {
     --mymemorymaker-primary: #11a7b5;
@@ -92,12 +93,24 @@ body {
         min-width: 400px;
     }
 
+    .results-background {
+        left: 400px !important;
+    }
+
     .results-column {
         flex-grow: 1;
     }
 
     .see-more-column.inactive {
         display: none;
+    }
+
+    .strapline {
+        font-size: 4rem;
+    }
+
+    .get-started-text {
+        font-size: 1.5rem;
     }
 }
 
@@ -107,12 +120,11 @@ body {
     }
 
     .filter-column.active .bg-gradient-home {
-        height: 75vh;
+        height: 100%;
         position: absolute;
         width: 100vw;
         z-index: -1;
-        background: white;
-        background-image: linear-gradient(0deg, rgba(255, 255, 255, 1) 74%, rgba(124, 207, 214, 1) 82%, rgba(17, 167, 181, 1) 88%, rgba(11, 102, 161, 1) 93%, rgba(5, 27, 139, 1) 100%);
+        background: #FAFBFBFF;
     }
 
     .filter-column.inactive {
@@ -127,6 +139,15 @@ body {
     .results-column.inactive, .see-more-column.inactive {
         display: none;
     }
+
+    .strapline {
+        font-family: "Exo", sans-serif;
+        font-size: 2rem;
+    }
+
+    .get-started-text {
+        font-size: 1rem;
+    }
 }
 
 .results-column.hide {
@@ -139,8 +160,30 @@ body {
 }
 
 .results-column {
-    background: rgba(232, 247, 248, 1);
-    background: linear-gradient(0deg, rgba(232, 247, 248, 1) 74%, rgba(124, 207, 214, 1) 82%, rgba(17, 167, 181, 1) 88%, rgba(11, 102, 161, 1) 93%, rgba(11, 102, 161, 1) 100%);
+    position: relative;
+}
+
+.strapline {
+    font-family: "Exo", sans-serif;
+}
+
+.results-background {
+    opacity: 0.1;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    object-fit: fill;
+background: rgb(196,196,196);
+background: linear-gradient(0deg, rgba(196,196,196,1) 0%, rgba(102,230,255,1) 59%);
+}
+
+.results-background-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 #second-navbar {
@@ -247,7 +290,11 @@ input[type="checkbox"]:checked + label.btn-activity-type-toggle {
     background: var(--mymemorymaker-primary);
 }
 
-.see-more-column {
-    background: rgba(232, 247, 248, 1);
-    background: linear-gradient(0deg, rgba(232, 247, 248, 1) 74%, rgba(124, 207, 214, 1) 82%, rgba(17, 167, 181, 1) 88%, rgba(11, 102, 161, 1) 93%, rgba(11, 102, 161, 1) 100%);
+.no-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.pointer {
+    cursor: pointer;
 }
