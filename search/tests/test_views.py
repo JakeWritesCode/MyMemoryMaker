@@ -538,9 +538,10 @@ class TestEditPlace(TestCase):
         self.client.force_login(self.user)
         response = self.client.get(self.url)
         assert isinstance(response.context["image_form"].instance, SearchImage)
-        assert SearchImage.objects.filter(id=response.context["image_form"].instance.id).count() == 0
+        assert (
+            SearchImage.objects.filter(id=response.context["image_form"].instance.id).count() == 0
+        )
         assert response.context["image_form"].fields["permissions_confirmation"].required is False
-
 
     def test_filters_form_populated_with_correct_filter_info(self):
         """The filter form should be populated with the attributes from the instance."""
