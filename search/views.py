@@ -25,9 +25,10 @@ from search.forms import NewActivityForm
 from search.forms import NewEventForm
 from search.forms import NewPlaceForm
 from search.forms import SearchImageForm
-from search.models import Activity, SearchImage
+from search.models import Activity
 from search.models import Event
 from search.models import Place
+from search.models import SearchImage
 
 
 @login_required
