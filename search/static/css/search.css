@@ -294,3 +294,7 @@ input[type="checkbox"]:checked + label.btn-activity-type-toggle {
     text-decoration: none;
     color: inherit;
 }
+
+.pointer {
+    cursor: pointer;
+}
