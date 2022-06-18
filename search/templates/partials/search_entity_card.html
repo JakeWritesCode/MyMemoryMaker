@@ -23,7 +23,7 @@
                     <div class="flex-grow-1">
                         {% if entity_id %}
                             <a onclick="loadSeeMore('{% url "see-more" entity_type entity_id %}')" class="no-link pointer">
-                                <h2 class="h3" id="search-entity-headline">
+                                <h2 class="h3" id="search-entity-headline">{{ entity_type }}:
                                     {% if headline %}{{ headline }}{% else %}My New Submission{% endif %}</h2>
                             </a>
                         {% else %}
