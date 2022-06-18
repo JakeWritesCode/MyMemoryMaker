@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """Tests for the search models."""
 
-# 3rd-party
+# Standard Library
 import datetime
 
+# 3rd-party
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
@@ -24,7 +25,10 @@ class TestSearchImageUploadPath(TestCase):
         """Test the function returns the correct filename."""
         image = SearchImageFactory()
         expected_time = datetime.datetime.strftime(timezone.now(), "%Y-%m-%d%H%M")
-        assert str(search_image_upload_path(image, "barry.jpeg")) == f'searchimages/{image.id}_{expected_time}.jpeg'
+        assert (
+            str(search_image_upload_path(image, "barry.jpeg"))
+            == f"searchimages/{image.id}_{expected_time}.jpeg"
+        )
 
 
 class TestSearchImages(TestCase):
