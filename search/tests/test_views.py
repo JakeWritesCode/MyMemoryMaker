@@ -532,6 +532,17 @@ class TestEditPlace(TestCase):
         assert response.context["image_form"].instance == self.image_obj
         assert response.context["image_form"].fields["permissions_confirmation"].required is False
 
+    def test_image_form_populated_with_new_image_if_one_does_not_exist(self):
+        """If there is no image attached, generate a new one."""
+        self.image_obj.delete()
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        assert isinstance(response.context["image_form"].instance, SearchImage)
+        assert (
+            SearchImage.objects.filter(id=response.context["image_form"].instance.id).count() == 0
+        )
+        assert response.context["image_form"].fields["permissions_confirmation"].required is False
+
     def test_filters_form_populated_with_correct_filter_info(self):
         """The filter form should be populated with the attributes from the instance."""
         new_filters = {x[0]: True for x in FILTERS.values()}

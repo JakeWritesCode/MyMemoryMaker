@@ -148,6 +148,14 @@ body {
     .get-started-text {
         font-size: 1rem;
     }
+
+    .main-navbar-button {
+        text-align: center;
+    }
+
+    .main-navbar-button .navbar-text {
+        font-size: 0.7rem;
+    }
 }
 
 .results-column.hide {
@@ -189,7 +197,7 @@ background: linear-gradient(0deg, rgba(196,196,196,1) 0%, rgba(102,230,255,1) 59
 #second-navbar {
     position: fixed;
     z-index: 10;
-    bottom: 59px;
+    bottom: 67px;
     width: 100vw;
     padding-top: 0;
     padding-bottom: 0;
@@ -297,4 +305,8 @@ input[type="checkbox"]:checked + label.btn-activity-type-toggle {
 
 .pointer {
     cursor: pointer;
+}
+
+.mobile-nav-button.active {
+    background: lightgrey !important;
 }
