@@ -28,7 +28,8 @@
         </div>
         <div class="results-column inactive" id="results-column">
             <div class="results-background mt-0 pt-0">
-                <img src="{% static "image/search-hobby-background.svg" %}" alt="results background" class="results-background-image">
+                <img src="{% static "image/search-hobby-background.svg" %}" alt="results background"
+                     class="results-background-image">
             </div>
             <div class="d-none pt-4 d-md-block welcome-banner active" id="welcome-banner">
                 {% include "partials/welcome_banner.html" %}
@@ -36,11 +37,16 @@
             <div id="search-results-target" class="">
                 <!-- Search results will go here! -->
             </div>
-            <div class="see-more-column inactive" id="see-more-column">
-                <div id="see-more-target">
-                </div>
+        </div>
+        <div class="see-more-column inactive" id="see-more-column">
+            <div class="results-background mt-0 pt-0">
+                <img src="{% static "image/search-hobby-background.svg" %}" alt="results background"
+                     class="results-background-image">
+            </div>
+            <div id="see-more-target">
             </div>
         </div>
+    </div>
     </div>
 
     <script>

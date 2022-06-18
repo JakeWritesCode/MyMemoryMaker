@@ -108,6 +108,10 @@ body {
     .strapline {
         font-size: 4rem;
     }
+
+    .get-started-text {
+        font-size: 1.5rem;
+    }
 }
 
 @media (max-width: 767px) {
@@ -140,6 +144,10 @@ body {
         font-family: "Exo", sans-serif;
         font-size: 2rem;
     }
+
+    .get-started-text {
+        font-size: 1rem;
+    }
 }
 
 .results-column.hide {
@@ -160,7 +168,7 @@ body {
 }
 
 .results-background {
-    opacity: 0.15;
+    opacity: 0.1;
     position: fixed;
     left: 0;
     top: 0;
@@ -168,8 +176,10 @@ body {
     height: 100%;
     z-index: -1;
     object-fit: fill;
-    background: rgb(166, 254, 255);
+background: rgb(196,196,196);
+background: linear-gradient(0deg, rgba(196,196,196,1) 0%, rgba(102,230,255,1) 59%);
 }
+
 .results-background-image {
     width: 100%;
     height: 100%;
@@ -280,3 +290,7 @@ input[type="checkbox"]:checked + label.btn-activity-type-toggle {
     background: var(--mymemorymaker-primary);
 }
 
+.no-link {
+    text-decoration: none;
+    color: inherit;
+}
