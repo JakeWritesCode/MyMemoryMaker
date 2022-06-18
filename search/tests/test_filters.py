@@ -183,10 +183,22 @@ class TestFilterSelectForm(SimpleTestCase):
         assert "form-control" in self.form.fields["datetime_from"].widget.attrs["class"]
         assert "form-control" in self.form.fields["datetime_to"].widget.attrs["class"]
 
-        for field in ["distance_lower", "distance_upper", "price_lower", "price_upper", "duration_lower", "duration_upper", "people_lower", "people_upper"]:
+        for field in [
+            "distance_lower",
+            "distance_upper",
+            "price_lower",
+            "price_upper",
+            "duration_lower",
+            "duration_upper",
+            "people_lower",
+            "people_upper",
+        ]:
             upper_lower = "from" if field.split("_")[1] == "lower" else "to"
-            name = field.split('_')[0]
-            assert self.form.fields[field].widget.attrs["aria-describedby"] == f"{upper_lower}-{name}-addon"
+            name = field.split("_")[0]
+            assert (
+                self.form.fields[field].widget.attrs["aria-describedby"]
+                == f"{upper_lower}-{name}-addon"
+            )
             assert "form-control search-on-change" in self.form.fields[field].widget.attrs["class"]
             assert self.form.fields[field].label.lower() == upper_lower
 
