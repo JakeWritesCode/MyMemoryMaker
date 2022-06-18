@@ -155,14 +155,38 @@ class FilterSearchForm(forms.Form):
         self.fields["place_select"].widget.attrs["class"] = "d-none"
         self.fields["datetime_from"].widget.attrs["class"] = "form-control"
         self.fields["datetime_to"].widget.attrs["class"] = "form-control"
-        self.fields["distance_lower"].widget = forms.HiddenInput()
-        self.fields["distance_upper"].widget = forms.HiddenInput()
-        self.fields["price_lower"].widget = forms.HiddenInput()
-        self.fields["price_upper"].widget = forms.HiddenInput()
-        self.fields["people_lower"].widget = forms.HiddenInput()
-        self.fields["people_upper"].widget = forms.HiddenInput()
-        self.fields["duration_upper"].widget = forms.HiddenInput()
-        self.fields["duration_lower"].widget = forms.HiddenInput()
+
+        self.fields["distance_lower"].widget.attrs["aria-describedby"] = "from-distance-addon"
+        self.fields["distance_lower"].widget.attrs["class"] = "form-control search-on-change"
+        self.fields["distance_lower"].label = "From"
+
+        self.fields["distance_upper"].label = "To"
+        self.fields["distance_upper"].widget.attrs["aria-describedby"] = "to-distance-addon"
+        self.fields["distance_upper"].widget.attrs["class"] = "form-control search-on-change"
+
+        self.fields["price_lower"].widget.attrs["aria-describedby"] = "from-price-addon"
+        self.fields["price_lower"].widget.attrs["class"] = "form-control search-on-change"
+        self.fields["price_lower"].label = "From"
+
+        self.fields["price_upper"].label = "To"
+        self.fields["price_upper"].widget.attrs["aria-describedby"] = "to-price-addon"
+        self.fields["price_upper"].widget.attrs["class"] = "form-control search-on-change"
+
+        self.fields["duration_lower"].widget.attrs["aria-describedby"] = "from-duration-addon"
+        self.fields["duration_lower"].widget.attrs["class"] = "form-control search-on-change"
+        self.fields["duration_lower"].label = "From"
+
+        self.fields["duration_upper"].label = "To"
+        self.fields["duration_upper"].widget.attrs["aria-describedby"] = "to-duration-addon"
+        self.fields["duration_upper"].widget.attrs["class"] = "form-control search-on-change"
+
+        self.fields["people_lower"].widget.attrs["aria-describedby"] = "from-people-addon"
+        self.fields["people_lower"].widget.attrs["class"] = "form-control search-on-change"
+        self.fields["people_lower"].label = "From"
+
+        self.fields["people_upper"].label = "To"
+        self.fields["people_upper"].widget.attrs["aria-describedby"] = "to-people-addon"
+        self.fields["people_upper"].widget.attrs["class"] = "form-control search-on-change"
 
         for field in self.fields.values():
             try:

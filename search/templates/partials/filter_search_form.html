@@ -51,82 +51,67 @@ Relies on a search.filters.FilterSearchForm to be passed as context["filter_sear
             </div>
             <div class="invalid-feedback-manual" id="invalid-feedback-location"></div>
         </div>
-        <!-- Distance, slider -->
+        <!-- Distance -->
         <div class="row mt-4">
             <div class="col-12">
                 <label for="id_distance_lower">Distance</label>
                 <div class="row">
                     <div class="col-6">
-                        <label for="distance_lower" class="form-label">
-                            <span id="distance-low-display"></span> miles
-                        </label>
-                        {{ filter_search_form.distance_lower }}
+                        {{ filter_search_form.distance_lower.label }}
+                        <div class="input-group">
+                            {{ filter_search_form.distance_lower }}
+                            <span class="input-group-text" id="from-distance-addon">miles</span>
+                        </div>
                     </div>
                     <div class="col-6">
-                        <label for="distance_upper" class="form-label float-right">
-                            <span id="distance-high-display"></span> miles
-                        </label>
-                        {{ filter_search_form.distance_upper }}
-                    </div>
-                    <div class="row px-3">
-                        <div class="col-12 pl-2">
-                            <div class="w-100 slider-margin-fix" style="height: 3px">
-                                <span id="distance-selector" class="distance-selector mt-1"></span>
-                            </div>
+                        {{ filter_search_form.distance_upper.label }}
+                        <div class="input-group">
+                            {{ filter_search_form.distance_upper }}
+                            <span class="input-group-text" id="to-distance-addon">miles</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Price, slider -->
+        <!-- Price -->
         <div class="row mt-4">
             <div class="col-12">
                 <label for="id_price_lower">Price</label>
                 <div class="row">
                     <div class="col-6">
-                        <label for="price_lower" class="form-label">
-                            £<span id="price-low-display"></span>
-                        </label>
-                        {{ filter_search_form.price_lower }}
+                        {{ filter_search_form.price_lower.label }}
+                        <div class="input-group">
+                            <span class="input-group-text" id="from-price-addon">£</span>
+                            {{ filter_search_form.price_lower }}
+                        </div>
                     </div>
                     <div class="col-6">
-                        <label for="price_upper" class="form-label float-right">
-                            £<span id="price-high-display"></span>
-                        </label>
-                        {{ filter_search_form.price_upper }}
-                    </div>
-                    <div class="row px-3">
-                        <div class="col-12 pl-2">
-                            <div class="w-100 slider-margin-fix" style="height: 3px">
-                                <span id="price-selector" class="price-selector mt-1"></span>
-                            </div>
+                        {{ filter_search_form.price_upper.label }}
+                        <div class="input-group">
+                            <span class="input-group-text" id="to-price-addon">£</span>
+                            {{ filter_search_form.price_upper }}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Duration, slider -->
+        <!-- Duration -->
         <div class="row mt-4">
             <div class="col-12">
                 <label for="id_duration_lower">Duration</label>
                 <div class="row">
                     <div class="col-6">
-                        <label for="duration_lower" class="form-label">
-                            <span id="duration-low-display"></span> hours
-                        </label>
-                        {{ filter_search_form.duration_lower }}
+                        {{ filter_search_form.duration_lower.label }}
+                        <div class="input-group">
+                            {{ filter_search_form.duration_lower }}
+                            <span class="input-group-text" id="from-duration-addon">hours</span>
+                        </div>
                     </div>
                     <div class="col-6">
-                        <label for="duration_upper" class="form-label float-right">
-                            <span id="duration-high-display"></span> hours
-                        </label>
-                        {{ filter_search_form.duration_upper }}
-                    </div>
-                    <div class="row px-3">
-                        <div class="col-12 pl-2">
-                            <div class="w-100 slider-margin-fix" style="height: 3px">
-                                <span id="duration-selector" class="duration-selector mt-1"></span>
-                            </div>
+                        {{ filter_search_form.duration_upper.label }}
+                        <div class="input-group">
+                            {{ filter_search_form.duration_upper }}
+                            <span class="input-group-text" id="to-duration-addon">hours</span>
                         </div>
                     </div>
                 </div>
@@ -160,27 +145,22 @@ Relies on a search.filters.FilterSearchForm to be passed as context["filter_sear
                     <h3 class="h5">{{ category|filter_name_human_readable }}</h3>
                     {% if category == "people" %}
                         <!-- Number of people, slider -->
-                        <div class="row mt-4">
+                        <div class="row mt-4 mb-3">
                             <div class="col-12">
                                 <label for="id_distance_lower">Number of people</label>
                                 <div class="row">
                                     <div class="col-6">
-                                        <label for="people_lower" class="form-label">
-                                            <span id="people-low-display"></span> people
-                                        </label>
-                                        {{ filter_search_form.people_lower }}
+                                        {{ filter_search_form.people_lower.label }}
+                                        <div class="input-group">
+                                            {{ filter_search_form.people_lower }}
+                                            <span class="input-group-text" id="from-people-addon">people</span>
+                                        </div>
                                     </div>
                                     <div class="col-6">
-                                        <label for="people_upper" class="form-label float-right">
-                                            <span id="people-high-display"></span> people
-                                        </label>
-                                        {{ filter_search_form.people_upper }}
-                                    </div>
-                                    <div class="row px-3">
-                                        <div class="col-12 pl-2">
-                                            <div class="w-100 slider-margin-fix" style="height: 3px">
-                                                <span id="people-selector" class="people-selector mt-1"></span>
-                                            </div>
+                                        {{ filter_search_form.people_upper.label }}
+                                        <div class="input-group">
+                                            {{ filter_search_form.people_upper }}
+                                            <span class="input-group-text" id="to-people-addon">people</span>
                                         </div>
                                     </div>
                                 </div>
@@ -238,54 +218,6 @@ Relies on a search.filters.FilterSearchForm to be passed as context["filter_sear
             runSearch()
         }
     }
-
-    generateRangeSelector(
-        "distance-selector",
-        "id_distance_lower",
-        "id_distance_upper",
-        "distance-low-display",
-        "distance-high-display",
-        0,
-        100,
-        0,
-        100,
-    )
-
-    generateRangeSelector(
-        "price-selector",
-        "id_price_lower",
-        "id_price_upper",
-        "price-low-display",
-        "price-high-display",
-        0,
-        250,
-        0,
-        250,
-    )
-
-    generateRangeSelector(
-        "people-selector",
-        "id_people_lower",
-        "id_people_upper",
-        "people-low-display",
-        "people-high-display",
-        1,
-        50,
-        1,
-        50,
-    )
-
-    generateRangeSelector(
-        "duration-selector",
-        "id_duration_lower",
-        "id_duration_upper",
-        "duration-low-display",
-        "duration-high-display",
-        0,
-        48,
-        0,
-        48,
-    )
 
     const dateTimeFrom = document.querySelector('#datetime-from-picker');
     new mdb.Datetimepicker(dateTimeFrom, {
