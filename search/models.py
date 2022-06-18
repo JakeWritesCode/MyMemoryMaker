@@ -1,18 +1,30 @@
 # -*- coding: utf-8 -*-
 """Models for search."""
 # Standard Library
+import os
 import uuid
 
 # 3rd-party
+from datetime import datetime
+
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.fields import HStoreField
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 from geopy.distance import distance
 
 # Project
 from search.constants import SEARCH_ENTITY_SOURCES
 from users.models import CustomUser
+
+
+def search_image_upload_path(instance, filename):
+    """Change the filename of an image on upload."""
+    ext = filename.split('.')[-1]
+    upload_date = datetime.strftime(timezone.now(), "%Y-%m-%d%H%M%S")
+    filename = "%s_%s.%s" % (instance.id, upload_date, ext)
+    return os.path.join('searchimages', filename)
 
 
 class SearchImage(models.Model):
@@ -26,7 +38,7 @@ class SearchImage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     uploaded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     uploaded_timestamp = models.DateTimeField(auto_now=True)
-    uploaded_image = models.ImageField(null=True, upload_to="searchimages/")
+    uploaded_image = models.ImageField(null=True, upload_to=search_image_upload_path)
     link_url = models.CharField(max_length=2048, null=True, blank=True)
     alt_text = models.CharField(max_length=2048)
 
