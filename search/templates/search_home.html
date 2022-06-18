@@ -6,7 +6,7 @@
     <nav class="navbar navbar-expand-sm bg-light navbar-light d-md-none" id="second-navbar">
         <div class="container-fluid p-0">
             <div class="btn-group w-100 nav-button-group" role="group" aria-label="Basic example">
-                <button type="button" class="btn btn-link btn-lg text-mymemorymaker-primary"
+                <button type="button" class="btn btn-link btn-lg text-mymemorymaker-primary mobile-nav-button active"
                         id="search-filter-column-select">Filters
                 </button>
                 <button type="button" class="btn btn-link btn-lg" id="search-results-column-select">Results</button>
@@ -61,8 +61,14 @@
             resultsColumn.classList.add("inactive")
             const seeMoreColumn = document.getElementById("see-more-column")
             seeMoreColumn.classList.add("inactive")
-            document.getElementById("search-filter-column-select").classList.add("text-mymemorymaker-primary")
-            document.getElementById("search-results-column-select").classList.remove("text-mymemorymaker-primary")
+            const filterButton = document.getElementById("search-filter-column-select")
+            filterButton.classList.add("text-mymemorymaker-primary")
+            filterButton.classList.add("mobile-nav-button")
+            filterButton.classList.add("active")
+            const resultsButton = document.getElementById("search-results-column-select")
+            resultsButton.classList.remove("text-mymemorymaker-primary")
+            resultsButton.classList.remove("mobile-nav-button")
+            resultsButton.classList.remove("active")
         })
         document.getElementById("search-results-column-select").addEventListener("click", function () {
             // make results column active on mobile
@@ -72,8 +78,14 @@
             const resultsColumn = document.getElementById("results-column")
             resultsColumn.classList.remove("inactive")
             resultsColumn.classList.add("active")
-            document.getElementById("search-filter-column-select").classList.remove("text-mymemorymaker-primary")
-            document.getElementById("search-results-column-select").classList.add("text-mymemorymaker-primary")
+            const filterButton = document.getElementById("search-filter-column-select")
+            filterButton.classList.remove("text-mymemorymaker-primary")
+            filterButton.classList.remove("mobile-nav-button")
+            filterButton.classList.remove("active")
+            const resultsButton = document.getElementById("search-results-column-select")
+            resultsButton.classList.add("text-mymemorymaker-primary")
+            resultsButton.classList.add("mobile-nav-button")
+            resultsButton.classList.add("active")
         })
     </script>
 {% endblock %}

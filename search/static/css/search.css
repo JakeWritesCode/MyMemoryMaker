@@ -298,3 +298,7 @@ input[type="checkbox"]:checked + label.btn-activity-type-toggle {
 .pointer {
     cursor: pointer;
 }
+
+.mobile-nav-button.active {
+    background: lightgrey !important;
+}
