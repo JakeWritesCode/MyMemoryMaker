@@ -93,6 +93,10 @@ body {
         min-width: 400px;
     }
 
+    .results-background {
+        left: 400px !important;
+    }
+
     .results-column {
         flex-grow: 1;
     }
@@ -112,12 +116,11 @@ body {
     }
 
     .filter-column.active .bg-gradient-home {
-        height: 75vh;
+        height: 100%;
         position: absolute;
         width: 100vw;
         z-index: -1;
-        background: white;
-        background-image: linear-gradient(0deg, rgba(255, 255, 255, 1) 74%, rgba(124, 207, 214, 1) 82%, rgba(17, 167, 181, 1) 88%, rgba(11, 102, 161, 1) 93%, rgba(5, 27, 139, 1) 100%);
+        background: #FAFBFBFF;
     }
 
     .filter-column.inactive {
@@ -149,20 +152,28 @@ body {
 }
 
 .results-column {
-    background: rgba(232, 247, 248, 1);
-
+    position: relative;
 }
 
 .strapline {
     font-family: "Exo", sans-serif;
 }
 
-.results-backround {
-    background-image: url(/static/image/search-hobby-background.svg);
-    position: absolute;
+.results-background {
+    opacity: 0.15;
+    position: fixed;
+    left: 0;
+    top: 0;
     width: 100%;
-    opacity: 0.1;
     height: 100%;
+    z-index: -1;
+    object-fit: fill;
+    background: rgb(166, 254, 255);
+}
+.results-background-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 #second-navbar {
@@ -269,7 +280,3 @@ input[type="checkbox"]:checked + label.btn-activity-type-toggle {
     background: var(--mymemorymaker-primary);
 }
 
-.see-more-column {
-    background: rgba(232, 247, 248, 1);
-    background: linear-gradient(0deg, rgba(232, 247, 248, 1) 74%, rgba(124, 207, 214, 1) 82%, rgba(17, 167, 181, 1) 88%, rgba(11, 102, 161, 1) 93%, rgba(11, 102, 161, 1) 100%);
-}
