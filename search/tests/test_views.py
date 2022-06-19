@@ -1107,3 +1107,58 @@ class TestSeeMore(TestCase):
         response = self.client.get(self.url)
         assert response.context["search_entity"] == self.event
         assert response.context["entity_type"] == "Event"
+
+
+class TestAddToWishlist(TestCase):
+    """Tests for the add to wishlist view."""
+
+    def setUp(self) -> None:  # noqa: D102
+        self.user = CustomUserFactory()
+        self.activity = ActivityFactory()
+        self.event = EventFactory()
+        self.place = PlaceFactory()
+        self.view = views.add_to_wishlist
+        self.url = reverse(self.view, args=["Event", self.event.id])
+
+    def test_view_requires_login(self):
+        """View should require user login."""
+        response = self.client.post(self.url, follow=True)
+        self.assertRedirects(response, reverse(log_in) + f"?next={self.url}")
+
+    def test_view_returns_error_message_if_entity_type_is_not_correct(self):
+        """If the entity type is incorrect return a 404."""
+        self.client.force_login(self.user)
+        response = self.client.post(reverse(self.view, args=["Not", "a123"]))
+        assert response.status_code == NOT_FOUND
+        assert "The entity type you requested does not exist." in str(response.content)
+
+    def test_view_returns_error_message_if_entity_id_is_not_correct(self):
+        """If the entity id is incorrect return a 404."""
+        self.client.force_login(self.user)
+        response = self.client.post(reverse(self.view, args=["Event", uuid.uuid4()]))
+        assert response.status_code == NOT_FOUND
+        assert "The entity ID you requested does not exist." in str(response.content)
+
+    def test_view_adds_activity_to_users_wishlist(self):
+        """View should add Activity to users wishlist."""
+        self.client.force_login(self.user)
+        response = self.client.post(reverse(self.view, args=["Activity", self.activity.id]))
+        assert response.status_code == OK
+        assert "Added to wishlist successfully." in str(response.content)
+        assert list(self.user.wishlist_activities.all()) == [self.activity]
+
+    def test_view_adds_place_to_users_wishlist(self):
+        """View should add Place to users wishlist."""
+        self.client.force_login(self.user)
+        response = self.client.post(reverse(self.view, args=["Place", self.place.id]))
+        assert response.status_code == OK
+        assert "Added to wishlist successfully." in str(response.content)
+        assert list(self.user.wishlist_places.all()) == [self.place]
+
+    def test_view_adds_event_to_users_wishlist(self):
+        """View should add Event to users wishlist."""
+        self.client.force_login(self.user)
+        response = self.client.post(reverse(self.view, args=["Event", self.event.id]))
+        assert response.status_code == OK
+        assert "Added to wishlist successfully." in str(response.content)
+        assert list(self.user.wishlist_events.all()) == [self.event]

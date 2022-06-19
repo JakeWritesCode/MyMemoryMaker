@@ -19,4 +19,6 @@ urlpatterns = [
     path("", views.search_view, name="search-home"),
     path("new-submission", views.new_entity_wizard, name="new-submission"),
     path("see-more/<entity_type>/<entity_id>", views.see_more, name="see-more"),
+    # POST views
+    path("add-to-wishlist/<entity_type>/<entity_id>", views.add_to_wishlist, name="add-to-wishlist"),
 ]

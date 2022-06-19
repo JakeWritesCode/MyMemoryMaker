@@ -3,19 +3,21 @@
 
 # Standard Library
 from ast import literal_eval
-from http.client import NOT_FOUND
+from http.client import NOT_FOUND, OK
 
 # 3rd-party
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
 
 # Project
+from django.views.decorators.http import require_POST
+
 from search.constants import FILTERS
 from search.filters import FilterQueryProcessor
 from search.filters import FilterSearchForm
@@ -455,3 +457,25 @@ def see_more(request, entity_type, entity_id):
         "see_more.html",
         {"search_entity": entity_instance, "entity_type": entity_type},
     )
+
+@require_POST
+@login_required
+def add_to_wishlist(request, entity_type, entity_id):
+    """Add an entity to the users wishlist."""
+    available_types = [["Activity", Activity], ["Event", Event], ["Place", Place]]
+    if entity_type not in [x[0] for x in available_types]:
+        return HttpResponse("The entity type you requested does not exist.", status=NOT_FOUND)
+    entity = [x[1] for x in available_types if entity_type == x[0]][0]
+    try:
+        entity_instance = entity.objects.get(id=entity_id)
+    except (Activity.DoesNotExist, Place.DoesNotExist, Event.DoesNotExist):
+        return HttpResponse("The entity ID you requested does not exist.", status=NOT_FOUND)
+
+    if entity_type == "Activity":
+        request.user.wishlist_activities.add(entity_instance)
+    if entity_type == "Place":
+        request.user.wishlist_places.add(entity_instance)
+    if entity_type == "Event":
+        request.user.wishlist_events.add(entity_instance)
+
+    return HttpResponse("Added to wishlist successfully.", status=OK)
