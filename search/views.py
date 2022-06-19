@@ -460,7 +460,7 @@ def see_more(request, entity_type, entity_id):
 
 @require_POST
 @login_required
-def add_to_wishlist(request, entity_type, entity_id):
+def modify_wishlist(request, entity_type, entity_id, add_or_remove):
     """Add an entity to the users wishlist."""
     available_types = [["Activity", Activity], ["Event", Event], ["Place", Place]]
     if entity_type not in [x[0] for x in available_types]:
@@ -472,10 +472,19 @@ def add_to_wishlist(request, entity_type, entity_id):
         return HttpResponse("The entity ID you requested does not exist.", status=NOT_FOUND)
 
     if entity_type == "Activity":
-        request.user.wishlist_activities.add(entity_instance)
+        if add_or_remove == "add":
+            request.user.wishlist_activities.add(entity_instance)
+        else:
+            request.user.wishlist_activities.remove(entity_instance)
     if entity_type == "Place":
-        request.user.wishlist_places.add(entity_instance)
+        if add_or_remove == "add":
+            request.user.wishlist_places.add(entity_instance)
+        else:
+            request.user.wishlist_places.remove(entity_instance)
     if entity_type == "Event":
-        request.user.wishlist_events.add(entity_instance)
+        if add_or_remove == "add":
+            request.user.wishlist_events.add(entity_instance)
+        else:
+            request.user.wishlist_events.remove(entity_instance)
 
     return HttpResponse("Added to wishlist successfully.", status=OK)

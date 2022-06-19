@@ -301,3 +301,77 @@ function backToResults() {
     document.getElementById("results-column").classList.remove("hide")
     document.getElementById("see-more-column").classList.add("inactive")
 }
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        let cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            let cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function addToWishlist(wishlistURL, button) {
+    // Add a search entity to the users wishlist.
+    fetch(wishlistURL, {
+        method: 'POST',
+        credentials: "same-origin",
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+        }
+    })
+        .then(function (response) {
+                if (response.status === 200) {
+                    // Do something here to show it's been added to the wishlist.
+                    button.classList.add("text-mymemorymaker-primary")
+                    const navbarWishlist = document.getElementById("navbar-wishlist")
+                    navbarWishlist.classList.add("hithere")
+                    setTimeout(function () {
+                        navbarWishlist.classList.remove('hithere');
+                        //....and whatever else you need to do
+                    }, 2000);
+                }
+            }
+        )
+}
+
+function addToWishlist(wishlistURL, button, addOrRemove) {
+    // Add a search entity to the users wishlist.
+    fetch(wishlistURL, {
+        method: 'POST',
+        credentials: "same-origin",
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+        }
+    })
+        .then(function (response) {
+                if (response.status === 200) {
+                    // Change the colour of the button and change the function to the opposite.
+                    if (addOrRemove === "add") {
+                        button.classList.add("text-mymemorymaker-primary")
+                        const newURL = wishlistURL.replace("add", "remove")
+                        button.onclick = function () {addToWishlist(newURL, button, 'remove')}
+                    } else {
+                        button.classList.remove("text-mymemorymaker-primary")
+                        const newURL = wishlistURL.replace("remove", "add")
+                        button.onclick = function () {addToWishlist(newURL, button, 'add')}
+                    }
+
+                    // Make the navbar button jiggle
+                    const navbarWishlist = document.getElementById("navbar-wishlist")
+                    navbarWishlist.classList.add("hithere")
+                    setTimeout(function () {
+                        navbarWishlist.classList.remove('hithere');
+                        //....and whatever else you need to do
+                    }, 2000);
+                }
+            }
+        )
+}

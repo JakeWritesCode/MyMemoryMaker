@@ -184,8 +184,8 @@ body {
     height: 100%;
     z-index: -1;
     object-fit: fill;
-background: rgb(196,196,196);
-background: linear-gradient(0deg, rgba(196,196,196,1) 0%, rgba(102,230,255,1) 59%);
+    background: rgb(196, 196, 196);
+    background: linear-gradient(0deg, rgba(196, 196, 196, 1) 0%, rgba(102, 230, 255, 1) 59%);
 }
 
 .results-background-image {
@@ -309,4 +309,27 @@ input[type="checkbox"]:checked + label.btn-activity-type-toggle {
 
 .mobile-nav-button.active {
     background: lightgrey !important;
+}
+
+.hithere {
+    animation: hithere 1s ease infinite;
+    color: var(--mymemorymaker-primary);
+}
+
+@keyframes hithere {
+    30% {
+        transform: scale(1.2);
+    }
+    40%, 60% {
+        transform: rotate(-20deg) scale(1.2);
+    }
+    50% {
+        transform: rotate(20deg) scale(1.2);
+    }
+    70% {
+        transform: rotate(0deg) scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
 }

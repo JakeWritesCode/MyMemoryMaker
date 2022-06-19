@@ -1,5 +1,6 @@
 {% load static %}
 {% load filter_name_human_readable %}
+{% load is_in_users_wishlist %}
 
 <div class="card card-shadow search-entity-card">
     <div class="card-body">
@@ -22,7 +23,8 @@
                 <div class="d-flex">
                     <div class="flex-grow-1">
                         {% if entity_id %}
-                            <a onclick="loadSeeMore('{% url "see-more" entity_type entity_id %}')" class="no-link pointer">
+                            <a onclick="loadSeeMore('{% url "see-more" entity_type entity_id %}')"
+                               class="no-link pointer">
                                 <h2 class="h3" id="search-entity-headline">{{ entity_type }}:
                                     {% if headline %}{{ headline }}{% else %}My New Submission{% endif %}</h2>
                             </a>
@@ -35,7 +37,20 @@
                                 description{% endif %}</div>
                     </div>
                     <div class="">
-                        <span class="material-icons material-icons-outlined search-entity-icon">favorite</span>
+                        {% is_in_users_wishlist entity_type entity_id as in_wishlist %}
+                        {% if not in_wishlist %}
+                            <span
+                                    class="material-icons material-icons-outlined search-entity-icon pointer"
+                                    onclick="addToWishlist('{% url "modify-wishlist" entity_type entity_id "add" %}', this, 'add')">
+                            favorite
+                            </span>
+                        {% else %}
+                            <span
+                                    class="material-icons material-icons-outlined search-entity-icon pointer text-mymemorymaker-primary"
+                                    onclick="addToWishlist('{% url "modify-wishlist" entity_type entity_id "remove" %}', this, 'remove')">
+                            favorite
+                            </span>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="row d-flex">
