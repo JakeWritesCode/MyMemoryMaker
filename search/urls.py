@@ -15,10 +15,12 @@ urlpatterns = [
     path("new-event", views.new_event, name="new-event"),
     path("edit-event/<event_id>", views.edit_event, name="edit-event"),
     path("search-results", views.search_results, name="search-results"),
+    path("my-wishlist-results", views.my_wishlist_results, name="my-wishlist-results"),
     # Whole pages
     path("", views.search_view, name="search-home"),
     path("new-submission", views.new_entity_wizard, name="new-submission"),
     path("see-more/<entity_type>/<entity_id>", views.see_more, name="see-more"),
+    path("my-wishlist", views.my_wishlist, name="my-wishlist"),
     # POST views
     path("modify-wishlist/<entity_type>/<entity_id>/<add_or_remove>", views.modify_wishlist, name="modify-wishlist"),
 ]

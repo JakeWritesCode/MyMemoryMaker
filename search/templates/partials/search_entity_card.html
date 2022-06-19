@@ -38,18 +38,20 @@
                     </div>
                     <div class="">
                         {% is_in_users_wishlist entity_type entity_id as in_wishlist %}
-                        {% if not in_wishlist %}
-                            <span
-                                    class="material-icons material-icons-outlined search-entity-icon pointer"
-                                    onclick="addToWishlist('{% url "modify-wishlist" entity_type entity_id "add" %}', this, 'add')">
-                            favorite
-                            </span>
-                        {% else %}
-                            <span
-                                    class="material-icons material-icons-outlined search-entity-icon pointer text-mymemorymaker-primary"
-                                    onclick="addToWishlist('{% url "modify-wishlist" entity_type entity_id "remove" %}', this, 'remove')">
-                            favorite
-                            </span>
+                        {% if entity_id %}
+                            {% if not in_wishlist %}
+                                <span
+                                        class="material-icons material-icons-outlined search-entity-icon pointer"
+                                        onclick="addToWishlist('{% url "modify-wishlist" entity_type entity_id "add" %}', this, 'add')">
+                                favorite
+                                </span>
+                            {% else %}
+                                <span
+                                        class="material-icons material-icons-outlined search-entity-icon pointer text-mymemorymaker-primary"
+                                        onclick="addToWishlist('{% url "modify-wishlist" entity_type entity_id "remove" %}', this, 'remove')">
+                                favorite
+                                </span>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>

@@ -197,13 +197,14 @@ function parseSearch() {
     return getParams
 }
 
-function runSearch() {
+function runSearch(force=false) {
     const getParams = parseSearch()
     const resultsTarget = document.getElementById("search-results-target")
 
     // It's possible the user could have deactivated all filters after activating some.
     // If so, just remove everything from the target div.
-    if (Object.keys(getParams).length === 0) {
+    // Except if we wanna force load, such as for wishlist
+    if (Object.keys(getParams).length === 0 && !force)  {
         resultsTarget.innerHTML = ""
         document.getElementById("welcome-banner").classList.add("active")
         document.getElementById("search-results-column-select").innerHTML = `Results`

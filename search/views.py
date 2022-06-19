@@ -488,3 +488,31 @@ def modify_wishlist(request, entity_type, entity_id, add_or_remove):
             request.user.wishlist_events.remove(entity_instance)
 
     return HttpResponse("Added to wishlist successfully.", status=OK)
+
+
+def my_wishlist(request):
+    """
+    My wishlist. A straight copy of search_home but limiting the results to only the users wishlist.
+
+    Actual results are served by search_results.
+    The difference here is we want to show everything on the wish list by default. Set a param so we load on page load.
+    """
+    filter_search_form = FilterSearchForm()
+
+    return render(
+        request,
+        "search_home.html",
+        {
+            "filter_search_form": filter_search_form,
+            "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+            "filters_dict": FILTERS,
+            "search_results_url": request.build_absolute_uri(reverse("my-wishlist-results")),
+            "wishlist": True
+        },
+    )
+
+
+def my_wishlist_results(request):
+    """An async view that returns the users wishlist results based on GET params."""
+    results = FilterQueryProcessor(request.GET, wishlist_user=request.user).get_results()
+    return render(request, "partials/search_results.html", {"results": results})

@@ -93,7 +93,7 @@ body {
         min-width: 400px;
     }
 
-    .results-background {
+    .results-background.shift {
         left: 400px !important;
     }
 

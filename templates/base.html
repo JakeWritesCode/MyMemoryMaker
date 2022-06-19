@@ -58,7 +58,7 @@
         </a>
         <ul class="navbar-nav px-0">
             <li class="nav-item mx-1">
-                <a class="nav-link active main-navbar-button py-0 {% if "/search" in request.build_absolute_uri %}navbar-icon-selected{% endif %}"
+                <a class="nav-link active main-navbar-button py-0 {% if request.build_absolute_uri|slice:"-7:-1" == "search" %}navbar-icon-selected{% endif %}"
                    href="{% url "search-home" %}">
                     <i class="fa-solid fa-magnifying-glass fa-xl"></i>
                     <br class="d-md-none">
@@ -83,7 +83,8 @@
             </li>
 
             <li class="nav-item mx-1">
-                <a class="nav-link active main-navbar-button py-0" href="3">
+                <a class="nav-link active main-navbar-button py-0 {% if "/my-wishlist" in request.build_absolute_uri %}navbar-icon-selected{% endif %}"
+                   href="{% url "my-wishlist" %}">
                     <i class="fa-solid fa-heart fa-xl" id="navbar-wishlist"></i>
                     <br class="d-md-none">
                     <span class="navbar-text"> Wishlist</span>
