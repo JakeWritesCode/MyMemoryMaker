@@ -50,6 +50,12 @@ class CustomUser(AbstractUser):
     """
 
     email = models.EmailField(unique=True, primary_key=True)
+    wishlist_activities = models.ManyToManyField(
+        "search.Activity", related_name="wishlist_activities",
+    )
+    wishlist_places = models.ManyToManyField("search.Place", related_name="wishlist_places")
+    wishlist_events = models.ManyToManyField("search.Event", related_name="wishlist_events")
+
     objects = CustomUserManager()
     username = None
     USERNAME_FIELD = "email"
