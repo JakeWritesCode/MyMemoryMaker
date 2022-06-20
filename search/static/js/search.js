@@ -319,30 +319,6 @@ function getCookie(name) {
     return cookieValue;
 }
 
-function addToWishlist(wishlistURL, button) {
-    // Add a search entity to the users wishlist.
-    fetch(wishlistURL, {
-        method: 'POST',
-        credentials: "same-origin",
-        headers: {
-            "X-CSRFToken": getCookie("csrftoken"),
-        }
-    })
-        .then(function (response) {
-                if (response.status === 200) {
-                    // Do something here to show it's been added to the wishlist.
-                    button.classList.add("text-mymemorymaker-primary")
-                    const navbarWishlist = document.getElementById("navbar-wishlist")
-                    navbarWishlist.classList.add("hithere")
-                    setTimeout(function () {
-                        navbarWishlist.classList.remove('hithere');
-                        //....and whatever else you need to do
-                    }, 2000);
-                }
-            }
-        )
-}
-
 function addToWishlist(wishlistURL, button, addOrRemove) {
     // Add a search entity to the users wishlist.
     fetch(wishlistURL, {
