@@ -22,5 +22,9 @@ urlpatterns = [
     path("see-more/<entity_type>/<entity_id>", views.see_more, name="see-more"),
     path("my-wishlist", views.my_wishlist, name="my-wishlist"),
     # POST views
-    path("modify-wishlist/<entity_type>/<entity_id>/<add_or_remove>", views.modify_wishlist, name="modify-wishlist"),
+    path(
+        "modify-wishlist/<entity_type>/<entity_id>/<add_or_remove>",
+        views.modify_wishlist,
+        name="modify-wishlist",
+    ),
 ]

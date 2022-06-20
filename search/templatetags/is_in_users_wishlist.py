@@ -5,10 +5,8 @@
 from django import template
 from django.contrib.auth.models import AnonymousUser
 
-# Project
-from users.models import CustomUser
-
 register = template.Library()
+
 
 @register.simple_tag(takes_context=True)
 def is_in_users_wishlist(context, entity_type: str, entity_id):
