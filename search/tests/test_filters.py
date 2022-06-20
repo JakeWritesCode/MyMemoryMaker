@@ -14,6 +14,7 @@ from django import forms
 from django.conf import settings
 from django.test import SimpleTestCase
 from django.test import TestCase
+from django.test import override_settings
 from django.utils import timezone
 
 # Project
@@ -220,12 +221,14 @@ class TestFilterQueryProcessor(TestCase):
     """
 
     def setUp(self) -> None:  # noqa: D102
+        self.user = CustomUserFactory()
         self.processor = FilterQueryProcessor
 
     def test_init(self):
         """Test class init."""
-        processor = self.processor("Tomatoes")
+        processor = self.processor("Tomatoes", self.user)
         assert processor.request_get == "Tomatoes"
+        assert processor.wishlist_user == self.user
 
     def test_types_required_returns_correct_types_required(self):
         """Function should return the base classes of the search entity types selected."""
@@ -433,9 +436,42 @@ class TestFilterQueryProcessor(TestCase):
         }
         assert self.processor(get_param)._perform_distance_query(places) is places
 
+    @override_settings(SEARCH_SHOW_UNMODERATED_RESULTS=True)
+    def test__get_base_queryset_returns_all_results_for_type_if_no_user_passed_in(self):
+        """If no user is passed in, the base queryset should be all objects."""
+        ActivityFactory()
+        PlaceFactory()
+        EventFactory()
+        processor = self.processor({})
+        assert list(processor._get_base_queryset(Activity)) == list(Activity.objects.all())
+        assert list(processor._get_base_queryset(Place)) == list(Place.objects.all())
+        assert list(processor._get_base_queryset(Event)) == list(Event.objects.all())
+
+    @override_settings(SEARCH_SHOW_UNMODERATED_RESULTS=True)
+    def test__get_base_queryset_returns_only_user_wishlist_results_for_type_if_user_passed_in(self):
+        """If user is passed in, the base queryset should be all objects in that users wishlist."""
+        ActivityFactory()
+        PlaceFactory()
+        EventFactory()
+        processor = self.processor({}, self.user)
+        assert list(processor._get_base_queryset(Activity)) == []
+        assert list(processor._get_base_queryset(Place)) == []
+        assert list(processor._get_base_queryset(Event)) == []
+
+        new_activity = ActivityFactory()
+        self.user.wishlist_activities.add(new_activity)
+        new_place = PlaceFactory()
+        self.user.wishlist_places.add(new_place)
+        new_event = EventFactory()
+        self.user.wishlist_events.add(new_event)
+
+        assert list(processor._get_base_queryset(Activity)) == [new_activity]
+        assert list(processor._get_base_queryset(Place)) == [new_place]
+        assert list(processor._get_base_queryset(Event)) == [new_event]
+
+    @override_settings(SEARCH_SHOW_UNMODERATED_RESULTS=False)
     def test_get_results_for_object_type_does_not_show_unapproved_items_if_settings(self):
         """Filters should not show unapproved items if SEARCH_SHOW_UNMODERATED_RESULTS=False."""
-        settings.SEARCH_SHOW_UNMODERATED_RESULTS = False
         activity = ActivityFactory()
         processor = self.processor({})
         result = processor._get_results_for_object_type(Activity)
