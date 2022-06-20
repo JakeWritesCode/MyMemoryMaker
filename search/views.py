@@ -418,15 +418,15 @@ def search_view(request):
             "filter_search_form": filter_search_form,
             "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
             "filters_dict": FILTERS,
-            "search_results_url": request.build_absolute_uri(reverse("search-results")),
+            "search_results_url": request.build_absolute_uri(reverse("search-results", args=["dummy"])),
         },
     )
 
 
-def search_results(request):
+def search_results(request, page_number):
     """An async view that returns the search results based on GET params."""
-    results = FilterQueryProcessor(request.GET).get_results()
-    return render(request, "partials/search_results.html", {"results": results})
+    results = FilterQueryProcessor(request.GET, page=int(page_number)).get_results()
+    return render(request, "partials/search_results.html", {"results": results, "page_number": page_number})
 
 
 @login_required
@@ -519,7 +519,7 @@ def my_wishlist(request):
 
 
 @login_required
-def my_wishlist_results(request):
+def my_wishlist_results(request, page_number):
     """An async view that returns the users wishlist results based on GET params."""
-    results = FilterQueryProcessor(request.GET, wishlist_user=request.user).get_results()
-    return render(request, "partials/search_results.html", {"results": results})
+    results = FilterQueryProcessor(request.GET, wishlist_user=request.user, page=int(page_number)).get_results()
+    return render(request, "partials/search_results.html", {"results": results, "page_number": page_number})

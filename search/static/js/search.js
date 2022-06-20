@@ -197,14 +197,14 @@ function parseSearch() {
     return getParams
 }
 
-function runSearch(force=false) {
+function runSearch(force=false, pageNumber=1) {
     const getParams = parseSearch()
     const resultsTarget = document.getElementById("search-results-target")
 
     // It's possible the user could have deactivated all filters after activating some.
     // If so, just remove everything from the target div.
     // Except if we wanna force load, such as for wishlist
-    if (Object.keys(getParams).length === 0 && !force)  {
+    if (Object.keys(getParams).length === 0 && !(force === true) )  {
         resultsTarget.innerHTML = ""
         document.getElementById("welcome-banner").classList.add("active")
         document.getElementById("search-results-column-select").innerHTML = `Results`
@@ -212,7 +212,7 @@ function runSearch(force=false) {
     }
 
     // Generate the get params
-    const searchResultsURLWithGETParams = new URL(searchResultsURL)
+    const searchResultsURLWithGETParams = new URL(searchResultsURL + pageNumber)
     for (let k in getParams) {
         searchResultsURLWithGETParams.searchParams.append(k, getParams[k]);
     }
@@ -224,7 +224,14 @@ function runSearch(force=false) {
     })
         .then(response => response.text())
         .then(html => {
-                resultsTarget.innerHTML = html;
+                if (pageNumber === 1) {
+                    resultsTarget.innerHTML = html;
+                } else {
+                    const loadMore = document.getElementById("load-more-button")
+                    resultsTarget.removeChild(loadMore)
+                    resultsTarget.innerHTML = resultsTarget.innerHTML + html
+                }
+
                 const totalResults = document.getElementById("total-number-of-results").innerHTML
                 document.getElementById("search-results-column-select").innerHTML = `Results (${totalResults})`
             }
@@ -234,7 +241,9 @@ function runSearch(force=false) {
     document.getElementById("welcome-banner").classList.remove("active")
 
     // Scrool back to the top of the results
-    document.getElementById("results-column").scrollTop = 0;
+    if (pageNumber === 1) {
+        document.getElementById("results-column").scrollTop = 0;
+    }
 }
 
 class ClassWatcher {

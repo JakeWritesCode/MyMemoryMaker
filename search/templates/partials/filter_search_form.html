@@ -249,5 +249,5 @@ Relies on a search.filters.FilterSearchForm to be passed as context["filter_sear
         }, runSearch)
     }
 
-    const searchResultsURL = "{{ search_results_url }}"
+    const searchResultsURL = "{{ search_results_url }}".replace("dummy", "")
 </script>

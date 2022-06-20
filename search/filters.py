@@ -4,6 +4,7 @@
 # Standard Library
 import random
 from datetime import datetime
+from operator import attrgetter
 from typing import Type
 from typing import Union
 
@@ -207,9 +208,11 @@ class FilterQueryProcessor:
     a list of applicable Activities, Events or Places.
     """  # noqa: D205 D400
 
-    def __init__(self, request_get, wishlist_user=None):  # noqa: D107
+    def __init__(self, request_get, wishlist_user=None, limit=20, page=1):  # noqa: D107
         self.request_get = request_get
         self.wishlist_user = wishlist_user
+        self.limit = limit
+        self.page = page
 
     def _types_required(self):
         """Which types of search entity are required."""
@@ -431,12 +434,19 @@ class FilterQueryProcessor:
 
         return list_of_results
 
+    def _paginator(self, list_of_results):
+        """Paginate the results."""
+        # TODO - This is the most disgustingly inefficient way to query a DB known to man. Fix it.
+        list_of_results.sort(key=attrgetter("id"))
+        lower_bound = self.limit * (self.page - 1)
+        upper_bound = (self.limit * self.page) - 1
+        return list_of_results[lower_bound:upper_bound]
+
     def get_results(self):
         """Return all results."""
         all_results = []
 
         for obj_type in self._types_required():
             all_results += list(self._get_results_for_object_type(obj_type))
-        random.shuffle(all_results)
 
-        return all_results
+        return self._paginator(all_results)

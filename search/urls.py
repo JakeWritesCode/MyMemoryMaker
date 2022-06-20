@@ -14,8 +14,8 @@ urlpatterns = [
     path("edit-place/<place_id>", views.edit_place, name="edit-place"),
     path("new-event", views.new_event, name="new-event"),
     path("edit-event/<event_id>", views.edit_event, name="edit-event"),
-    path("search-results", views.search_results, name="search-results"),
-    path("my-wishlist-results", views.my_wishlist_results, name="my-wishlist-results"),
+    path("search-results/<page_number>", views.search_results, name="search-results"),
+    path("my-wishlist-results/<page_number>", views.my_wishlist_results, name="my-wishlist-results"),
     # Whole pages
     path("", views.search_view, name="search-home"),
     path("new-submission", views.new_entity_wizard, name="new-submission"),

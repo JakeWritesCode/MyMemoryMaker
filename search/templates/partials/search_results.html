@@ -10,6 +10,10 @@ Basically just parses each result into a card.
         </div>
     </div>
 {% endfor %}
-<div class="row" style="height: 120px"></div>
+<div class="row py-2" id="load-more-button" style="margin-bottom: 120px">
+    <div class="col-12 text-center">
+        <button class="btn btn-primary" role="button" type="button" onclick="runSearch(false, {{ page_number|add:"1" }})">Load more results</button>
+    </div>
+</div>
 <!-- A hidden span with the total number of results we can use to populate the search button. -->
 <span id="total-number-of-results" class="d-none">{{ results|length }}</span>
