@@ -12,6 +12,7 @@ from unittest.mock import patch
 from crispy_forms.helper import FormHelper
 from django import forms
 from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
 from django.test import SimpleTestCase
 from django.test import TestCase
 from django.test import override_settings
@@ -468,6 +469,26 @@ class TestFilterQueryProcessor(TestCase):
         assert list(processor._get_base_queryset(Activity)) == [new_activity]
         assert list(processor._get_base_queryset(Place)) == [new_place]
         assert list(processor._get_base_queryset(Event)) == [new_event]
+
+    @override_settings(SEARCH_SHOW_UNMODERATED_RESULTS=True)
+    def test__get_base_queryset_returns_empty_qs_if_user_passed_in_is_anonymous(self):
+        """If AnonymousUser is passed in, the base queryset should be Entity.objects.none."""
+        ActivityFactory()
+        PlaceFactory()
+        EventFactory()
+
+        new_activity = ActivityFactory()
+        self.user.wishlist_activities.add(new_activity)
+        new_place = PlaceFactory()
+        self.user.wishlist_places.add(new_place)
+        new_event = EventFactory()
+        self.user.wishlist_events.add(new_event)
+
+        processor = self.processor({}, AnonymousUser())
+
+        assert list(processor._get_base_queryset(Activity)) == []
+        assert list(processor._get_base_queryset(Place)) == []
+        assert list(processor._get_base_queryset(Event)) == []
 
     @override_settings(SEARCH_SHOW_UNMODERATED_RESULTS=False)
     def test_get_results_for_object_type_does_not_show_unapproved_items_if_settings(self):
