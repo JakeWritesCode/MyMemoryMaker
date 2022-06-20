@@ -449,4 +449,9 @@ class FilterQueryProcessor:
         for obj_type in self._types_required():
             all_results += list(self._get_results_for_object_type(obj_type))
 
-        return self._paginator(all_results)
+        self._cached_results = all_results
+        return self._paginator(self._cached_results)
+
+    def get_result_count(self):
+        """Get the total number of results ignoring pagination."""
+        return len(self._cached_results)
