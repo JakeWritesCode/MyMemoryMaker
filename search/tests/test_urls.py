@@ -52,3 +52,11 @@ class TestURLs(SimpleTestCase):
     def test_modify_wishlist_url(self):
         """Test url."""
         assert reverse(views.modify_wishlist, args=["Event", "a123", "add"]) == "/search/modify-wishlist/Event/a123/add"
+
+    def test_my_wishlist_url(self):
+        """Test url."""
+        assert reverse(views.my_wishlist) == "/search/my-wishlist"
+
+    def test_my_wishlist_results_url(self):
+        """Test url."""
+        assert reverse(views.my_wishlist_results) == "/search/my-wishlist-results"
