@@ -1107,3 +1107,151 @@ class TestSeeMore(TestCase):
         response = self.client.get(self.url)
         assert response.context["search_entity"] == self.event
         assert response.context["entity_type"] == "Event"
+
+
+class TestModifyWishlist(TestCase):
+    """Tests for the add to wishlist view."""
+
+    def setUp(self) -> None:  # noqa: D102
+        self.user = CustomUserFactory()
+        self.activity = ActivityFactory()
+        self.event = EventFactory()
+        self.place = PlaceFactory()
+        self.view = views.modify_wishlist
+        self.url = reverse(self.view, args=["Event", self.event.id, "add"])
+
+    def test_view_requires_login(self):
+        """View should require user login."""
+        response = self.client.post(self.url, follow=True)
+        self.assertRedirects(response, reverse(log_in) + f"?next={self.url}")
+
+    def test_view_returns_error_message_if_entity_type_is_not_correct(self):
+        """If the entity type is incorrect return a 404."""
+        self.client.force_login(self.user)
+        response = self.client.post(reverse(self.view, args=["Not", "a123", "add"]))
+        assert response.status_code == NOT_FOUND
+        assert "The entity type you requested does not exist." in str(response.content)
+
+    def test_view_returns_error_message_if_entity_id_is_not_correct(self):
+        """If the entity id is incorrect return a 404."""
+        self.client.force_login(self.user)
+        response = self.client.post(reverse(self.view, args=["Event", uuid.uuid4(), "add"]))
+        assert response.status_code == NOT_FOUND
+        assert "The entity ID you requested does not exist." in str(response.content)
+
+    def test_view_adds_activity_to_users_wishlist_if_requested(self):
+        """View should add Activity to users wishlist."""
+        self.client.force_login(self.user)
+        response = self.client.post(reverse(self.view, args=["Activity", self.activity.id, "add"]))
+        assert response.status_code == OK
+        assert "Added to wishlist successfully." in str(response.content)
+        assert list(self.user.wishlist_activities.all()) == [self.activity]
+
+    def test_view_removes_activity_from_users_wishlist_if_requested(self):
+        """View should remove Activity from users wishlist."""
+        self.client.force_login(self.user)
+        self.user.wishlist_activities.add(self.activity)
+        response = self.client.post(
+            reverse(self.view, args=["Activity", self.activity.id, "remove"]),
+        )
+        assert response.status_code == OK
+        assert "Removed from wishlist successfully." in str(response.content)
+        assert list(self.user.wishlist_activities.all()) == []
+
+    def test_view_adds_place_to_users_wishlist(self):
+        """View should add Place to users wishlist."""
+        self.client.force_login(self.user)
+        response = self.client.post(reverse(self.view, args=["Place", self.place.id, "add"]))
+        assert response.status_code == OK
+        assert "Added to wishlist successfully." in str(response.content)
+        assert list(self.user.wishlist_places.all()) == [self.place]
+
+    def test_view_removes_place_from_users_wishlist_if_requested(self):
+        """View should remove Place from users wishlist."""
+        self.client.force_login(self.user)
+        self.user.wishlist_places.add(self.place)
+        response = self.client.post(reverse(self.view, args=["Place", self.place.id, "remove"]))
+        assert response.status_code == OK
+        assert "Removed from wishlist successfully." in str(response.content)
+        assert list(self.user.wishlist_places.all()) == []
+
+    def test_view_adds_event_to_users_wishlist(self):
+        """View should add Event to users wishlist."""
+        self.client.force_login(self.user)
+        response = self.client.post(reverse(self.view, args=["Event", self.event.id, "add"]))
+        assert response.status_code == OK
+        assert "Added to wishlist successfully." in str(response.content)
+        assert list(self.user.wishlist_events.all()) == [self.event]
+
+    def test_view_removes_event_from_users_wishlist_if_requested(self):
+        """View should remove Event from users wishlist."""
+        self.client.force_login(self.user)
+        self.user.wishlist_events.add(self.event)
+        response = self.client.post(reverse(self.view, args=["Event", self.event.id, "remove"]))
+        assert response.status_code == OK
+        assert "Removed from wishlist successfully." in str(response.content)
+        assert list(self.user.wishlist_events.all()) == []
+
+
+class TestMyWishlist(TestCase):
+    """Tests for the my_wishlist view."""
+
+    def setUp(self) -> None:  # noqa: D102
+        self.view = views.my_wishlist
+        self.url = reverse(self.view)
+        self.user = CustomUserFactory()
+
+    def test_view_requires_login(self):
+        """View should require user login."""
+        response = self.client.get(self.url, follow=True)
+        self.assertRedirects(response, reverse(log_in) + f"?next={self.url}")
+
+    def test_template(self):
+        """Test that the view returns the correct template."""
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "search_home.html")
+
+    def test_context(self):
+        """Test that the view renders the correct context."""
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        assert isinstance(response.context["filter_search_form"], FilterSearchForm)
+        assert response.context["GOOGLE_MAPS_API_KEY"] == settings.GOOGLE_MAPS_API_KEY
+        assert response.context["filters_dict"] == FILTERS
+        assert reverse("my-wishlist-results") in response.context["search_results_url"]
+        assert response.context["wishlist"] is True
+
+
+class TestMyWishlistResults(TestCase):
+    """Test my_wishlist_results view."""
+
+    def setUp(self) -> None:  # noqa: D102
+        self.view = views.my_wishlist_results
+        self.url = reverse(self.view)
+        self.user = CustomUserFactory()
+        self.activity = ActivityFactory(approved_by=self.user, approval_timestamp=timezone.now())
+        self.event = EventFactory(approved_by=self.user, approval_timestamp=timezone.now())
+        self.place = PlaceFactory(approved_by=self.user, approval_timestamp=timezone.now())
+        self.user.wishlist_activities.add(self.activity)
+        self.user.wishlist_events.add(self.event)
+        self.user.wishlist_places.add(self.place)
+
+    def test_template(self):
+        """Test that the view returns the correct template."""
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "partials/search_results.html")
+
+    def test_view_requires_login(self):
+        """View should require user login."""
+        response = self.client.get(self.url, follow=True)
+        self.assertRedirects(response, reverse(log_in) + f"?next={self.url}")
+
+    def test_results(self):
+        """Functional test to make sure that all results are returned."""
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        assert self.activity.headline in str(response.content)
+        assert self.event.headline in str(response.content)
+        assert self.place.headline in str(response.content)

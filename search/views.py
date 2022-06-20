@@ -4,6 +4,7 @@
 # Standard Library
 from ast import literal_eval
 from http.client import NOT_FOUND
+from http.client import OK
 
 # 3rd-party
 from django.conf import settings
@@ -14,6 +15,7 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 # Project
 from search.constants import FILTERS
@@ -455,3 +457,69 @@ def see_more(request, entity_type, entity_id):
         "see_more.html",
         {"search_entity": entity_instance, "entity_type": entity_type},
     )
+
+
+@require_POST
+@login_required
+def modify_wishlist(request, entity_type, entity_id, add_or_remove):
+    """Add an entity to the users wishlist."""
+    available_types = [["Activity", Activity], ["Event", Event], ["Place", Place]]
+    if entity_type not in [x[0] for x in available_types]:
+        return HttpResponse("The entity type you requested does not exist.", status=NOT_FOUND)
+    entity = [x[1] for x in available_types if entity_type == x[0]][0]
+    try:
+        entity_instance = entity.objects.get(id=entity_id)
+    except (Activity.DoesNotExist, Place.DoesNotExist, Event.DoesNotExist):
+        return HttpResponse("The entity ID you requested does not exist.", status=NOT_FOUND)
+
+    if entity_type == "Activity":
+        if add_or_remove == "add":
+            request.user.wishlist_activities.add(entity_instance)
+        else:
+            request.user.wishlist_activities.remove(entity_instance)
+    if entity_type == "Place":
+        if add_or_remove == "add":
+            request.user.wishlist_places.add(entity_instance)
+        else:
+            request.user.wishlist_places.remove(entity_instance)
+    if entity_type == "Event":
+        if add_or_remove == "add":
+            request.user.wishlist_events.add(entity_instance)
+        else:
+            request.user.wishlist_events.remove(entity_instance)
+
+    if add_or_remove == "add":
+        return HttpResponse("Added to wishlist successfully.", status=OK)
+    else:
+        return HttpResponse("Removed from wishlist successfully.", status=OK)
+
+
+@login_required
+def my_wishlist(request):
+    """
+    My wishlist. A straight copy of search_home but limiting the results to only the users wishlist.
+
+    Actual results are served by search_results.
+    The difference here is we want to show everything on the wish list by default.
+    Set a param so we load on page load.
+    """
+    filter_search_form = FilterSearchForm()
+
+    return render(
+        request,
+        "search_home.html",
+        {
+            "filter_search_form": filter_search_form,
+            "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+            "filters_dict": FILTERS,
+            "search_results_url": request.build_absolute_uri(reverse("my-wishlist-results")),
+            "wishlist": True,
+        },
+    )
+
+
+@login_required
+def my_wishlist_results(request):
+    """An async view that returns the users wishlist results based on GET params."""
+    results = FilterQueryProcessor(request.GET, wishlist_user=request.user).get_results()
+    return render(request, "partials/search_results.html", {"results": results})

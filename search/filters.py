@@ -17,6 +17,7 @@ from crispy_forms.layout import Layout
 from crispy_forms.layout import Row
 from django import forms
 from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
 from django.db.models import Q
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -206,8 +207,9 @@ class FilterQueryProcessor:
     a list of applicable Activities, Events or Places.
     """  # noqa: D205 D400
 
-    def __init__(self, request_get):  # noqa: D107
+    def __init__(self, request_get, wishlist_user=None):  # noqa: D107
         self.request_get = request_get
+        self.wishlist_user = wishlist_user
 
     def _types_required(self):
         """Which types of search entity are required."""
@@ -389,11 +391,31 @@ class FilterQueryProcessor:
             if distance_lower <= x.distance_from(lat_selected, long_selected) <= distance_upper
         ]
 
+    def _get_base_queryset(self, query_obj: Type[Union[Activity, Event, Place]]):
+        """Gets the base queryset either for all results or the users wishlist."""
+        if not self.wishlist_user:
+            queryset = query_obj.objects.all()
+            if not settings.SEARCH_SHOW_UNMODERATED_RESULTS:
+                queryset = queryset.filter(approved_by__isnull=False)
+        else:
+            if isinstance(self.wishlist_user, AnonymousUser):
+                return query_obj.objects.none()
+
+            pairs = [
+                [Activity, self.wishlist_user.wishlist_activities],
+                [Place, self.wishlist_user.wishlist_places],
+                [Event, self.wishlist_user.wishlist_events],
+            ]
+            queryset = query_obj.objects.none()
+            for pair in pairs:
+                if query_obj == pair[0]:
+                    queryset = pair[1].all()
+
+        return queryset
+
     def _get_results_for_object_type(self, query_obj: Type[Union[Activity, Event, Place]]):
         """Run the query and get the results for each type."""
-        queryset = query_obj.objects.all()
-        if not settings.SEARCH_SHOW_UNMODERATED_RESULTS:
-            queryset = queryset.filter(approved_by__isnull=False)
+        queryset = self._get_base_queryset(query_obj)
         queryset = self._append_slider_queries(queryset)
         queryset = self._append_search_queries(queryset)
         queryset = self._append_null_boolean_filter_queries(queryset)
