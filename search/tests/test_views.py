@@ -1128,14 +1128,14 @@ class TestModifyWishlist(TestCase):
     def test_view_returns_error_message_if_entity_type_is_not_correct(self):
         """If the entity type is incorrect return a 404."""
         self.client.force_login(self.user)
-        response = self.client.post(reverse(self.view, args=["Not", "a123"]))
+        response = self.client.post(reverse(self.view, args=["Not", "a123", "add"]))
         assert response.status_code == NOT_FOUND
         assert "The entity type you requested does not exist." in str(response.content)
 
     def test_view_returns_error_message_if_entity_id_is_not_correct(self):
         """If the entity id is incorrect return a 404."""
         self.client.force_login(self.user)
-        response = self.client.post(reverse(self.view, args=["Event", uuid.uuid4()]))
+        response = self.client.post(reverse(self.view, args=["Event", uuid.uuid4(), "add"]))
         assert response.status_code == NOT_FOUND
         assert "The entity ID you requested does not exist." in str(response.content)
 
@@ -1178,7 +1178,7 @@ class TestModifyWishlist(TestCase):
     def test_view_adds_event_to_users_wishlist(self):
         """View should add Event to users wishlist."""
         self.client.force_login(self.user)
-        response = self.client.post(reverse(self.view, args=["Event", self.event.id]))
+        response = self.client.post(reverse(self.view, args=["Event", self.event.id, "add"]))
         assert response.status_code == OK
         assert "Added to wishlist successfully." in str(response.content)
         assert list(self.user.wishlist_events.all()) == [self.event]
