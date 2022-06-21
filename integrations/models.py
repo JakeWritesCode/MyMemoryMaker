@@ -27,3 +27,12 @@ class EventBriteRawEventData(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     event_id = models.ForeignKey(EventBriteEventID, on_delete=models.CASCADE)
     data = models.JSONField()
+    last_fetched = models.DateTimeField()
+
+
+class EventBriteImportError(models.Model):
+    """A place to log issues so we can figure out what's going on."""
+
+    function = models.CharField(max_length=500)
+    error_message = models.TextField()
+    important_args = models.JSONField()

@@ -10,3 +10,4 @@ from integrations import models
 # Register your models here.
 admin.site.register(models.EventBriteEventID)
 admin.site.register(models.EventBriteRawEventData)
+admin.site.register(models.EventBriteImportError)

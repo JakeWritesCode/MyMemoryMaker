@@ -44,6 +44,7 @@ def get_all_eventbrite_raw_event_data():
     """Async task to get raw data for found events."""
     all_events = EventBriteEventID.objects.filter(
             last_seen__gt=timezone.now() - timedelta(hours=EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS),
+
         ).values_list("event_id", flat=True)
     all_events = list(all_events)
     for chunk in chunks(all_events, 100):
@@ -51,10 +52,21 @@ def get_all_eventbrite_raw_event_data():
 
 
 @shared_task(time_limit=1200)
-def parse_eventbrite_data_into_events():
+def parse_eventbrite_data_into_events(event_ids):
     """Async task to turn eventbrite data into actual events."""
     downloader = EventBriteEventParser()
-    downloader.process_data()
+    downloader.process_data(event_ids)
+
+
+@shared_task()
+def parse_all_eventbrite_data_into_events():
+    """Async task to turn eventbrite data into actual events."""
+    all_events = EventBriteEventID.objects.filter(
+            last_seen__gt=timezone.now() - timedelta(hours=EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS),
+        ).values_list("event_id", flat=True)
+    all_events = list(all_events)
+    for chunk in chunks(all_events, 100):
+        parse_eventbrite_data_into_events.delay(chunk)
 
 
 @shared_task(time_limit=4800)

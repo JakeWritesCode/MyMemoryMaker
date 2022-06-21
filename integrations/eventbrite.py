@@ -26,6 +26,7 @@ from integrations.constants import EVENTBRITE_CATEGORY_MAPPING
 from integrations.constants import EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS
 from integrations.exceptions import APIError
 from integrations.models import EventBriteEventID
+from integrations.models import EventBriteImportError
 from integrations.models import EventBriteRawEventData
 from integrations.utils import http_request_with_backoff
 from search.constants import SEARCH_ENTITY_SOURCES
@@ -45,6 +46,18 @@ def get_or_create_api_user():
     return user
 
 
+def log_eventbrite_error(function: str, error_message: str, *args, **kwargs):
+    """Log an EventBrite error message."""
+    EventBriteImportError.objects.create(
+        error_message=error_message,
+        function=function,
+        important_args={
+            "args": args,
+            "kwargs": kwargs,
+        },
+    )
+
+
 class EventIDDownloader:
     """
     Stage 1 of the download process.
@@ -58,7 +71,13 @@ class EventIDDownloader:
         url = f"{url}?page={page_id}"
         response = http_request_with_backoff("get", url)
         if response.status_code != OK:
-            raise APIError(f"The page {url} did not return the correct status, status {response.status_code}.")
+            log_eventbrite_error(
+                "EventIDDownloader._fetch_page_content",
+                "The event listings URL could did not return the correct status code.",
+                url=url,
+                status_code=response.status_code,
+            )
+            raise APIError("Incorrect status code.")
 
         data = str(response.content)
         return data
@@ -134,6 +153,13 @@ class EventRawDataDownloader:
         )
         response = http_request_with_backoff("get", url)
         if response.status_code != OK:
+            log_eventbrite_error(
+                "EventRawDataDownloader._get_event_data",
+                "The raw data endpoint could did not return the correct status code.",
+                url=url,
+                status_code=response.status_code,
+                response=json.loads(response.content),
+            )
             raise APIError(
                 f"The API did not return a correct response. "
                 f"{response.status_code}, {response.content}",
@@ -147,10 +173,15 @@ class EventRawDataDownloader:
                 event_id_obj = EventBriteEventID.objects.get(event_id=event_id)
                 try:
                     raw_data = EventBriteRawEventData.objects.get(event_id=event_id_obj)
+                    if (
+                        timezone.now() - raw_data.last_fetched
+                    ).total_seconds() / 3600 < EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS:
+                        continue
                 except EventBriteRawEventData.DoesNotExist:
                     raw_data = EventBriteRawEventData(event_id=event_id_obj)
                 event_data = self._get_event_data(event_id)
                 raw_data.data = event_data
+                raw_data.last_fetched = timezone.now()
                 raw_data.save()
             except APIError:
                 continue
@@ -295,6 +326,12 @@ class EventBriteEventParser:
         )
         response = http_request_with_backoff("get", url)
         if response.status_code != OK:
+            log_eventbrite_error(
+                "EventBriteEventParser._update_description",
+                "The event listings URL could did not return the correct status code.",
+                url=url,
+                status_code=response.status_code,
+            )
             raise ValueError(
                 f"Unable to update description. Response code="
                 f"{response.status_code}, error={response.content}",
@@ -355,32 +392,36 @@ class EventBriteEventParser:
             event.images.add(new_image)
             event.places.add(place)
         except (KeyError, ValueError, TypeError, IntegrityError, TransportError) as e:
-            logging.error(
-                f"Unable to create a new event for id {raw_data.event_id.event_id}, error {e}.",
+            log_eventbrite_error(
+                "EventBriteEventParser._populate_event",
+                str(e),
+                event_id=raw_data.event_id.event_id,
             )
             return False
 
-    def process_data(self):
+    def process_data(self, all_events=None):
         """Process the latest EventBrite data into actual events."""
-        all_events = EventBriteEventID.objects.filter(
-            last_seen__gt=timezone.now() - timedelta(hours=EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS),
-        )
+        if not all_events:
+            all_events = EventBriteEventID.objects.filter(
+                last_seen__gt=timezone.now() - timedelta(hours=EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS),
+            ).values_list("event_id", flat=True)
+            all_events = list(all_events)
         for event_id in all_events:
 
             try:
-                event_raw_data = EventBriteRawEventData.objects.get(event_id=event_id)
+                event_raw_data = EventBriteRawEventData.objects.get(event_id__event_id=event_id)
             except EventBriteRawEventData.DoesNotExist:
                 continue
 
             try:
-                event = Event.objects.get(attributes__eventbrite_event_id=event_id.event_id)
+                event = Event.objects.get(attributes__eventbrite_event_id=event_id)
                 if not self._has_event_changed(event, event_raw_data):
                     continue
             except Event.DoesNotExist:
                 event = Event()
             except Event.MultipleObjectsReturned:
                 event = Event.objects.filter(
-                    attributes__eventbrite_event_id=event_id.event_id,
+                    attributes__eventbrite_event_id=event_id,
                 ).first()
                 event.delete()
                 continue

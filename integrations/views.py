@@ -11,7 +11,7 @@ from integrations.eventbrite import EventBriteEventParser
 from integrations.eventbrite import EventIDDownloader
 from integrations.eventbrite import EventRawDataDownloader
 from integrations.tasks import eventbrite_full_download, get_all_eventbrite_event_ids, \
-    get_all_eventbrite_raw_event_data
+    get_all_eventbrite_raw_event_data, parse_all_eventbrite_data_into_events
 
 
 @staff_member_required
@@ -31,8 +31,7 @@ def get_eventbrite_raw_event_data(request):
 @staff_member_required
 def parse_eventbrite_data_into_events(request):
     """Manually start the Eventbrite event parsing process."""
-    downloader = EventBriteEventParser()
-    downloader.process_data()
+    parse_all_eventbrite_data_into_events.delay()
     return HttpResponse("Complete", status=200)
 
 

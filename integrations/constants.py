@@ -8,30 +8,30 @@ EVENTBRITE_EVENT_ID_URLS = [
     "https://www.eventbrite.com/d/united-kingdom/all-events/",
     "https://www.eventbrite.com/d/united-kingdom--manchester/all-events/",
     "https://www.eventbrite.com/d/united-kingdom--birmingham/all-events/",
-    "https://www.eventbrite.com/d/united-kingdom--leeds/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--glasgow/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--sheffield/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--bradford/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--liverpool/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--bristol/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--cardiff/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--belfast/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--leicester/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--wakefield/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--coventry/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--nottingham/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--newcastle-upon-tyne/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--sunderland/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--brighton-and-hove/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--kingston-upon-hull--22193/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--plymouth/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--wolverhampton/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--derby/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--swansea/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--southampton/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--salford/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--york/all-events/"
-    "https://www.eventbrite.com/d/united-kingdom--oxford/all-events/"
+    "https://www.eventbrite.com/d/united-kingdom--leeds/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--glasgow/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--sheffield/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--bradford/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--liverpool/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--bristol/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--cardiff/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--belfast/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--leicester/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--wakefield/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--coventry/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--nottingham/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--newcastle-upon-tyne/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--sunderland/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--brighton-and-hove/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--kingston-upon-hull--22193/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--plymouth/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--wolverhampton/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--derby/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--swansea/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--southampton/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--salford/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--york/all-events/",
+    "https://www.eventbrite.com/d/united-kingdom--oxford/all-events/",
 ]
 
 BLEACH_ALLOWED_TAGS = [
