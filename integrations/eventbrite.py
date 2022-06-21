@@ -20,7 +20,7 @@ from googlemaps.exceptions import TransportError
 from pytz import UTC
 
 # Project
-from integrations.constants import BLEACH_ALLOWED_ATTRIBUTES
+from integrations.constants import BLEACH_ALLOWED_ATTRIBUTES, EVENTBRITE_EVENT_ID_URLS
 from integrations.constants import BLEACH_ALLOWED_TAGS
 from integrations.constants import EVENTBRITE_CATEGORY_MAPPING
 from integrations.constants import EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS
@@ -53,9 +53,9 @@ class EventIDDownloader:
     of light web scraping.
     """
 
-    def _fetch_page_content(self, page_id: int):
+    def _fetch_page_content(self, url, page_id: int):
         """Perform a GET request for that page's events."""
-        url = f"https://www.eventbrite.co.uk/d/united-kingdom/all-events/?page={page_id}"
+        url = f"{url}?page={page_id}"
         response = http_request_with_backoff("get", url)
         if response.status_code != OK:
             raise APIError(f"The page {url} did not return the correct status.")
@@ -99,21 +99,25 @@ class EventIDDownloader:
         """Get and update all event ID's from the EventBrite site."""
         logging.info(f"Beginning EventBrite event ID download @ {timezone.now()}")
 
-        for page_number in range(1, 500):
-            page_content = self._fetch_page_content(page_number)
+        for location_url in EVENTBRITE_EVENT_ID_URLS:
+            for page_number in range(1, 500):
+                try:
+                    page_content = self._fetch_page_content(location_url, page_number)
+                except APIError:
+                    continue
 
-            if not self._check_for_results(page_content):
-                logging.info(
-                    f"EventBrite event ID downloader ran out of pages on page {page_number}",
-                )
-                return True
+                if not self._check_for_results(page_content):
+                    logging.info(
+                        f"EventBrite event ID downloader ran out of pages on page {page_number}",
+                    )
+                    return True
 
-            event_ids = self._get_event_ids_from_page(page_content)
-            for event_id in event_ids:
-                event, _ = EventBriteEventID.objects.get_or_create(event_id=event_id)
-                event.last_seen = timezone.now()
-                event.save()
-            logging.info(f"EventBrite event ID downloader completed downloading page {page_number}")
+                event_ids = self._get_event_ids_from_page(page_content)
+                for event_id in event_ids:
+                    event, _ = EventBriteEventID.objects.get_or_create(event_id=event_id)
+                    event.last_seen = timezone.now()
+                    event.save()
+                logging.info(f"EventBrite event ID downloader completed downloading page {page_number}")
 
         logging.info(f"Completed EventBrite event ID download @ {timezone.now()}")
         return True

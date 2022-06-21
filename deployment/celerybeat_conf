@@ -10,7 +10,7 @@ CELERYD_CHDIR="/opt/app/MyMemoryMaker"
 CELERYBEAT_CHDIR="/opt/app/MyMemoryMaker"
 
 # Extra command-line arguments to the worker
-CELERYBEAT_OPTS="--schedule=/var/run/celery/celerybeat-schedule"
+CELERYBEAT_OPTS="--schedule=/var/run/celery/celerybeat-schedule --scheduler django_celery_beat.schedulers:DatabaseScheduler"
 
 # %n will be replaced with the first part of the nodename.
 CELERYD_LOG_FILE="/var/log/celery/%n%I.log"
