@@ -7,11 +7,10 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse
 
 # Project
-from integrations.eventbrite import EventBriteEventParser
-from integrations.eventbrite import EventIDDownloader
-from integrations.eventbrite import EventRawDataDownloader
-from integrations.tasks import eventbrite_full_download, get_all_eventbrite_event_ids, \
-    get_all_eventbrite_raw_event_data, parse_all_eventbrite_data_into_events
+from integrations.tasks import eventbrite_full_download
+from integrations.tasks import get_all_eventbrite_event_ids
+from integrations.tasks import get_all_eventbrite_raw_event_data
+from integrations.tasks import parse_all_eventbrite_data_into_events
 
 
 @staff_member_required

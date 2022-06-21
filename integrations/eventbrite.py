@@ -118,7 +118,7 @@ class EventIDDownloader:
         """Get and update all event ID's from the EventBrite site."""
         logging.info(f"Beginning EventBrite event ID download from {base_url} @ {timezone.now()}")
 
-        for page_number in range(1, 500):
+        for page_number in range(1, 50):
             try:
                 page_content = self._fetch_page_content(base_url, page_number)
             except APIError:

@@ -21,3 +21,5 @@ if len(sys.argv) > 0 and sys.argv[1] != "collectstatic":
     DATABASES = {
         "default": dj_database_url.parse(getenv("DATABASE_URL")),
     }
+
+SEARCH_SHOW_UNMODERATED_RESULTS = True

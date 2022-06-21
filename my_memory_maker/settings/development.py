@@ -3,6 +3,8 @@
 
 
 # Local
+import dj_database_url
+
 from .base import *  # noqa: F403
 
 DEBUG = getenv("DEBUG", True)  # noqa: F405
