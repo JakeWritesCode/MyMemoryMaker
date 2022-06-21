@@ -9,7 +9,7 @@ from integrations.eventbrite import EventIDDownloader
 from integrations.eventbrite import EventRawDataDownloader
 
 
-@shared_task
+@shared_task(time_limit=1200)
 def get_eventbrite_event_ids():
     """Async tasks to get all EventIDs."""
     downloader = EventIDDownloader()
