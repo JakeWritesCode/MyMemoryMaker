@@ -20,7 +20,7 @@ from googlemaps.exceptions import TransportError
 from pytz import UTC
 
 # Project
-from integrations.constants import BLEACH_ALLOWED_ATTRIBUTES, EVENTBRITE_EVENT_ID_URLS
+from integrations.constants import BLEACH_ALLOWED_ATTRIBUTES
 from integrations.constants import BLEACH_ALLOWED_TAGS
 from integrations.constants import EVENTBRITE_CATEGORY_MAPPING
 from integrations.constants import EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS
@@ -95,29 +95,28 @@ class EventIDDownloader:
 
         return event_ids
 
-    def get_event_ids(self):
+    def get_event_ids(self, base_url):
         """Get and update all event ID's from the EventBrite site."""
-        logging.info(f"Beginning EventBrite event ID download @ {timezone.now()}")
+        logging.info(f"Beginning EventBrite event ID download from {base_url} @ {timezone.now()}")
 
-        for location_url in EVENTBRITE_EVENT_ID_URLS:
-            for page_number in range(1, 500):
-                try:
-                    page_content = self._fetch_page_content(location_url, page_number)
-                except APIError:
-                    continue
+        for page_number in range(1, 500):
+            try:
+                page_content = self._fetch_page_content(base_url, page_number)
+            except APIError:
+                continue
 
-                if not self._check_for_results(page_content):
-                    logging.info(
-                        f"EventBrite event ID downloader ran out of pages on page {page_number}",
-                    )
-                    continue
+            if not self._check_for_results(page_content):
+                logging.info(
+                    f"EventBrite event ID downloader ran out of pages on page {page_number}",
+                )
+                return
 
-                event_ids = self._get_event_ids_from_page(page_content)
-                for event_id in event_ids:
-                    event, _ = EventBriteEventID.objects.get_or_create(event_id=event_id)
-                    event.last_seen = timezone.now()
-                    event.save()
-                logging.info(f"EventBrite event ID downloader completed downloading page {page_number}")
+            event_ids = self._get_event_ids_from_page(page_content)
+            for event_id in event_ids:
+                event, _ = EventBriteEventID.objects.get_or_create(event_id=event_id)
+                event.last_seen = timezone.now()
+                event.save()
+            logging.info(f"EventBrite event ID downloader completed downloading page {page_number}")
 
         logging.info(f"Completed EventBrite event ID download @ {timezone.now()}")
         return True
@@ -141,18 +140,15 @@ class EventRawDataDownloader:
             )
         return json.loads(response.content)
 
-    def get_recently_seen_events(self):
+    def get_recently_seen_events(self, event_ids):
         """Get all the recently seen events."""
-        all_events = EventBriteEventID.objects.filter(
-            last_seen__gt=timezone.now() - timedelta(hours=EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS),
-        )
-        for event_id in all_events:
+        for event_id in event_ids:
             try:
-                event_data = self._get_event_data(event_id.event_id)
                 try:
                     raw_data = EventBriteRawEventData.objects.get(event_id=event_id)
                 except EventBriteRawEventData.DoesNotExist:
                     raw_data = EventBriteRawEventData(event_id=event_id)
+                event_data = self._get_event_data(event_id)
                 raw_data.data = event_data
                 raw_data.save()
             except APIError:

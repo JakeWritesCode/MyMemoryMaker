@@ -10,22 +10,21 @@ from django.http import HttpResponse
 from integrations.eventbrite import EventBriteEventParser
 from integrations.eventbrite import EventIDDownloader
 from integrations.eventbrite import EventRawDataDownloader
-from integrations.tasks import eventbrite_full_download
+from integrations.tasks import eventbrite_full_download, get_all_eventbrite_event_ids, \
+    get_all_eventbrite_raw_event_data
 
 
 @staff_member_required
 def get_eventbrite_event_ids(request):
     """Manually start the Eventbrite event ID download process."""
-    downloader = EventIDDownloader()
-    downloader.get_event_ids()
+    get_all_eventbrite_event_ids.delay()
     return HttpResponse("Complete", status=200)
 
 
 @staff_member_required
 def get_eventbrite_raw_event_data(request):
     """Manually start the Eventbrite event data download process."""
-    downloader = EventRawDataDownloader()
-    downloader.get_recently_seen_events()
+    get_all_eventbrite_raw_event_data.delay()
     return HttpResponse("Complete", status=200)
 
 
