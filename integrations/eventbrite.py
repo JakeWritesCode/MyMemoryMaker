@@ -110,7 +110,7 @@ class EventIDDownloader:
                     logging.info(
                         f"EventBrite event ID downloader ran out of pages on page {page_number}",
                     )
-                    return True
+                    continue
 
                 event_ids = self._get_event_ids_from_page(page_content)
                 for event_id in event_ids:
