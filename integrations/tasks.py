@@ -44,7 +44,7 @@ def get_all_eventbrite_raw_event_data():
     """Async task to get raw data for found events."""
     all_events = EventBriteEventID.objects.filter(
             last_seen__gt=timezone.now() - timedelta(hours=EVENTBRITE_DOWNLOAD_FREQUENCY_HOURS),
-        ).values_list("id", flat=True)
+        ).values_list("event_id", flat=True)
     all_events = list(all_events)
     for chunk in chunks(all_events, 100):
         get_eventbrite_raw_event_data.delay(chunk)

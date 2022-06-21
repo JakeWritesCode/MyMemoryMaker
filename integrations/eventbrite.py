@@ -58,7 +58,7 @@ class EventIDDownloader:
         url = f"{url}?page={page_id}"
         response = http_request_with_backoff("get", url)
         if response.status_code != OK:
-            raise APIError(f"The page {url} did not return the correct status.")
+            raise APIError(f"The page {url} did not return the correct status, status {response.status_code}.")
 
         data = str(response.content)
         return data
@@ -144,10 +144,11 @@ class EventRawDataDownloader:
         """Get all the recently seen events."""
         for event_id in event_ids:
             try:
+                event_id_obj = EventBriteEventID.objects.get(event_id=event_id)
                 try:
-                    raw_data = EventBriteRawEventData.objects.get(event_id=event_id)
+                    raw_data = EventBriteRawEventData.objects.get(event_id=event_id_obj)
                 except EventBriteRawEventData.DoesNotExist:
-                    raw_data = EventBriteRawEventData(event_id=event_id)
+                    raw_data = EventBriteRawEventData(event_id=event_id_obj)
                 event_data = self._get_event_data(event_id)
                 raw_data.data = event_data
                 raw_data.save()
