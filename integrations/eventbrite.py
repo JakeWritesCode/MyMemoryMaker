@@ -194,7 +194,7 @@ class EventBriteEventParser:
         """Create a gmaps client."""
         self.gmaps_client = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
 
-    def _has_event_changed(self, event: Event, raw_data: EventBriteRawEventData):
+    def has_event_changed(self, event: Event, raw_data: EventBriteRawEventData):
         """Has the event changed compared to the last time we looked."""
         try:
             last_updated = datetime.strptime(raw_data.data["changed"], "%Y-%m-%dT%H:%M:%SZ")
@@ -415,7 +415,7 @@ class EventBriteEventParser:
 
             try:
                 event = Event.objects.get(attributes__eventbrite_event_id=event_id)
-                if not self._has_event_changed(event, event_raw_data):
+                if not self.has_event_changed(event, event_raw_data):
                     continue
             except Event.DoesNotExist:
                 event = Event()

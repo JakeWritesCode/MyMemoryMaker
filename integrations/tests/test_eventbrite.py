@@ -295,25 +295,25 @@ class TestEventBriteEventParser(TestCase):
         """Test class init."""
         assert isinstance(self.parser.gmaps_client, MagicMock)
 
-    def test__has_event_changed(self):
+    def test_has_event_changed(self):
         """Function should return True if event has changed, False if not."""
         event = EventFactory(last_updated=timezone.now())
-        assert self.parser._has_event_changed(event, self.raw_data[0]) is False
+        assert self.parser.has_event_changed(event, self.raw_data[0]) is False
         event.last_updated = timezone.now() - timedelta(days=1000)
         event.save()
-        assert self.parser._has_event_changed(event, self.raw_data[0]) is True
+        assert self.parser.has_event_changed(event, self.raw_data[0]) is True
 
-    def test__has_event_changed_returns_true_if_eventbrite_has_no_changed_date(self):
+    def test_has_event_changed_returns_true_if_eventbrite_has_no_changed_date(self):
         """If there is no changed date from eventbrite and no headline, return True."""
         event = Event()
         self.raw_data[0].data["changed"] = None
-        assert self.parser._has_event_changed(event, self.raw_data[0]) is True
+        assert self.parser.has_event_changed(event, self.raw_data[0]) is True
 
-    def test__has_event_changed_false_if_eventbrite_has_no_changed_date_and_event_populated(self):
+    def test_has_event_changed_false_if_eventbrite_has_no_changed_date_and_event_populated(self):
         """If there is no changed date from eventbrite and a headline, return False."""
         event = EventFactory
         self.raw_data[0].data["changed"] = None
-        assert self.parser._has_event_changed(event, self.raw_data[0]) is False
+        assert self.parser.has_event_changed(event, self.raw_data[0]) is False
 
     def test__parse_datetime(self):
         """Function should parse datetime."""
@@ -597,7 +597,7 @@ class TestEventBriteEventParser(TestCase):
         for rd in self.raw_data:
             EventFactory(attributes={"eventbrite_event_id": rd.event_id.event_id})
 
-        self.parser._has_event_changed = MagicMock(return_value=False)
+        self.parser.has_event_changed = MagicMock(return_value=False)
         self.parser._populate_event = MagicMock()
         self.parser.process_data()
         self.parser._populate_event.assert_not_called()
