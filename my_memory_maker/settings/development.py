@@ -11,5 +11,9 @@ DEBUG = getenv("DEBUG", True)  # noqa: F405
 ALLOWED_HOSTS = ["*"]
 STATIC_ROOT = None
 
-SEARCH_SHOW_UNMODERATED_RESULTS = True
+SEARCH_SHOW_UNMODERATED_RESULTS = {
+    "Activity": True,
+    "Place": True,
+    "Event": True,
+}
 CELERY_ALWAYS_EAGER = 1
