@@ -522,7 +522,7 @@ def my_wishlist(request):
             "filter_search_form": filter_search_form,
             "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
             "filters_dict": FILTERS,
-            "search_results_url": request.build_absolute_uri(reverse("my-wishlist-results")),
+            "search_results_url": request.build_absolute_uri(reverse("my-wishlist-results", args=["dummy"])),
             "wishlist": True,
         },
     )

@@ -330,6 +330,9 @@ function getCookie(name) {
 
 function addToWishlist(wishlistURL, button, addOrRemove) {
     // Add a search entity to the users wishlist.
+    if (userAuthed !== "True") {
+        window.location.replace(loginURL)
+    }
     fetch(wishlistURL, {
         method: 'POST',
         credentials: "same-origin",

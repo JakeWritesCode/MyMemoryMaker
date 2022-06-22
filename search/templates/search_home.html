@@ -94,9 +94,10 @@
             const wishlist = "{{ wishlist }}"
             console.log(wishlist)
             if (wishlist === "True") {
-                console.log("Hey there!")
                 runSearch(true)
             }
         }
+        const userAuthed = '{{ user.is_authenticated }}'
+        const loginURL = '{% url "log-in" %}'
     </script>
 {% endblock %}

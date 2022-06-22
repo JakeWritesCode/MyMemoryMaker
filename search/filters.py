@@ -398,7 +398,7 @@ class FilterQueryProcessor:
         """Gets the base queryset either for all results or the users wishlist."""
         if not self.wishlist_user:
             queryset = query_obj.objects.all()
-            if not settings.SEARCH_SHOW_UNMODERATED_RESULTS[query_obj.class_name]:
+            if not settings.SEARCH_SHOW_UNMODERATED_RESULTS[query_obj.__name__]:
                 queryset = queryset.filter(approved_by__isnull=False)
         else:
             if isinstance(self.wishlist_user, AnonymousUser):
