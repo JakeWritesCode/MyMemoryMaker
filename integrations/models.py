@@ -25,7 +25,7 @@ class EventBriteRawEventData(models.Model):
     """EventBrite raw download data."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    event_id = models.ForeignKey(EventBriteEventID, on_delete=models.CASCADE)
+    event_id = models.OneToOneField(EventBriteEventID, on_delete=models.CASCADE)
     data = models.JSONField()
     last_fetched = models.DateTimeField()
 

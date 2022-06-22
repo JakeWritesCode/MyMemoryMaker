@@ -182,7 +182,10 @@ class EventRawDataDownloader:
                 event_data = self._get_event_data(event_id)
                 raw_data.data = event_data
                 raw_data.last_fetched = timezone.now()
-                raw_data.save()
+                try:
+                    raw_data.save()
+                except IntegrityError:
+                    continue
             except APIError:
                 continue
 
