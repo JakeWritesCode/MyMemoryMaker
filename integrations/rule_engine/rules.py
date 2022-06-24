@@ -231,7 +231,7 @@ class PlaceConference(HeadlineDescriptionContainsRule):
         "alone",
         "colleagues",
         "business",
-        "educationalal",
+        "educational",
     ]
     ACTIVITIES_TO_ADD = ["Go to a lecture"]
 
