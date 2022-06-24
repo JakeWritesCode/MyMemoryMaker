@@ -7,6 +7,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse
 
 # Project
+from integrations.tasks import apply_rule_engine_to_unmoderated_results
 from integrations.tasks import eventbrite_full_download
 from integrations.tasks import get_all_eventbrite_event_ids
 from integrations.tasks import get_all_eventbrite_raw_event_data
@@ -31,6 +32,13 @@ def get_eventbrite_raw_event_data(request):
 def parse_eventbrite_data_into_events(request):
     """Manually start the Eventbrite event parsing process."""
     parse_all_eventbrite_data_into_events.delay()
+    return HttpResponse("Complete", status=200)
+
+
+@staff_member_required
+def apply_ruleengine_to_unmoderated_results(request):
+    """Apply the rule engine to unmoderated results."""
+    apply_rule_engine_to_unmoderated_results()
     return HttpResponse("Complete", status=200)
 
 

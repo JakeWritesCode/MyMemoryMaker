@@ -100,6 +100,8 @@ FILTERS = {
     ],
 }
 
+FLAT_FILTERS = [x for xs in FILTERS.values() for x in xs]
+
 """
 These are the upper and lower bounds we'll allow the user to enter when
 creating a new search entity.

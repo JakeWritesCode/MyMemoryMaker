@@ -15,7 +15,8 @@ from integrations.eventbrite import EventIDDownloader
 from integrations.eventbrite import EventRawDataDownloader
 from integrations.models import EventBriteEventID
 from integrations.models import EventBriteRawEventData
-from search.models import Event
+from search.models import Event, Activity, Place
+from integrations.rule_engine import RuleEngine
 
 
 @shared_task(time_limit=1200)
@@ -123,6 +124,14 @@ def parse_all_eventbrite_data_into_events():
 
     for chunk in chunks(unparsed_events, 100):
         parse_eventbrite_data_into_events.delay(chunk)
+
+
+@shared_task()
+def apply_rule_engine_to_unmoderated_results():
+    engine = RuleEngine()
+    for entity_type in [Activity, Event, Place]:
+        qs = entity_type.unmoderated.all()
+        engine.apply_rules(qs)
 
 
 @shared_task(time_limit=4800)

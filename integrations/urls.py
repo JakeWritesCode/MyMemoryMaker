@@ -29,4 +29,9 @@ urlpatterns = [
         views.start_eventbrite_async_download,
         name="start_eventbrite_async_download",
     ),
+    path(
+        "apply_ruleengine_to_unmoderated_results",
+        views.apply_ruleengine_to_unmoderated_results,
+        name="apply_ruleengine_to_unmoderated_results",
+    ),
 ]

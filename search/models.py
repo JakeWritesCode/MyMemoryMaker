@@ -64,6 +64,20 @@ class SearchImage(models.Model):
         return super(SearchImage, self).save(*args, **kwargs)
 
 
+class UnmoderatedManager(models.Manager):
+    """Unmoderated results only."""
+    def get_queryset(self):
+        """Get qs."""
+        return super().get_queryset().filter(approval_timestamp__isnull=True)
+
+
+class ModeratedManager(models.Manager):
+    """Moderated results only."""
+    def get_queryset(self):
+        """Get qs."""
+        return super().get_queryset().filter(approval_timestamp__isnull=False)
+
+
 class SearchEntity(models.Model):
     """An abstract base class for searchable entities."""
 
@@ -108,6 +122,10 @@ class SearchEntity(models.Model):
 
     class Meta:  # noqa: D106
         abstract = True
+
+    objects = models.Manager()
+    unmoderated = UnmoderatedManager()
+    moderated = ModeratedManager()
 
     def clean_synonyms_keywords(self):
         """Make all synonyms lower case."""
