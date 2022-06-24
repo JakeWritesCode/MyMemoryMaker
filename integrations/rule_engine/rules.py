@@ -461,7 +461,7 @@ class PlaceRacecourse(HeadlineDescriptionContainsRule):
         "child_friendly",
         "landmarks",
         "charity_and_causes",
-        "educationalal",
+        "educational",
         "other_sports",
     ]
 

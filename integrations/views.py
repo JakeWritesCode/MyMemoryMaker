@@ -38,7 +38,7 @@ def parse_eventbrite_data_into_events(request):
 @staff_member_required
 def apply_ruleengine_to_unmoderated_results(request):
     """Apply the rule engine to unmoderated results."""
-    apply_rule_engine_to_unmoderated_results()
+    apply_rule_engine_to_unmoderated_results.delay()
     return HttpResponse("Complete", status=200)
 
 
