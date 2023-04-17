@@ -1,4 +1,4 @@
-# MyMemoryMaker
-Jake & Katies awesome new project!
+A fully responsive local events PWA built in Django.
 
-Watch this space 🚀
+This was intended as an experiment to see how far you could take a component based design 
+and server-side rendering in place of using an API and a web framework.
